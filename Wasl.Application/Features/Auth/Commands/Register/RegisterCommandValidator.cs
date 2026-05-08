@@ -40,7 +40,7 @@ namespace Wasl.Application.Features.Auth.Commands.Register
                 .Matches("[A-Z]").WithMessage(_localizer["Validation.Auth.PasswordCapitalLetter"])
                 .Matches("[a-z]").WithMessage(_localizer["Validation.Auth.PasswordSmallLetter"])
                 .Matches("[0-9]").WithMessage(_localizer["Validation.Auth.PasswordConatainNumber"])
-                .Matches(@"[\W_]").WithMessage(_localizer["Must Be Contain A Special Character"]);
+                .Matches(@"[\W_]").WithMessage(_localizer["Validation.Auth.PasswordSpecialCharacter"]);
         }
     }
 }

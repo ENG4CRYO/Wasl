@@ -88,7 +88,7 @@ namespace Wasl.Application.Features.Auth.Commands.InitiateRegistration
                 await _emailService.SendEmailAsync(request.Email, "Your Secure OTP Code", emailBody, cancellationToken);
             }
          
-            return ApiResponse<string>.Success(registerToken, _localizer["Auth.Auth.RegisterSendOtp"]);
+            return ApiResponse<string>.Success(registerToken, _localizer["Auth.RegisterSendOtp"]);
         }
     }
 }
