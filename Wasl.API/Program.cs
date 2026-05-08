@@ -104,7 +104,6 @@ try
 
     app.UseResponseCompression();
 
-    app.UsePathBase("/wasl");
     app.MapOpenApi();
     app.MapScalarApiReference(options =>
     {
