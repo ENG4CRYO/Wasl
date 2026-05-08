@@ -113,11 +113,7 @@ try
                .WithCustomCss(CssScalar.GetCss());
     });
     app.UseCors("AllowAll");
-    
-
-    app.UseCors("Production");
-    
-
+   
     var forwardedHeadersOptions = new ForwardedHeadersOptions
     {
         ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
