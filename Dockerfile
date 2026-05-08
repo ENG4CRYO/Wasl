@@ -2,20 +2,20 @@ FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
 
-COPY ["CleanStarter.API/CleanStarter.API.csproj", "CleanStarter.API/"]
-COPY ["CleanStarter.Application/CleanStarter.Application.csproj", "CleanStarter.Application/"]
-COPY ["CleanStarter.Core/CleanStarter.Core.csproj", "CleanStarter.Core/"]
-COPY ["CleanStarter.Infrastructure/CleanStarter.Infrastructure.csproj", "CleanStarter.Infrastructure/"]
+COPY ["Wasl.API/Wasl.API.csproj", "Wasl.API/"]
+COPY ["Wasl.Application/Wasl.Application.csproj", "Wasl.Application/"]
+COPY ["Wasl.Core/Wasl.Core.csproj", "Wasl.Core/"]
+COPY ["Wasl.Infrastructure/Wasl.Infrastructure.csproj", "Wasl.Infrastructure/"]
 
 
-RUN dotnet restore "CleanStarter.API/CleanStarter.API.csproj"
+RUN dotnet restore "Wasl.API/Wasl.API.csproj"
 # نسخ باقي الكود وبناء المشروع
 COPY . .
-WORKDIR "/src/CleanStarter.API"
+WORKDIR "/src/Wasl.API"
 RUN dotnet publish -c Release -o /app/publish
 
 # صورة التشغيل (Runtime) - بسيطة وسريعة
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
 WORKDIR /app
 COPY --from=build /app/publish .
-ENTRYPOINT ["dotnet", "CleanStarter.API.dll"]
+ENTRYPOINT ["dotnet", "Wasl.API.dll"]

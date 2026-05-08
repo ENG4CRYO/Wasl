@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="Directory.Build.props" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="Wasl.UnitTests/Wasl.UnitTests.csproj" Id="dc083c71-c2fb-41db-8fa0-89dd5c8f8ade" />
+  </Folder>
+  <Project Path="Wasl.api/Wasl.API.csproj" />
+  <Project Path="Wasl.Application/Wasl.Application.csproj" />
+  <Project Path="Wasl.Core/Wasl.Core.csproj" />
+  <Project Path="Wasl.Infrastructure/Wasl.Infrastructure.csproj" />
+</Solution>

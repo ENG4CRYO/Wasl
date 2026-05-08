@@ -1,12 +1,12 @@
 services:
   api:
     # الخيار 1: إذا رفعت الصورة على Docker Hub (أنصح به)
-    image: engcryo/cleanstarter-api:v1
+    image: engcryo/wasl-api:v1
 
     # الخيار 2: إذا نقلت ملفات الكود للسيرفر وتريد البناء هناك (احذف السطر فوق وفعل هذا)
     # build: .
 
-    container_name: cleanstarter-api
+    container_name: wasl-api
     restart: always
     ports:
       - "80:8080"  # يربط بورت 80 في السيرفر ببورت 8080 في التطبيق

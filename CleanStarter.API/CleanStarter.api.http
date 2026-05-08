@@ -1,6 +1,0 @@
-@CleanStarter.api_HostAddress = http://localhost:5081
-
-GET {{CleanStarter.api_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###
