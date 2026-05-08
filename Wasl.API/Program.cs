@@ -74,6 +74,8 @@ try
 
     var app = builder.Build();
 
+
+
     await app.ApplyDatabaseMigrationsAsync();
 
     app.UseRequestLocalization(localizationOptions);
@@ -102,6 +104,7 @@ try
 
     app.UseResponseCompression();
 
+    app.UsePathBase("/wasl");
     app.MapOpenApi();
     app.MapScalarApiReference(options =>
     {
