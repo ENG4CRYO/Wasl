@@ -20,6 +20,10 @@ namespace Wasl.Infrastructure.Data
         }
 
         public DbSet<RefreshToken> RefreshTokens { get; set; }
+        public DbSet<DriverProfile> DriverProfiles => Set<DriverProfile>();
+        public DbSet<Ride> Rides => Set<Ride>();
+        public DbSet<RideReview> RideReviews => Set<RideReview>();
+        public DbSet<WalletTransaction> WalletTransactions => Set<WalletTransaction>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
