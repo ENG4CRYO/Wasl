@@ -70,7 +70,7 @@ namespace Wasl.Application.Features.Auth.Commands.VerifyRegistration
                 var errorMessages = string.Join(" | ", result.Errors.Select(e => e.Description));
                 return ApiResponse<AuthModel>.Failure(_localizer["Auth.CreateUserFeiled"]);
             }
-            await _userManager.AddToRoleAsync(newUser, AspRoles.User);
+            await _userManager.AddToRoleAsync(newUser, AspRoles.Rider);
 
 
             var newRefreshToken = _tokenHelper.GenerateRefreshToken();

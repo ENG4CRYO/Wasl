@@ -1,9 +1,10 @@
 ﻿namespace Wasl.Core.Constants
 {
-    public class AspRoles
+    public static class AspRoles
     {
         public const string Admin = "Admin";
-        public const string User = "User";
+        public const string Rider = "Rider";
+        public const string Driver = "Driver";
     }
 }
 

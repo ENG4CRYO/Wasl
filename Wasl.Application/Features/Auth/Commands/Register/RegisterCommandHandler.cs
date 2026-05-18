@@ -59,7 +59,7 @@ namespace Wasl.Application.Features.Auth.Commands.Register
             }
 
  
-            await _userManager.AddToRoleAsync(newUser, AspRoles.User);
+            await _userManager.AddToRoleAsync(newUser, AspRoles.Rider);
 
             var newRefreshToken = _tokenHelper.GenerateRefreshToken();
             newUser.RefreshTokens.Add(newRefreshToken);
