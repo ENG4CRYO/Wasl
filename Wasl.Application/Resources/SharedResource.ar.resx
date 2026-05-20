@@ -237,4 +237,22 @@
   <data name="Validation.Auth.RegisterTokenRequired" xml:space="preserve">
     <value>توكن التسجيل مطلوب</value>
   </data>
+  <data name="Validation.Auth.PhoneNumberRequired" xml:space="preserve">
+    <value>رقم الهاتف مطلوب</value>
+  </data>
+  <data name="Validation.Auth.InvalidPhoneNumber" xml:space="preserve">
+    <value>رقم الهاتف خاطئ</value>
+  </data>
+  <data name="Validation.Auth.CityNotNull" xml:space="preserve">
+    <value>لا يمكن ان تكون المدينة بلا قيمة</value>
+  </data>
+  <data name="Validation.Auth.CityNotEmpty" xml:space="preserve">
+    <value>قيمة المدينة فارغة</value>
+  </data>
+  <data name="Validation.Auth.AddressNotNull" xml:space="preserve">
+    <value>لا يمكن ان يكون العنوان بلا قيمة</value>
+  </data>
+  <data name="Validation.Auth.AddressNotEmpty" xml:space="preserve">
+    <value>قيمة العنوان فارغة</value>
+  </data>
 </root>

@@ -1,17 +1,21 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Asp.Versioning;
 using MediatR;
-using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using Wasl.Application.Common;
 using Wasl.Application.Dtos.AuthModel;
-using Wasl.Application.Features.Auth.Commands.InitiateRegistration;
-using Wasl.Application.Features.Auth.Commands.VerifyRegistration;
+using Wasl.Application.Features.Auth.Commands.DriverRegistration;
+using Wasl.Application.Features.Auth.Commands.DriverRegistration.InitiateDriverRegistration;
+using Wasl.Application.Features.Auth.Commands.ForgotPassword;
 using Wasl.Application.Features.Auth.Commands.Login;
 using Wasl.Application.Features.Auth.Commands.RefreshToken;
-using Wasl.Application.Features.Auth.Commands.RevokeToken;
-using Wasl.Application.Features.Auth.Commands.ForgotPassword;
 using Wasl.Application.Features.Auth.Commands.ResetPassword;
+using Wasl.Application.Features.Auth.Commands.RevokeToken;
+using Wasl.Application.Features.Auth.Commands.RiderRegistration.InitiateRiderRegistration;
+using Wasl.Application.Features.Auth.Commands.RiderRegistration.VerifyRiderRegistration;
 
 namespace Wasl.API.Controllers.V1
 {
+    [ApiVersion("1.0")]
     [ApiController]
     [Route("api/v{version:apiVersion}/[controller]")]
     public class AuthController : ControllerBase
@@ -23,28 +27,42 @@ namespace Wasl.API.Controllers.V1
             _mediator = mediator;
         }
 
-        #region Registration Flow (OTP Based)
-        [HttpPost("initiate-registration")]
-        public async Task<IActionResult> InitiateRegistration([FromBody] InitiateRegistrationCommand request)
+        #region Rider Registration
+
+        [HttpPost("rider/initiate-registration")]
+        [Tags("Rider Authentication")]
+        public async Task<ActionResult<ApiResponse<string>>> InitiateRiderRegistration([FromBody] InitiateRiderRegistrationCommand command)
         {
-            var result = await _mediator.Send(request);
-
-            if (!result.Succeeded)
-                return BadRequest(result);
-
-            return Ok(result);
+            var result = await _mediator.Send(command);
+            return result.Succeeded ? Ok(result) : BadRequest(result);
         }
 
-        [HttpPost("verify-registration")]
-        public async Task<IActionResult> VerifyRegistration([FromBody] VerifyRegistrationCommand request)
+        [HttpPost("rider/verify-registration")]
+        [Tags("Rider Authentication")]
+        public async Task<ActionResult<ApiResponse<AuthModel>>> VerifyRiderRegistration([FromBody] VerifyRiderRegistrationCommand command)
         {
-            var result = await _mediator.Send(request);
+            var result = await _mediator.Send(command);
+            return result.Succeeded ? Ok(result) : BadRequest(result);
+        }
 
-            if (!result.Succeeded)
-                return BadRequest(result);
+        #endregion
 
-           
-            return Ok(result);
+        #region Driver Registration
+
+        [HttpPost("driver/initiate-registration")]
+        [Tags("Driver Authentication")]
+        public async Task<ActionResult<ApiResponse<string>>> InitiateDriverRegistration([FromBody] InitiateDriverRegistrationCommand command)
+        {
+            var result = await _mediator.Send(command);
+            return result.Succeeded ? Ok(result) : BadRequest(result);
+        }
+
+        [HttpPost("driver/verify-registration")]
+        [Tags("Driver Authentication")]
+        public async Task<ActionResult<ApiResponse<AuthModel>>> VerifyDriverRegistration([FromBody] VerifyDriverRegistrationCommand command)
+        {
+            var result = await _mediator.Send(command);
+            return result.Succeeded ? Ok(result) : BadRequest(result);
         }
 
         #endregion

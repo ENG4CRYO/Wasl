@@ -1,21 +1,23 @@
-﻿ using Wasl.Application.Resources;
-using Wasl.Application.Validators.Auth;
-using FluentValidation;
+﻿using FluentValidation;
 using Microsoft.Extensions.Localization;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Wasl.Application.Resources;
 
-namespace Wasl.Application.Features.Auth.Commands.InitiateRegistration
+namespace Wasl.Application.Features.Auth.Commands.DriverRegistration.VerifyDriverRegistration
 {
-    public class InitiateRegistrationCommandValidator : AbstractValidator<InitiateRegistrationCommand>
+    public class VerifyDriverRegistrationCommandValidator : AbstractValidator<VerifyDriverRegistrationCommand>
     {
-        private readonly IStringLocalizer<SharedResource> _localizer;   
-
-        public InitiateRegistrationCommandValidator(IStringLocalizer<SharedResource> localizer)
+        private readonly IStringLocalizer<SharedResource> _localizer;
+        public VerifyDriverRegistrationCommandValidator(IStringLocalizer<SharedResource> localizer)
         {
             _localizer = localizer;
             RuleLevelCascadeMode = CascadeMode.Stop;
+            RuleFor(x => x.RegisterToken)
+                .NotEmpty().WithMessage(_localizer["Validation.Auth.RegisterTokenRequired"]);
+
+            RuleFor(x => x.OtpCode).NotEmpty().Length(6).WithMessage(_localizer["Validation.Auth.OTPRequired"]);
 
             RuleFor(x => x.FirstName)
              .NotEmpty().WithMessage(_localizer["Validation.Auth.FirstNameRequired"])
@@ -25,14 +27,9 @@ namespace Wasl.Application.Features.Auth.Commands.InitiateRegistration
                 .NotEmpty().WithMessage(_localizer["Validation.Auth.LastNameRequired"])
                 .MaximumLength(50).WithMessage(_localizer["Validation.Auth.LastNameMaxLength"]);
 
-            RuleFor(x => x.UserName)
-                .NotEmpty().WithMessage(_localizer["Validation.Auth.UserNameRequired"])
-                .MinimumLength(3).WithMessage(_localizer["Validation.Auth.UserNameMinLength"])
-                .MaximumLength(15).WithMessage(_localizer["Validation.Auth.UserNameMaxLength"]);
-
-            RuleFor(x => x.Email)
-                .NotEmpty().WithMessage(_localizer["Validation.Auth.EmailRequired"])
-                .EmailAddress().WithMessage(_localizer["Validation.Auth.InvalidEmailFormat"]);
+            RuleFor(x => x.PhoneNumber)
+                .NotEmpty().WithMessage(_localizer["Validation.Auth.PhoneNumberRequired"])
+                .Matches(@"^\+?[1-9]\d{1,14}$").WithMessage(_localizer["Validation.Auth.InvalidPhoneNumber"]);
 
             RuleFor(x => x.Password)
                 .Cascade(CascadeMode.Continue)
@@ -42,6 +39,17 @@ namespace Wasl.Application.Features.Auth.Commands.InitiateRegistration
                 .Matches("[a-z]").WithMessage(_localizer["Validation.Auth.PasswordSmallLetter"])
                 .Matches("[0-9]").WithMessage(_localizer["Validation.Auth.PasswordConatainNumber"])
                 .Matches(@"[\W_]").WithMessage(_localizer["Validation.Auth.PasswordSpecialCharacter"]);
+
+            RuleFor(x => x.City)
+                .NotNull().WithMessage(_localizer["Validation.Auth.CityNotNull"])
+                .NotEmpty().WithMessage(_localizer["Validation.Auth.CityNotEmpty"]);
+
+            RuleFor(x => x.Address)
+                 .NotNull().WithMessage(_localizer["Validation.Auth.AddressNotNull"])
+                 .NotEmpty().WithMessage(_localizer["Validation.Auth.AddressNotEmpty"]);
+
+
+
         }
     }
 }

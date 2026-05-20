@@ -237,4 +237,22 @@
   <data name="Validation.Auth.RegisterTokenRequired" xml:space="preserve">
     <value>Register token is required</value>
   </data>
+  <data name="Validation.Auth.PhoneNumberRequired" xml:space="preserve">
+    <value>Phone number is required</value>
+  </data>
+  <data name="Validation.Auth.InvalidPhoneNumber" xml:space="preserve">
+    <value>Invalid phone number</value>
+  </data>
+  <data name="Validation.Auth.CityNotNull" xml:space="preserve">
+    <value>City Cannot be null</value>
+  </data>
+  <data name="Validation.Auth.CityNotEmpty" xml:space="preserve">
+    <value>City cannot be empty</value>
+  </data>
+  <data name="Validation.Auth.AddressNotNull" xml:space="preserve">
+    <value>Address cannot be null</value>
+  </data>
+  <data name="Validation.Auth.AddressNotEmpty" xml:space="preserve">
+    <value>Address cannot be empty</value>
+  </data>
 </root>

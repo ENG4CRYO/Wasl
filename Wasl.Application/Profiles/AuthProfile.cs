@@ -5,7 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using Wasl.Application.Features.Auth.Commands.Register;
-using Wasl.Application.Features.Auth.Commands.InitiateRegistration;
+using Wasl.Application.Features.Auth.Commands.RiderRegistration.InitiateRiderRegistration;
+using Wasl.Application.Features.Auth.Commands.DriverRegistration.InitiateDriverRegistration;
 
 namespace Wasl.Application.Profiles
 {
@@ -17,7 +18,9 @@ namespace Wasl.Application.Profiles
             CreateMap<RegisterCommand, ApplicationUser>();
             CreateMap<AuthModel, ApplicationUser>();
             CreateMap<ApplicationUser, AuthModel>();
-            CreateMap<InitiateRegistrationCommand, ApplicationUser>();
+            CreateMap<InitiateRiderRegistrationCommand, ApplicationUser>();
+            CreateMap<InitiateDriverRegistrationCommand, ApplicationUser>();
+
         }
     }
 }
