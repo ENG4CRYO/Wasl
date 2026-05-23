@@ -35,7 +35,7 @@ namespace Wasl.Application.Features.Auth.Commands.DriverRegistration.InitiateDri
         }
         public async Task<ApiResponse<string>> Handle(InitiateDriverRegistrationCommand request, CancellationToken cancellationToken)
         {
-            var exsitingUser = _userManager.FindByEmailAsync(request.Email);
+            var exsitingUser = await _userManager.FindByEmailAsync(request.Email);
 
             if (exsitingUser != null)
             {

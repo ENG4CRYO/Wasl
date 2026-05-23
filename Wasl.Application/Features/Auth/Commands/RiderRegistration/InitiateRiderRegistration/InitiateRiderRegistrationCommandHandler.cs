@@ -35,7 +35,7 @@ namespace Wasl.Application.Features.Auth.Commands.RiderRegistration.InitiateRide
         }
         public async Task<ApiResponse<string>> Handle(InitiateRiderRegistrationCommand request, CancellationToken cancellationToken)
         {
-            var exsitingUser = _userManager.FindByEmailAsync(request.Email);
+            var exsitingUser = await _userManager.FindByEmailAsync(request.Email);
 
             if (exsitingUser != null)
             {

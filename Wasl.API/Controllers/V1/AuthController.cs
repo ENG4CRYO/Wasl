@@ -70,6 +70,7 @@ namespace Wasl.API.Controllers.V1
         #region Login & Token Management
 
         [HttpPost("login")]
+        [Tags("Common Authentication")]
         public async Task<IActionResult> Login([FromBody] LoginCommand request)
         {
             var result = await _mediator.Send(request);
@@ -81,6 +82,7 @@ namespace Wasl.API.Controllers.V1
         }
 
         [HttpPost("refresh-token")]
+        [Tags("Common Authentication")]
         public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenCommand request)
         {
             var result = await _mediator.Send(request);
@@ -92,6 +94,7 @@ namespace Wasl.API.Controllers.V1
         }
 
         [HttpPost("revoke-token")]
+        [Tags("Common Authentication")]
         public async Task<IActionResult> RevokeToken([FromBody] RevokeTokenCommand request)
         {
             var result = await _mediator.Send(request);
@@ -107,6 +110,7 @@ namespace Wasl.API.Controllers.V1
         #region Password Management Flow
 
         [HttpPost("forgot-password")]
+        [Tags("Common Authentication")]
         public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordCommand request)
         {
             var result = await _mediator.Send(request);
@@ -115,6 +119,7 @@ namespace Wasl.API.Controllers.V1
         }
 
         [HttpPost("reset-password")]
+        [Tags("Common Authentication")]
         public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordCommand request)
         {
             var result = await _mediator.Send(request);

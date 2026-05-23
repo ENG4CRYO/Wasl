@@ -30,7 +30,7 @@ namespace Wasl.Application.Features.Auth.Commands.RiderRegistration.VerifyRiderR
 
             RuleFor(x => x.PhoneNumber)
                 .NotEmpty().WithMessage(_localizer["Validation.Auth.PhoneNumberRequired"])
-                .Matches(@"^\+?[1-9]\d{1,14}$").WithMessage(_localizer["Validation.Auth.InvalidPhoneNumber"]);
+                .Matches(@"^07[0-9]{9}$").WithMessage(_localizer["Validation.Auth.InvalidPhoneNumber"]);
 
             RuleFor(x => x.Password)
                 .Cascade(CascadeMode.Continue)
