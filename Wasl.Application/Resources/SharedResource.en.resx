@@ -124,7 +124,7 @@
     <value>If your email is registered, you will receive an OTP shortly.</value>
   </data>
   <data name="Auth.RegisterSendOtp" xml:space="preserve">
-    <value>OTP has been sent to your email. Please verify.</value>
+    <value>OTP has been sent to your email. Please verify</value>
   </data>
   <data name="Auth.UserNameAlreadyTaken" xml:space="preserve">
     <value>Username is already taken</value>
@@ -275,5 +275,20 @@
   </data>
   <data name="Validation.DriverProfiles.SelfieImageRequired" xml:space="preserve">
     <value>Selfie image is required</value>
+  </data>
+  <data name="DriverProfiles.Unauthorized" xml:space="preserve">
+    <value>You are not authorized to perform this operation</value>
+  </data>
+  <data name="DriverProfiles.NotFound" xml:space="preserve">
+    <value>The driver file was not found</value>
+  </data>
+  <data name="DriverProfiles.AlreadyUnderReview" xml:space="preserve">
+    <value>Your file is already under review, please wait</value>
+  </data>
+  <data name="DriverProfiles.AlreadyApproved" xml:space="preserve">
+    <value>Your account is already approved</value>
+  </data>
+  <data name="DriverProfiles.SubmitSuccess" xml:space="preserve">
+    <value>Your data has been successfully received and is now under review</value>
   </data>
 </root>

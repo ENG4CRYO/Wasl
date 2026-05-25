@@ -34,19 +34,6 @@ namespace Wasl.API.Controllers.V1
             var result = await _mediator.Send(command);
             return result.Succeeded ? Ok(result) : BadRequest(result);
         }
-        [Tags("Driver Profile")]
-        [HttpGet("test-claims")]
-        [Authorize] 
-        public IActionResult TestClaims()
-        {
-           
-            var claims = HttpContext.User.Claims.Select(c => new { c.Type, c.Value }).ToList();
-
-            return Ok(new
-            {
-                ControllerUserId = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "uid")?.Value,
-                ServiceUserId = _currentUserService.UserId 
-            });
-        }
+        
     }
 }

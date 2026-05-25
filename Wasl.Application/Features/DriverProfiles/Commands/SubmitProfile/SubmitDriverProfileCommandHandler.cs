@@ -32,10 +32,10 @@ namespace Wasl.Application.Features.DriverProfiles.Commands.SubmitProfile
 
         public async Task<ApiResponse<string>> Handle(SubmitDriverProfileCommand request, CancellationToken cancellationToken)
         {
-            var userId = _currentUserService.UserId;
+            var userId = _currentUserService.UserId();
             if (string.IsNullOrEmpty(userId))
             {
-                return ApiResponse<string>.Failure("غير مصرح لك بالقيام بهذه العملية.");
+                return ApiResponse<string>.Failure(_localizer["DriverProfiles.Unauthorized"]);
             }
 
             var driverProfile = await _context.DriverProfiles
@@ -43,17 +43,17 @@ namespace Wasl.Application.Features.DriverProfiles.Commands.SubmitProfile
 
             if (driverProfile == null)
             {
-                return ApiResponse<string>.Failure("لم يتم العثور على ملف السائق.");
+                return ApiResponse<string>.Failure(_localizer["DriverProfiles.NotFound"]);
             }
 
-  
             if (driverProfile.ApprovalStatus == DriverApprovalStatus.UnderReview)
             {
-                return ApiResponse<string>.Failure("ملفك قيد المراجعة بالفعل، يرجى الانتظار.");
+                return ApiResponse<string>.Failure(_localizer["DriverProfiles.AlreadyUnderReview"]);
             }
+
             if (driverProfile.ApprovalStatus == DriverApprovalStatus.Approved)
             {
-                return ApiResponse<string>.Failure("حسابك معتمد مسبقاً.");
+                return ApiResponse<string>.Failure(_localizer["DriverProfiles.AlreadyApproved"]);
             }
 
             var vehicleUrl = await _fileService.SaveFileAsync(request.VehicleImage, "drivers/vehicles", cancellationToken);
@@ -65,7 +65,6 @@ namespace Wasl.Application.Features.DriverProfiles.Commands.SubmitProfile
             driverProfile.VehicleYear = request.VehicleYear;
             driverProfile.VinNumber = request.VinNumber;
 
-
             driverProfile.VehicleImagesUrl = vehicleUrl;
             driverProfile.LicenseFrontUrl = licenseFrontUrl;
             driverProfile.LicenseBackUrl = licenseBackUrl;
@@ -75,7 +74,7 @@ namespace Wasl.Application.Features.DriverProfiles.Commands.SubmitProfile
 
             await _context.SaveChangesAsync(cancellationToken);
 
-            return ApiResponse<string>.Success("تم استلام بياناتك بنجاح، وهي الآن قيد المراجعة.");
+            return ApiResponse<string>.Success(_localizer["DriverProfiles.SubmitSuccess"]);
         }
     }
 }

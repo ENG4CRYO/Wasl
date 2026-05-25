@@ -33,7 +33,7 @@ namespace Wasl.Infrastructure.Data
 
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
-            var userId = _currentUser.UserId ?? "System";
+            var userId = _currentUser.UserId() ?? "System";
             var now = DateTime.UtcNow;
 
             foreach (var entry in ChangeTracker.Entries())

@@ -276,4 +276,19 @@
   <data name="Validation.DriverProfiles.SelfieImageRequired" xml:space="preserve">
     <value>الصورة الشخصية مطلوبة</value>
   </data>
+  <data name="DriverProfiles.Unauthorized" xml:space="preserve">
+    <value>غير مصرح لك بالقيام بهذه العملية</value>
+  </data>
+  <data name="DriverProfiles.NotFound" xml:space="preserve">
+    <value>لم يتم العثور على ملف السائق</value>
+  </data>
+  <data name="DriverProfiles.AlreadyUnderReview" xml:space="preserve">
+    <value> ملفك قيد المراجعة بالفعل يرجى الانتظار</value>
+  </data>
+  <data name="DriverProfiles.AlreadyApproved" xml:space="preserve">
+    <value>حسابك معتمد مسبقا</value>
+  </data>
+  <data name="DriverProfiles.SubmitSuccess" xml:space="preserve">
+    <value>تم استلام بياناتك بنجاح وهي الان قيد المراجعة</value>
+  </data>
 </root>
