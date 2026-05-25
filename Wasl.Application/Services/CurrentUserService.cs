@@ -17,16 +17,7 @@ namespace Wasl.Application.Services
             _httpContextAccessor = httpContextAccessor;
         }
 
-        public string? UserId
-        {
-            get
-            {
-                return _httpContextAccessor
-                    .HttpContext?
-                    .User?
-                    .FindFirst(ClaimTypes.NameIdentifier)?
-                    .Value;
-            }
-        }
+        public string? UserId => _httpContextAccessor.HttpContext?.User?.Claims
+                                 .FirstOrDefault(c => c.Type == "uid")?.Value;
     }
 }

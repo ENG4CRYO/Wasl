@@ -27,7 +27,7 @@ try
     builder.Services.AddGlobalCors(builder.Configuration);
     builder.Services.AddGlobalHealthChecks(builder.Configuration);
     builder.Services.AddApiResponseCompression();
-
+    builder.Services.AddHttpContextAccessor();
 
 
     builder.Services.AddOpenApi(options =>
@@ -123,6 +123,7 @@ try
     app.UseForwardedHeaders(forwardedHeadersOptions);
 
     app.UseHttpsRedirection();
+  
 
     app.UseSecurityHeaders(PolicyCollection.policyCollection(app));
     app.UseGlobalHealthChecks();
