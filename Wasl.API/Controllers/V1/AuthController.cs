@@ -30,7 +30,7 @@ namespace Wasl.API.Controllers.V1
         #region Rider Registration
 
         [HttpPost("rider/initiate-registration")]
-        [Tags("Rider Authentication")]
+        [Tags("Rider Auth")]
         public async Task<ActionResult<ApiResponse<string>>> InitiateRiderRegistration([FromBody] InitiateRiderRegistrationCommand command)
         {
             var result = await _mediator.Send(command);
@@ -38,7 +38,7 @@ namespace Wasl.API.Controllers.V1
         }
 
         [HttpPost("rider/verify-registration")]
-        [Tags("Rider Authentication")]
+        [Tags("Rider Auth")]
         public async Task<ActionResult<ApiResponse<AuthModel>>> VerifyRiderRegistration([FromBody] VerifyRiderRegistrationCommand command)
         {
             var result = await _mediator.Send(command);
@@ -50,7 +50,7 @@ namespace Wasl.API.Controllers.V1
         #region Driver Registration
 
         [HttpPost("driver/initiate-registration")]
-        [Tags("Driver Authentication")]
+        [Tags("Driver Auth")]
         public async Task<ActionResult<ApiResponse<string>>> InitiateDriverRegistration([FromBody] InitiateDriverRegistrationCommand command)
         {
             var result = await _mediator.Send(command);
@@ -58,7 +58,7 @@ namespace Wasl.API.Controllers.V1
         }
 
         [HttpPost("driver/verify-registration")]
-        [Tags("Driver Authentication")]
+        [Tags("Driver Auth")]
         public async Task<ActionResult<ApiResponse<AuthModel>>> VerifyDriverRegistration([FromBody] VerifyDriverRegistrationCommand command)
         {
             var result = await _mediator.Send(command);

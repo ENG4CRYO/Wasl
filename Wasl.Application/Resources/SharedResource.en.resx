@@ -255,4 +255,25 @@
   <data name="Validation.Auth.AddressNotEmpty" xml:space="preserve">
     <value>Address cannot be empty</value>
   </data>
+  <data name="Validation.DriverProfiles.VehicleModelRequired" xml:space="preserve">
+    <value>Vehicle model is required</value>
+  </data>
+  <data name="Validation.DriverProfiles.VehicleYearRequired" xml:space="preserve">
+    <value>Year of manufacture required</value>
+  </data>
+  <data name="Validation.DriverProfiles.VINRequired" xml:space="preserve">
+    <value>VIN is required</value>
+  </data>
+  <data name="Validation.DriverProfiles.VehicleImageRequired" xml:space="preserve">
+    <value>Vehicle image is required</value>
+  </data>
+  <data name="Validation.DriverProfiles.LicenseFrontImageRequired" xml:space="preserve">
+    <value>License front image is required</value>
+  </data>
+  <data name="Validation.DriverProfiles.LicenseBackImageRequired" xml:space="preserve">
+    <value>License back image is required</value>
+  </data>
+  <data name="Validation.DriverProfiles.SelfieImageRequired" xml:space="preserve">
+    <value>Selfie image is required</value>
+  </data>
 </root>

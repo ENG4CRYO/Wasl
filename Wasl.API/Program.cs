@@ -129,6 +129,7 @@ try
     app.UseRateLimiter();
     app.UseAuthentication();
     app.UseAuthorization();
+    app.UseStaticFiles();
     app.MapControllers().RequireRateLimiting("IpLimiter");
 
     app.Run();

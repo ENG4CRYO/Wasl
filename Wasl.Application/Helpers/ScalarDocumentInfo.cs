@@ -6,7 +6,7 @@
         {
             string template = """
                 # 🏗️ Wasl Enterprise API Guide
-                Welcome to the official developer documentation for the **Wasl** platform. This API is built using **.NET 9**, following **Clean Architecture** and **CQRS** patterns with a focus on high security and performance.
+                Welcome to the official developer documentation for the **Wasl** platform. This API is built using **.NET 10**, following **Clean Architecture** and **CQRS** patterns with a focus on high security and performance.
 
                 ---
 
@@ -81,16 +81,11 @@
                 }
                 ```
 
-                ### 💡 Frontend Implementation Tips:
-                1. **Unified Error Handling:** Create a global interceptor to check `succeeded == false`.
-                2. **Field Mapping:** If `errors` has keys, map them to your form input error labels.
-                3. **Toasts:** If `errors` is empty but `succeeded` is false, show the `message` in a Toast/Snackbar.
-
                 ---
 
                 ## 🧪 Development & Testing
                 * **Environment:** `Development`
-                * **Test Credentials:** * Email: `tester@wasl.com`
+                * **Test Credentials:** * Email: `wasl@test.com`
                   * Static OTP: `123456` (Note: Only enabled in Mock/Dev mode).
                 """;
 

@@ -1,10 +1,11 @@
-﻿using Wasl.Application.Helpers;
-using Microsoft.AspNetCore.OpenApi;
+﻿using Microsoft.AspNetCore.OpenApi;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi;
 using System.Collections.Generic;
+using System.Text.Json.Nodes;
 using System.Threading.Tasks;
+using Wasl.Application.Helpers;
 
 namespace Wasl.API.Extensions
 {
@@ -54,6 +55,29 @@ namespace Wasl.API.Extensions
                         }
                     });
 
+                    var tagGroups = new JsonArray
+                    {
+                        new JsonObject
+                        {
+                            ["name"] = "Driver 🚗",
+                            ["tags"] = new JsonArray { "Driver Auth", "Driver Profile" }
+                        },
+                        new JsonObject
+                        {
+                            ["name"] = "Rider 👤",
+                            ["tags"] = new JsonArray { "Rider Auth" }
+                        },
+                        new JsonObject
+                        {
+                            ["name"] = "Common ⚙️",
+                            ["tags"] = new JsonArray { "Common Authentication" }
+                        }
+                    };
+
+                    document.Extensions ??= new Dictionary<string, IOpenApiExtension>();
+
+                    document.Extensions["x-tagGroups"] = new JsonNodeExtension(tagGroups);
+     
                     return Task.CompletedTask;
                 });
             });

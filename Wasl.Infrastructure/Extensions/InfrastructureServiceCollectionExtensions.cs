@@ -90,6 +90,10 @@ namespace Wasl.Infrastructure.Extensions
             services.AddTransient<ITemplateService, TemplateService>();
 
 
+            services.AddHttpContextAccessor();
+            services.AddScoped<IFileService, LocalFileService>();
+
+
             return services;
         }
     }

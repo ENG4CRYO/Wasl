@@ -255,4 +255,25 @@
   <data name="Validation.Auth.AddressNotEmpty" xml:space="preserve">
     <value>قيمة العنوان فارغة</value>
   </data>
+  <data name="Validation.DriverProfiles.VehicleModelRequired" xml:space="preserve">
+    <value>موديل السيارة مطلوب</value>
+  </data>
+  <data name="Validation.DriverProfiles.VehicleYearRequired" xml:space="preserve">
+    <value>سنة الاصدار مطلوبة</value>
+  </data>
+  <data name="Validation.DriverProfiles.VINRequired" xml:space="preserve">
+    <value>رقم الشاصي مطلوب</value>
+  </data>
+  <data name="Validation.DriverProfiles.VehicleImageRequired" xml:space="preserve">
+    <value>صورة السيارة مطلوبة</value>
+  </data>
+  <data name="Validation.DriverProfiles.LicenseFrontImageRequired" xml:space="preserve">
+    <value>صورة الاجازة الامامية مطلوبة</value>
+  </data>
+  <data name="Validation.DriverProfiles.LicenseBackImageRequired" xml:space="preserve">
+    <value>صورة الاجازة الخلفية مطلوبة</value>
+  </data>
+  <data name="Validation.DriverProfiles.SelfieImageRequired" xml:space="preserve">
+    <value>الصورة الشخصية مطلوبة</value>
+  </data>
 </root>
