@@ -15,7 +15,7 @@ services:
     networks:
       - wasl_network
     volumees:
-      - ./WaslUploads:/app/wwwroot/uploads
+      - ./WaslUploads:/app/wwwroot
 
 networks:
   wasl_network:
