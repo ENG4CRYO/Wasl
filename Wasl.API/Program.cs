@@ -74,10 +74,6 @@ try
 
     var app = builder.Build();
 
-
-
-    await app.ApplyDatabaseMigrationsAsync();
-
     app.UseRequestLocalization(localizationOptions);
 
     using (var scope = app.Services.CreateScope())

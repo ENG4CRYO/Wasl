@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 services:
   wasl-api:
@@ -6,7 +6,7 @@ services:
     container_name: wasl_api_container
     restart: always
     ports:
-      - "5060:8080" 
+      - "5060:8080"
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - ConnectionStrings__DefaultConnection=${DB_CONNECTION_STRING}
@@ -14,6 +14,8 @@ services:
       - DomainUrl=${DOMAIN_URL}
     networks:
       - wasl_network
+    volumees:
+      - ./WaslUploads:/app/wwwroot/uploads
 
 networks:
   wasl_network:
