@@ -118,6 +118,7 @@ try
     forwardedHeadersOptions.KnownProxies.Clear();
     app.UseForwardedHeaders(forwardedHeadersOptions);
 
+    app.UseStaticFiles();
     app.UseHttpsRedirection();
   
 
@@ -126,7 +127,6 @@ try
     app.UseRateLimiter();
     app.UseAuthentication();
     app.UseAuthorization();
-    app.UseStaticFiles();
     app.MapControllers().RequireRateLimiting("IpLimiter");
 
     app.Run();
