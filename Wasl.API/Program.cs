@@ -110,7 +110,7 @@ try
     app.MapOpenApi();
     app.MapScalarApiReference(options =>
     {
-        options.Theme = ScalarTheme.BluePlanet;
+        options.Theme = ScalarTheme.Moon;
         options.Layout = ScalarLayout.Modern;
         options.WithTitle("Wasl API")
                .WithCustomCss(CssScalar.GetCss());

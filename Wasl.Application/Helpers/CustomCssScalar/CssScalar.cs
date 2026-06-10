@@ -6,11 +6,13 @@
         {
             return @"
                 .scalar-card-content table, 
-                 .markdown table {
-            display: block !important;
-            overflow-x: auto !important;
-            white-space: nowrap !important;
-            width: 100% !important;";
+                .markdown table {
+                    display: block !important;
+                    overflow-x: auto !important;
+                    white-space: nowrap !important;
+                    width: 100% !important;
+                } 
+            ";
         }
     }
 }
