@@ -25,6 +25,39 @@
 
                 ---
 
+                ## 📡 Real-Time Location Tracking (SignalR)
+                The platform uses **SignalR** backed by **Redis** for high-performance, real-time location tracking and broadcasting.
+
+                ### 🔌 1. Connecting to the Hub
+                - **Endpoint URL:** `https://apiservice.ddns.net/wasl/hubs/tracking`
+                - **Authentication:** Standard browser WebSockets do not support HTTP Headers. You **must** pass the JWT Access Token in the URL query string:
+                  `?access_token=YOUR_JWT_TOKEN`
+                  *(The backend automatically intercepts this and authenticates the session).*
+
+                ### 🎧 2. Client Listening Events (Frontend -> Listen)
+                Register these listeners **before** starting the connection:
+                - `ReceiveLocationUpdate(double latitude, double longitude)`: Triggered when a driver updates their location.
+
+                ### 🚀 3. Client Invoking Events (Frontend -> Send)
+                Once connected, invoke these backend methods:
+                - `UpdateLocation(double latitude, double longitude)`: Broadcasts the Driver's current GPS coordinates to the system.
+
+                ### 🗺️ 4. Radar Simulator (Testing Tool)
+                We provide a built-in web simulator to test live tracking without a mobile app.
+                - **Simulator Link:** [https://apiservice.ddns.net/wasl/driver_radar_simulation.html](https://apiservice.ddns.net/wasl/driver_radar_simulation.html)
+                - **Usage:** Login as a Driver. The simulator will automatically connect to SignalR and start broadcasting mock GPS movements on the map.
+
+                ---
+
+                ## 🚖 Ride Lifecycle & Business Logic
+                To maintain data integrity, a strict state machine is enforced:
+                1. **Pending:** Ride requested by the Rider.
+                2. **Accepted:** Driver accepts the ride. *(Validation: A Driver cannot accept a new ride if they already have an Active/Accepted ride).*
+                3. **InProgress:** The trip is ongoing.
+                4. **Completed:** The Driver finishes the trip using the `complete` endpoint, freeing them to accept new requests.
+
+                ---
+
                 ## 📌 Infrastructure & Standards
 
                 ### 🌍 Localization (Multi-language)
@@ -33,7 +66,7 @@
                 - Validation errors are also localized automatically.
 
                 ### 📧 Background Jobs
-                Email sending is non-blocking. We use **System.Threading.Channels** to queue emails and process them in a background worker, ensuring the API responds instantly to the user.
+                Email sending is non-blocking. We use **System.Threading.Channels** to queue emails and process them in a background worker, ensuring the API responds instantly.
 
                 ---
 
@@ -84,7 +117,7 @@
                 ---
 
                 ## 🧪 Development & Testing
-                * **Environment:** `Development`
+                * **Environment:** `Production / Development`
                 * **Test Credentials:** * Email: `wasl@test.com`
                   * Static OTP: `123456` (Note: Only enabled in Mock/Dev mode).
                 """;
