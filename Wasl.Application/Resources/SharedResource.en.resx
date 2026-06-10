@@ -291,4 +291,25 @@
   <data name="DriverProfiles.SubmitSuccess" xml:space="preserve">
     <value>Your data has been successfully received and is now under review</value>
   </data>
+  <data name="Validation.Rides.RideIdNotNull" xml:space="preserve">
+    <value>RideId cannot be null</value>
+  </data>
+  <data name="Validation.Rides.RideIdNotEmpty" xml:space="preserve">
+    <value>RideId cannot be empty</value>
+  </data>
+  <data name="Validation.Rides.LatitudeNotNull" xml:space="preserve">
+    <value>Latitude Cannot be null</value>
+  </data>
+  <data name="Validation.Rides.LatitudeNotEmpty" xml:space="preserve">
+    <value>Latitude cannot be empty</value>
+  </data>
+  <data name="Validation.Rides.LongitudeNotNull" xml:space="preserve">
+    <value>Longitude cannot be null</value>
+  </data>
+  <data name="Validation.Rides.LongitudeNotEmpty" xml:space="preserve">
+    <value>Longitude cannot be empty</value>
+  </data>
+  <data name="Validation.Rides.RideIdMustBeGuid" xml:space="preserve">
+    <value>RideId must be Guid</value>
+  </data>
 </root>

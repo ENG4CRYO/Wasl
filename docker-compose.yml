@@ -14,7 +14,7 @@ services:
       - DomainUrl=${DOMAIN_URL}
     networks:
       - wasl_network
-    volumees:
+    volumes:
       - ./WaslUploads:/app/wwwroot
 
 networks:

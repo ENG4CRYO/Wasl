@@ -71,7 +71,13 @@ namespace Wasl.API.Extensions
                         {
                             ["name"] = "Common ⚙️",
                             ["tags"] = new JsonArray { "Common Authentication" }
+                        },
+                        new JsonObject
+                        {
+                            ["name"] = "Rides",
+                            ["tags"] = new JsonArray { "Rides" }
                         }
+
                     };
 
                     document.Extensions ??= new Dictionary<string, IOpenApiExtension>();

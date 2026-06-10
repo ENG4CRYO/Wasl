@@ -1,18 +1,24 @@
-﻿using Wasl.api.Extensions;
-using Wasl.api.Factories;
-using Wasl.api.Middlewares;
-using Wasl.API.Extensions;
-using Wasl.API.Helper.CustomCssScalar;
-using Wasl.Application.Common;
-using Wasl.Application.Extensions;
-using Wasl.Application.Helpers;
-using Wasl.Infrastructure.Extensions;
+﻿using Hangfire;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
 using Scalar.AspNetCore;
 using Serilog;
 using SharpGrip.FluentValidation.AutoValidation.Mvc.Extensions;
+using Wasl.api.Extensions;
+using Wasl.api.Factories;
+using Wasl.api.Hubs;
+using Wasl.api.Middlewares;
+using Wasl.API.Extensions;
+using Wasl.API.Helper.CustomCssScalar;
+using Wasl.API.Hubs;
+using Wasl.API.Services;
+using Wasl.Application.Common;
+using Wasl.Application.Extensions;
+using Wasl.Application.Helpers;
+using Wasl.Application.Interfaces.Infrastructure;
+using Wasl.Infrastructure.Extensions;
 
 SerilogExtension.SetupBootstrapLogger();
 
@@ -28,7 +34,8 @@ try
     builder.Services.AddGlobalHealthChecks(builder.Configuration);
     builder.Services.AddApiResponseCompression();
     builder.Services.AddHttpContextAccessor();
-
+    builder.Services.AddScoped<IDriverNotificationService,DriverNotificationService>();
+    builder.Services.AddSingleton<IUserIdProvider, CustomUserIdProvider>();
 
     builder.Services.AddOpenApi(options =>
     {
@@ -71,11 +78,23 @@ try
         .AddSupportedCultures(supportedCultures)
         .AddSupportedUICultures(supportedCultures);
 
+    builder.Services.AddSignalR();
+
+    builder.Services.AddCors(options =>
+    {
+        options.AddPolicy("AllowAll", builder =>
+        {
+            builder.SetIsOriginAllowed(_ => true) 
+                   .AllowAnyMethod()
+                   .AllowAnyHeader()
+                   .AllowCredentials();
+        });
+    });
 
     var app = builder.Build();
 
     app.UseRequestLocalization(localizationOptions);
-
+    app.UseCors("AllowAll");
     using (var scope = app.Services.CreateScope())
     {
         var services = scope.ServiceProvider;
@@ -128,6 +147,8 @@ try
     app.UseAuthentication();
     app.UseAuthorization();
     app.MapControllers().RequireRateLimiting("IpLimiter");
+    app.UseHangfireDashboard("/hangfire");
+    app.MapHub<TrackingHub>("/hubs/tracking");
 
     app.Run();
 }

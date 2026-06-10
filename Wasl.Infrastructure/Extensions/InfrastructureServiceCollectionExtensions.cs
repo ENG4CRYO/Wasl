@@ -1,4 +1,17 @@
-﻿using Wasl.Application.Helpers;
+﻿using Hangfire;
+using Hangfire.PostgreSql;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
+using StackExchange.Redis;
+using System;
+using System.Collections.Generic;
+using System.Text;
+using System.Threading.Channels;
+using Wasl.Application.Helpers;
 using Wasl.Application.Interfaces;
 using Wasl.Application.Interfaces.Common;
 using Wasl.Application.Interfaces.Infrastructure;
@@ -8,16 +21,6 @@ using Wasl.Infrastructure.Data;
 using Wasl.Infrastructure.Models;
 using Wasl.Infrastructure.Services;
 using Wasl.Infrastructure.Settings;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.IdentityModel.Tokens;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Channels;
 
 namespace Wasl.Infrastructure.Extensions
 {
@@ -86,12 +89,44 @@ namespace Wasl.Infrastructure.Extensions
                     ValidAudience = jwtAudience,
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
                 };
+
+                options.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        var accessToken = context.Request.Query["access_token"];
+
+                        var path = context.HttpContext.Request.Path;
+                        if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hubs"))
+                        {
+                            context.Token = accessToken;
+                        }
+                        return Task.CompletedTask;
+                    }
+                };
             });;
             services.AddTransient<ITemplateService, TemplateService>();
 
 
             services.AddHttpContextAccessor();
             services.AddScoped<IFileService, LocalFileService>();
+
+            var redisConnectionString = configuration.GetConnectionString("Redis");
+
+            services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(redisConnectionString!));
+
+            services.AddScoped<IRedisCacheService, RedisCacheService>();
+
+            services.AddHangfire(config => config
+                 .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+                 .UseSimpleAssemblyNameTypeSerializer()
+                 .UseRecommendedSerializerSettings()
+                 .UsePostgreSqlStorage(config =>
+                 config.UseNpgsqlConnection(configuration.GetConnectionString("DefaultConnection"))));
+
+            services.AddHangfireServer();
+
+            services.AddScoped<IRideDispatchService, RideDispatchService>();
 
 
             return services;

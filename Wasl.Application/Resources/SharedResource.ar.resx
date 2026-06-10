@@ -291,4 +291,25 @@
   <data name="DriverProfiles.SubmitSuccess" xml:space="preserve">
     <value>تم استلام بياناتك بنجاح وهي الان قيد المراجعة</value>
   </data>
+  <data name="Validation.Rides.RideIdNotNull" xml:space="preserve">
+    <value>رقم الرحلة لايمكن ان يكون بلا قيمة</value>
+  </data>
+  <data name="Validation.Rides.RideIdNotEmpty" xml:space="preserve">
+    <value>رقم الرحلة لايمكن ان يكون فارغا</value>
+  </data>
+  <data name="Validation.Rides.LatitudeNotNull" xml:space="preserve">
+    <value>خط العرض لايمكن ان يكون بلا قيمة</value>
+  </data>
+  <data name="Validation.Rides.LatitudeNotEmpty" xml:space="preserve">
+    <value>خط العرض لايمكن ان يكون فارغا</value>
+  </data>
+  <data name="Validation.Rides.LongitudeNotNull" xml:space="preserve">
+    <value>خط الطول لايمكن ان يكون بلا قيمة</value>
+  </data>
+  <data name="Validation.Rides.LongitudeNotEmpty" xml:space="preserve">
+    <value>خط الطول لا يمكن ان يكون فارغا </value>
+  </data>
+  <data name="Validation.Rides.RideIdMustBeGuid" xml:space="preserve">
+    <value />
+  </data>
 </root>
