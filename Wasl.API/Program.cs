@@ -83,7 +83,7 @@ try
     var app = builder.Build();
 
     app.UseRequestLocalization(localizationOptions);
-    app.UseCors("AllowAll");
+
     using (var scope = app.Services.CreateScope())
     {
         var services = scope.ServiceProvider;
@@ -116,7 +116,7 @@ try
         options.WithTitle("Wasl API")
                .WithCustomCss(CssScalar.GetCss());
     });
-    app.UseCors("AllowAll");
+
    
     var forwardedHeadersOptions = new ForwardedHeadersOptions
     {
@@ -134,6 +134,9 @@ try
     app.UseSecurityHeaders(PolicyCollection.policyCollection(app));
     app.UseGlobalHealthChecks();
     app.UseRateLimiter();
+    app.UseRouting();
+    app.UseCors("AllowAll");
+
     app.UseAuthentication();
     app.UseAuthorization();
     app.MapControllers().RequireRateLimiting("IpLimiter");
