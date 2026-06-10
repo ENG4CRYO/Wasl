@@ -9,11 +9,11 @@ namespace Wasl.api.Extensions
         {
             services.AddCors(options =>
             {
-               
                 options.AddPolicy("AllowAll", builder =>
-                    builder.AllowAnyOrigin()   
-                           .AllowAnyMethod()  
-                           .AllowAnyHeader());
+                    builder.SetIsOriginAllowed(_ => true)
+                           .AllowAnyMethod()
+                           .AllowAnyHeader()
+                           .AllowCredentials());
 
                 var allowedOrigins = configuration.GetSection("AllowedOrigins").Get<string[]>();
                 if (allowedOrigins != null && allowedOrigins.Length > 0)
