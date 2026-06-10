@@ -137,6 +137,7 @@ try
     forwardedHeadersOptions.KnownProxies.Clear();
     app.UseForwardedHeaders(forwardedHeadersOptions);
 
+    app.UseDefaultFiles();
     app.UseStaticFiles();
     app.UseHttpsRedirection();
   
