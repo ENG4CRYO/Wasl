@@ -30,7 +30,6 @@ try
 
     builder.RegisterSerilog();
     builder.Services.AddGlobalRateLimiter();
-    builder.Services.AddGlobalCors(builder.Configuration);
     builder.Services.AddGlobalHealthChecks(builder.Configuration);
     builder.Services.AddApiResponseCompression();
     builder.Services.AddHttpContextAccessor();
