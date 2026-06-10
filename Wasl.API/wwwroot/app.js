@@ -10,7 +10,7 @@
 const CONFIG = Object.freeze({
     API_BASE_URL: (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
         ? 'https://localhost:7231'
-        : 'https://apiservice.ddns.net:5060',
+        : 'https://apiservice.ddns.net/wasl:5060',
     SIGNALR_HUB: '/hubs/tracking',
     TOAST_DURATION: 3500,
     AUDIO_URL: 'https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3',
