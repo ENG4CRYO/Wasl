@@ -310,6 +310,33 @@
     <value>خط الطول لا يمكن ان يكون فارغا </value>
   </data>
   <data name="Validation.Rides.RideIdMustBeGuid" xml:space="preserve">
-    <value />
+    <value>رقم الرحلة يجب ان يكون من نوع GUID</value>
+  </data>
+  <data name="Rides.FailedToAcceptFlight" xml:space="preserve">
+    <value>عذراً، تم قبول الرحلة من قبل سائق آخر أو أنك مشغول برحلة حالية</value>
+  </data>
+  <data name="Rides.FlightDoesNotExist" xml:space="preserve">
+    <value>الرحلة غير موجودة</value>
+  </data>
+  <data name="Rides.FlightNotYours" xml:space="preserve">
+    <value>عذراً، لا يمكنك تعديل حالة رحلة لا تخصك</value>
+  </data>
+  <data name="Rides.StatusNotAccepted" xml:space="preserve">
+    <value>لا يمكن تغيير الحالة، الرحلة ليست قيد الاستلام حالياً</value>
+  </data>
+  <data name="Rides.ArrivedSeuccesfully" xml:space="preserve">
+    <value>تم إشعار الراكب بوصولك بنجاح</value>
+  </data>
+  <data name="Rides.FlightAcceptanceSucceeded" xml:space="preserve">
+    <value>مبروك الرحلة من نصيبك</value>
+  </data>
+  <data name="Rides.StatusAlreadyCompleted" xml:space="preserve">
+    <value>هذه الرحلة منتهية أو ملغاة بالفعل</value>
+  </data>
+  <data name="Rides.FlightCompletedSucceeded" xml:space="preserve">
+    <value>تم إنهاء الرحلة بنجاح</value>
+  </data>
+  <data name="Rides.RequestRideRicevedSuccessfuly" xml:space="preserve">
+    <value>تم استلام الطلب، جاري البحث عن أقرب السائقين</value>
   </data>
 </root>

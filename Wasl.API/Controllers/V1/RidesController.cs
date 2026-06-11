@@ -5,9 +5,12 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Wasl.Application.Common;
 using Wasl.Application.Features.Rides.Commands;
-using Wasl.Application.Features.Rides.Commands.RequestRide;
 using Wasl.Application.Features.Rides.Commands.AcceptRide; // أضفنا هذا المسار
+using Wasl.Application.Features.Rides.Commands.CompleteRide;
+using Wasl.Application.Features.Rides.Commands.DriverArrived;
+using Wasl.Application.Features.Rides.Commands.RequestRide;
 using Wasl.Core.Constants;
 
 namespace Wasl.API.Controllers.V1
@@ -50,18 +53,14 @@ namespace Wasl.API.Controllers.V1
 
             if (string.IsNullOrEmpty(riderId))
             {
-                return Unauthorized(new { Message = "يجب تسجيل الدخول أولاً" });
+                return Unauthorized(ApiResponse<string>.Failure("Unauthorized"));
             }
 
             command.RiderId = riderId;
 
-            var rideId = await _mediator.Send(command);
+            var result = await _mediator.Send(command);
 
-            return Ok(new
-            {
-                Message = "تم استلام الطلب، جاري البحث عن أقرب السائقين...",
-                RideId = rideId
-            });
+            return Ok(result);
         }
 
         /// <summary>
@@ -89,19 +88,107 @@ namespace Wasl.API.Controllers.V1
 
             if (string.IsNullOrEmpty(driverId))
             {
-                return Unauthorized(new { Message = "التوكن غير صالح أو لا يحتوي على معرف السائق" });
+                return Unauthorized(ApiResponse<string>.Failure("Unauthorized"));
             }
 
             command.DriverId = driverId;
 
-            var isSuccess = await _mediator.Send(command);
+            var result = await _mediator.Send(command);
 
-            if (isSuccess)
+            if (result.Succeeded)
             {
-                return Ok(new { Message = "مبروك، الرحلة من نصيبك!", RideId = command.RideId });
+                return Ok(result);
             }
 
-            return BadRequest(new { Message = "عذراً، تم قبول الرحلة من قبل سائق آخر أو أنك مشغول برحلة حالية." });
+            return BadRequest(result);
+        }
+
+
+        /// <summary>
+        /// Marks the ride as 'Arrived' when the driver reaches the pickup location.
+        /// </summary>
+        /// <remarks>
+        /// **Role Required:** Driver
+        /// 
+        /// Validates that the ride is currently in the 'Accepted' state and belongs to the requesting driver, 
+        /// then transitions it to 'Arrived' to notify the rider.
+        /// </remarks>
+        /// <param name="id">The unique identifier of the Ride.</param>
+        /// <returns>A success message indicating the status update.</returns>
+        [Authorize(Roles = AspRoles.Driver)]
+        [HttpPost("{id}/arrive")]
+        [Tags("Rides")]
+        [ProducesResponseType(typeof(ApiResponse<bool>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<bool>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        public async Task<IActionResult> DriverArrived(string id)
+        {
+            var driverId = User.FindFirst("uid")?.Value;
+
+            if (string.IsNullOrEmpty(driverId))
+            {
+                return Unauthorized(ApiResponse<string>.Failure("Unauthorized"));
+            }
+
+            var command = new DriverArrivedCommand
+            {
+                RideId = id,
+                DriverId = driverId
+            };
+
+            var result = await _mediator.Send(command);
+
+            if (!result.Succeeded)
+            {
+                return BadRequest(result);
+            }
+
+            return Ok(result);
+        }
+
+
+        /// <summary>
+        /// Marks the ride as 'Completed' when the trip is successfully finished.
+        /// </summary>
+        /// <remarks>
+        /// **Role Required:** Driver
+        /// 
+        /// Validates that the ride is not already completed or cancelled, and belongs to the requesting driver, 
+        /// then transitions it to 'Completed' to free up the driver for new requests.
+        /// </remarks>
+        /// <param name="id">The unique identifier of the Ride.</param>
+        /// <returns>A success message indicating the ride has been completed.</returns>
+        [Authorize(Roles = AspRoles.Driver)]
+        [HttpPost("{id}/complete")]
+        [Tags("Rides")]
+        [ProducesResponseType(typeof(ApiResponse<bool>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<bool>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        public async Task<IActionResult> CompleteRide(string id)
+        {
+            var driverId = User.FindFirst("uid")?.Value;
+
+            if (string.IsNullOrEmpty(driverId))
+            {
+                return Unauthorized(ApiResponse<string>.Failure("Unauthorized"));
+            }
+
+            var command = new CompleteRideCommand
+            {
+                RideId = id,
+                DriverId = driverId
+            };
+
+            var result = await _mediator.Send(command);
+
+            if (!result.Succeeded)
+            {
+                return BadRequest(result);
+            }
+
+            return Ok(result);
         }
     }
 }

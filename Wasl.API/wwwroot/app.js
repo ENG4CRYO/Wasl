@@ -1,12 +1,5 @@
-﻿/**
- * Wasl Driver Radar — app.js
- * Production-ready, clean architecture.
- * Pattern: Module with cached DOM refs, single source of truth for state.
- */
+﻿'use strict';
 
-'use strict';
-
-/* ── Configuration ── */
 const CONFIG = Object.freeze({
     API_BASE_URL: (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
         ? 'https://localhost:7231'
@@ -16,15 +9,14 @@ const CONFIG = Object.freeze({
     AUDIO_URL: 'https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3',
 });
 
-/* ── Application State ── */
+
 const state = {
     connection: null,
     activeRide: null,
     isRefreshing: false,
 };
 
-/* ── Cached DOM References ── */
-// Lazily populated after DOMContentLoaded
+
 const dom = {};
 
 function cacheDom() {
@@ -43,7 +35,7 @@ function cacheDom() {
     dom.notificationsArea = document.getElementById('notificationsArea');
     dom.emptyState = document.getElementById('emptyState');
     dom.toastContainer = document.getElementById('toastContainer');
-    // Modal
+
     dom.rideModal = document.getElementById('rideModal');
     dom.modalPickup = document.getElementById('modalPickup');
     dom.modalDrop = document.getElementById('modalDrop');
@@ -53,9 +45,6 @@ function cacheDom() {
     dom.modalDismissBtn = document.getElementById('modalDismissBtn');
 }
 
-/* ══════════════════════════════════════════════
-   AUTH
-══════════════════════════════════════════════ */
 
 function getToken() { return localStorage.getItem('driverToken'); }
 function getRefreshToken() { return localStorage.getItem('refreshToken'); }
@@ -144,10 +133,7 @@ async function refreshMyToken() {
     return null;
 }
 
-/**
- * Authenticated fetch wrapper.
- * Handles 401 with a single token refresh attempt.
- */
+
 async function apiFetch(endpoint, options = {}) {
     const token = getToken();
 
@@ -174,12 +160,9 @@ async function apiFetch(endpoint, options = {}) {
     return response;
 }
 
-/* ══════════════════════════════════════════════
-   SIGNALR
-══════════════════════════════════════════════ */
 
 async function startSignalR() {
-    // جدار حماية: يمنع انهيار وتجمد الصفحة تماماً في حال فشل تحميل مكتبة SignalR من السيرفر الخارجي
+    
     if (typeof signalR === 'undefined') {
         setStatus('error');
         showToast('مكتبة SignalR الخرجية لم تُحمل بعد. تأكد من جودة الإنترنت.', 'error');
@@ -229,9 +212,6 @@ function setStatus(type) {
     dom.statusText.textContent = text;
 }
 
-/* ══════════════════════════════════════════════
-   LOCATION
-══════════════════════════════════════════════ */
 
 async function sendLocation() {
     if (!isConnected()) {
@@ -259,9 +239,6 @@ async function sendLocation() {
     }
 }
 
-/* ══════════════════════════════════════════════
-   RIDE REQUEST MODAL
-══════════════════════════════════════════════ */
 
 function renderRideRequest(data) {
     playNotificationSound();
@@ -271,7 +248,7 @@ function renderRideRequest(data) {
     dom.modalPickup.textContent = `${data.lat}, ${data.lng}`;
     dom.modalDrop.textContent = `${data.dropLat}, ${data.dropLng}`;
     dom.modalRideId.textContent = data.rideId;
-    dom.modalMap.src = `https://maps.google.com/maps?saddr=${data.lat},${data.lng}&daddr=${data.dropLat},${data.dropLng}&output=embed`;
+    dom.modalMap.src = `https://maps.google.com/maps?saddr=$${data.lat},${data.lng}&daddr=${data.dropLat},${data.dropLng}&output=embed`;
 
     openModal();
 }
@@ -325,14 +302,90 @@ async function acceptRide() {
     }
 }
 
+async function arriveRide() {
+    if (!state.activeRide) return;
+
+    const btnArrived = document.getElementById('btnArrived');
+    if (btnArrived) {
+        btnArrived.disabled = true;
+        btnArrived.innerText = "جاري الإرسال...";
+    }
+
+    try {
+        const response = await apiFetch(`/api/v1/Rides/${state.activeRide.rideId}/arrive`, {
+            method: 'POST'
+        });
+
+        if (response && response.ok) {
+            const result = await response.json();
+            showToast(result.message || 'تم إرسال إشعار الوصول للراكب بنجاح!', 'success');
+            if (btnArrived) btnArrived.style.display = 'none';
+        } else {
+            const errorData = response ? await response.json().catch(() => ({})) : {};
+            showToast(errorData.message || 'فشل تحديث الحالة', 'error');
+            if (btnArrived) {
+                btnArrived.disabled = false;
+                btnArrived.innerText = "📍 لقد وصلت (Arrived)";
+            }
+        }
+    } catch (err) {
+        console.error("Error arriving ride:", err);
+        showToast('حدث خطأ في الاتصال بالخادم.', 'error');
+        if (btnArrived) {
+            btnArrived.disabled = false;
+            btnArrived.innerText = "📍 لقد وصلت (Arrived)";
+        }
+    }
+}
+
+async function completeRide() {
+    if (!state.activeRide) return;
+
+    const btnComplete = document.getElementById('btnCompleteRide');
+    if (btnComplete) {
+        btnComplete.disabled = true;
+        btnComplete.innerText = "جاري الإنهاء...";
+    }
+
+    try {
+        const response = await apiFetch(`/api/v1/Rides/${state.activeRide.rideId}/complete`, {
+            method: 'POST'
+        });
+
+        if (response && response.ok) {
+            showToast('تم إنهاء الرحلة بنجاح، أنت متاح الآن للطلبات! 🏁', 'success');
+            state.activeRide = null; 
+
+
+            dom.notificationsArea.innerHTML = '';
+            dom.emptyState.hidden = false;
+        } else {
+            const errorData = response ? await response.json().catch(() => ({})) : {};
+            showToast(errorData.message || 'فشل إنهاء الرحلة', 'error');
+            if (btnComplete) {
+                btnComplete.disabled = false;
+                btnComplete.innerText = "🏁 إنهاء الرحلة";
+            }
+        }
+    } catch (err) {
+        console.error("Error completing ride:", err);
+        showToast('حدث خطأ في الاتصال بالخادم.', 'error');
+        if (btnComplete) {
+            btnComplete.disabled = false;
+            btnComplete.innerText = "🏁 إنهاء الرحلة";
+        }
+    }
+}
+
 function renderActiveRideDashboard(data) {
     dom.emptyState.hidden = true;
     dom.notificationsArea.innerHTML = '';
 
-    const mapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${data.lat},${data.lng}&destination=${data.dropLat},${data.dropLng}&travelmode=driving`;
+    const mapsUrl = `https://www.google.com/maps/dir/?api=1&origin=$${data.lat},${data.lng}&destination=${data.dropLat},${data.dropLng}&travelmode=driving`;
 
     const card = document.createElement('div');
     card.className = 'ride-card';
+
     card.innerHTML = `
         <p class="ride-card-title">✅ أنت الآن في رحلة نشطة</p>
         <div class="ride-card-body">
@@ -340,7 +393,13 @@ function renderActiveRideDashboard(data) {
             <p><b>🏁 الوجهة:</b> <span></span></p>
             <p class="ride-card-id">ID: <code></code></p>
         </div>
-        <a class="btn-map" target="_blank" rel="noopener noreferrer">
+        
+        <div class="controls-group" style="margin-top: 15px; display: flex; gap: 10px;">
+            <button id="btnArrived" class="btn btn-warning" onclick="arriveRide()">📍 لقد وصلت (Arrived)</button>
+            <button id="btnCompleteRide" class="btn btn-danger" onclick="completeRide()">🏁 إنهاء الرحلة</button>
+        </div>
+
+        <a class="btn-map" target="_blank" rel="noopener noreferrer" style="margin-top: 15px; display: inline-block;">
             🗺️ بدء التوجيه الصوتي
         </a>
     `;
@@ -354,7 +413,6 @@ function renderActiveRideDashboard(data) {
     dom.notificationsArea.appendChild(card);
 }
 
-/* ── UI HELPERS ── */
 function showDashboard() {
     dom.loginScreen.hidden = true;
     dom.dashboardScreen.hidden = false;
@@ -398,19 +456,18 @@ function togglePasswordVisibility() {
     btn.setAttribute('aria-label', isVisible ? 'إظهار كلمة المرور' : 'إخفاء كلمة المرور');
 }
 
-/* ── EVENT BINDING ── */
 function bindEvents() {
-    // Login
+
     dom.loginBtn.addEventListener('click', login);
     dom.email.addEventListener('keydown', e => { if (e.key === 'Enter') dom.password.focus(); });
     dom.password.addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
     dom.passwordToggle.addEventListener('click', togglePasswordVisibility);
 
-    // Dashboard
+
     dom.logoutBtn.addEventListener('click', logout);
     dom.sendBtn.addEventListener('click', sendLocation);
 
-    // Modal
+
     dom.modalAcceptBtn.addEventListener('click', acceptRide);
     dom.modalDismissBtn.addEventListener('click', closeRideModal);
 
@@ -425,23 +482,12 @@ function bindEvents() {
     });
 }
 
-/* ══════════════════════════════════════════════
-   INIT
-══════════════════════════════════════════════ */
 
 function init() {
     cacheDom();
     bindEvents();
 
-    // [تعديل الفصل الإجباري]: قمنا بإيقاف التوجيه التلقائي المبني على التوكن القديم المخزن
-    // الصفحة الآن ستبدأ دائماً وأولاً من واجهة تسجيل الدخول بشكل منعزل لضمان استقرار التشغيل والربط
-    /*
-    const savedToken = getToken();
-    if (savedToken) {
-        showDashboard();
-        startSignalR();
-    }
-    */
+
 }
 
 if (document.readyState === 'loading') {

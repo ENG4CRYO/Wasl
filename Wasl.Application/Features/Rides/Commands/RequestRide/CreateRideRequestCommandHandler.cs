@@ -2,34 +2,40 @@
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Localization;
 using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Wasl.Application.Common;
 using Wasl.Application.Interfaces.Common;
 using Wasl.Application.Interfaces.Infrastructure;
+using Wasl.Application.Resources;
 using Wasl.Core.Entities;
 using Wasl.Core.Enums;
 
 namespace Wasl.Application.Features.Rides.Commands.RequestRide;
 
-public class CreateRideRequestCommandHandler : IRequestHandler<CreateRideRequestCommand, Guid>
+public class CreateRideRequestCommandHandler : IRequestHandler<CreateRideRequestCommand, ApiResponse<Guid>>
 {
     private readonly IBackgroundJobClient _backgroundJobClient;
     private readonly IRideDispatchService _dispatchService;
     private readonly IApplicationDbContext _dbContext;
+    private readonly IStringLocalizer<SharedResource> _localizer;
 
     public CreateRideRequestCommandHandler(
         IBackgroundJobClient backgroundJobClient,
         IRideDispatchService dispatchService,
-        IApplicationDbContext dbContext)
+        IApplicationDbContext dbContext,
+        IStringLocalizer<SharedResource> localizer)
     {
         _backgroundJobClient = backgroundJobClient;
         _dispatchService = dispatchService;
         _dbContext = dbContext;
+        _localizer = localizer;
     }
 
-    public async Task<Guid> Handle(CreateRideRequestCommand request, CancellationToken cancellationToken)
+    public async Task<ApiResponse<Guid>> Handle(CreateRideRequestCommand request, CancellationToken cancellationToken)
     {
         var newRideId = Guid.NewGuid();
 
@@ -52,6 +58,6 @@ public class CreateRideRequestCommandHandler : IRequestHandler<CreateRideRequest
             _dispatchService.DispatchRideAsync(newRideId, request.PickupLatitude, request.PickupLongitude, 3.0, new List<string>())
         );
 
-        return newRideId;
+        return ApiResponse<Guid>.Success(newRideId, _localizer["Rides.RequestRideRicevedSuccessfuly"]);
     }
 }

@@ -312,4 +312,31 @@
   <data name="Validation.Rides.RideIdMustBeGuid" xml:space="preserve">
     <value>RideId must be Guid</value>
   </data>
+  <data name="Rides.FailedToAcceptFlight" xml:space="preserve">
+    <value>Sorry, the trip has been accepted by another driver or you are busy with a current trip.</value>
+  </data>
+  <data name="Rides.FlightDoesNotExist" xml:space="preserve">
+    <value>The flight does not exist</value>
+  </data>
+  <data name="Rides.FlightNotYours" xml:space="preserve">
+    <value>Sorry, you cannot edit the status of a flight that does not belong to you.</value>
+  </data>
+  <data name="Rides.StatusNotAccepted" xml:space="preserve">
+    <value>The status cannot be changed, the flight is not currently being received.</value>
+  </data>
+  <data name="Rides.ArrivedSeuccesfully" xml:space="preserve">
+    <value>The passenger has been notified of your successful arrival.</value>
+  </data>
+  <data name="Rides.FlightAcceptanceSucceeded" xml:space="preserve">
+    <value>Congratulations, the trip is yours!</value>
+  </data>
+  <data name="Rides.StatusAlreadyCompleted" xml:space="preserve">
+    <value>This ride is already completed or cancelled</value>
+  </data>
+  <data name="Rides.FlightCompletedSucceeded" xml:space="preserve">
+    <value>Ride completed successfully</value>
+  </data>
+  <data name="Rides.RequestRideRicevedSuccessfuly" xml:space="preserve">
+    <value>The request has been received, we are searching for the nearest drivers</value>
+  </data>
 </root>
