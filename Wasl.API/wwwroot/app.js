@@ -9,13 +9,113 @@ const CONFIG = Object.freeze({
     AUDIO_URL: 'https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3',
 });
 
-
 const state = {
     connection: null,
     activeRide: null,
     isRefreshing: false,
+    lang: localStorage.getItem('wasl_lang') || 'ar'
 };
 
+const TRANSLATIONS = {
+    ar: {
+        langToggleBtn: "English",
+        subtitle: "بوابة السائق للمطورين",
+        emailLabel: "البريد الإلكتروني",
+        passwordLabel: "كلمة المرور",
+        loginBtn: "تسجيل الدخول",
+        radarTitle: "🚕 رادار Wasl",
+        connecting: "جاري الاتصال…",
+        connected: "متصل بالرادار ✓",
+        connFailed: "فشل الاتصال بالرادار",
+        logoutBtn: "خروج",
+        yourLocation: "موقعك الحالي",
+        locationHint: "القيم الحالية تمثل موقع بغداد، العراق",
+        updateLocationBtn: "تحديث الموقع",
+        operationsPanel: "لوحة العمليات",
+        waitingRides: "متصل. في انتظار طلبات العملاء…",
+        newRideReq: "طلب رحلة جديد",
+        pickupPoint: "نقطة الانطلاق",
+        dropoffPoint: "الوجهة النهائية",
+        rideIdStr: "رقم الرحلة: ",
+        acceptRideBtn: "قبول الرحلة",
+        ignoreBtn: "تجاهل",
+        reqEmailPass: "يرجى إدخال البريد الإلكتروني وكلمة المرور",
+        networkError: "تعذّر الاتصال بالخادم. تحقق من الإنترنت.",
+        sessionExpired: "انتهت الجلسة. يرجى تسجيل الدخول مجدداً.",
+        invalidCoords: "قيم الإحداثيات غير صحيحة",
+        radarNotConnected: "أنت غير متصل بالرادار",
+        btnSending: "جاري الإرسال...",
+        btnFinishing: "جاري الإنهاء...",
+        btnArrived: "📍 لقد وصلت (Arrived)",
+        btnComplete: "🏁 إنهاء الرحلة",
+        activeRideTitle: "✅ أنت الآن في رحلة نشطة",
+        voiceGuide: "🗺️ بدء التوجيه الصوتي"
+    },
+    en: {
+        langToggleBtn: "العربية",
+        subtitle: "Developer Driver Portal",
+        emailLabel: "Email Address",
+        passwordLabel: "Password",
+        loginBtn: "Login",
+        radarTitle: "🚕 Wasl Radar",
+        connecting: "Connecting…",
+        connected: "Connected to Radar ✓",
+        connFailed: "Radar Connection Failed",
+        logoutBtn: "Logout",
+        yourLocation: "Your Current Location",
+        locationHint: "Current values represent Baghdad, Iraq",
+        updateLocationBtn: "Update Location",
+        operationsPanel: "Operations Panel",
+        waitingRides: "Connected. Waiting for ride requests…",
+        newRideReq: "New Ride Request",
+        pickupPoint: "Pickup Point",
+        dropoffPoint: "Dropoff Destination",
+        rideIdStr: "Ride ID: ",
+        acceptRideBtn: "Accept Ride",
+        ignoreBtn: "Dismiss",
+        reqEmailPass: "Please enter email and password",
+        networkError: "Connection failed. Check your internet.",
+        sessionExpired: "Session expired. Please login again.",
+        invalidCoords: "Invalid coordinate values",
+        radarNotConnected: "You are not connected to the radar",
+        btnSending: "Sending...",
+        btnFinishing: "Completing...",
+        btnArrived: "📍 Arrived",
+        btnComplete: "🏁 Complete Ride",
+        activeRideTitle: "✅ You are in an active ride",
+        voiceGuide: "🗺️ Start Voice Guidance"
+    }
+};
+
+function t(key) {
+    return TRANSLATIONS[state.lang][key] || key;
+}
+
+function applyLanguage() {
+    document.documentElement.lang = state.lang;
+    document.documentElement.dir = state.lang === 'ar' ? 'rtl' : 'ltr';
+    document.getElementById('langToggleBtn').textContent = t('langToggleBtn');
+
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (TRANSLATIONS[state.lang][key]) {
+            el.textContent = t(key);
+        }
+    });
+
+    if (state.lang === 'en') {
+        document.getElementById('email').placeholder = 'driver@wasl.com';
+    }
+}
+
+function toggleLanguage() {
+    state.lang = state.lang === 'ar' ? 'en' : 'ar';
+    localStorage.setItem('wasl_lang', state.lang);
+    applyLanguage();
+
+    if (isConnected()) setStatus('connected');
+    else if (state.connection) setStatus('connecting');
+}
 
 const dom = {};
 
@@ -35,7 +135,6 @@ function cacheDom() {
     dom.notificationsArea = document.getElementById('notificationsArea');
     dom.emptyState = document.getElementById('emptyState');
     dom.toastContainer = document.getElementById('toastContainer');
-
     dom.rideModal = document.getElementById('rideModal');
     dom.modalPickup = document.getElementById('modalPickup');
     dom.modalDrop = document.getElementById('modalDrop');
@@ -44,7 +143,6 @@ function cacheDom() {
     dom.modalAcceptBtn = document.getElementById('modalAcceptBtn');
     dom.modalDismissBtn = document.getElementById('modalDismissBtn');
 }
-
 
 function getToken() { return localStorage.getItem('driverToken'); }
 function getRefreshToken() { return localStorage.getItem('refreshToken'); }
@@ -57,12 +155,21 @@ function clearTokens() {
     localStorage.removeItem('refreshToken');
 }
 
+function getErrorMessage(result, fallback) {
+    if (!result) return fallback;
+    if (result.errors && Object.keys(result.errors).length > 0) {
+        const firstKey = Object.keys(result.errors)[0];
+        return result.errors[firstKey][0];
+    }
+    return result.message || fallback;
+}
+
 async function login() {
     const email = dom.email.value.trim();
     const password = dom.password.value;
 
     if (!email || !password) {
-        showToast('يرجى إدخال البريد الإلكتروني وكلمة المرور', 'warning');
+        showToast(t('reqEmailPass'), 'warning');
         return;
     }
 
@@ -71,21 +178,25 @@ async function login() {
     try {
         const response = await fetch(`${CONFIG.API_BASE_URL}/api/v1/Auth/login`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept-Language': state.lang
+            },
             body: JSON.stringify({ email, password }),
         });
 
-        if (response.ok) {
-            const { data } = await response.json();
-            saveTokens(data.token, data.refreshToken);
-            showToast('تم تسجيل الدخول بنجاح ✓', 'success');
+        const result = await response.json().catch(() => null);
+
+        if (response.ok && result?.succeeded) {
+            saveTokens(result.data.token, result.data.refreshToken);
+            showToast(result.message || 'Success', 'success');
             showDashboard();
             startSignalR();
         } else {
-            showToast('البريد الإلكتروني أو كلمة المرور غير صحيحة', 'error');
+            showToast(getErrorMessage(result, t('networkError')), 'error');
         }
     } catch {
-        showToast('تعذّر الاتصال بالخادم. تحقق من تشغيل الـ Backend والإنترنت.', 'error');
+        showToast(t('networkError'), 'error');
     } finally {
         setButtonLoading(dom.loginBtn, false);
     }
@@ -93,7 +204,7 @@ async function login() {
 
 async function logout() {
     if (state.connection) {
-        try { await state.connection.stop(); } catch { /* already stopped */ }
+        try { await state.connection.stop(); } catch { }
         state.connection = null;
     }
     state.activeRide = null;
@@ -116,30 +227,33 @@ async function refreshMyToken() {
     try {
         const response = await fetch(`${CONFIG.API_BASE_URL}/api/v1/Auth/refresh-token`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept-Language': state.lang
+            },
             body: JSON.stringify({ token: expiredToken, refreshToken }),
         });
 
-        if (response.ok) {
-            const { data } = await response.json();
-            saveTokens(data.token, data.refreshToken);
-            return data;
+        const result = await response.json();
+        if (response.ok && result.succeeded) {
+            saveTokens(result.data.token, result.data.refreshToken);
+            return result.data;
         }
     } catch (e) {
-        console.error('[Wasl] Token refresh failed:', e);
+        console.error(e);
     } finally {
         state.isRefreshing = false;
     }
     return null;
 }
 
-
 async function apiFetch(endpoint, options = {}) {
-    const token = getToken();
+    let token = getToken();
 
     const headers = {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`,
+        'Accept-Language': state.lang,
         ...options.headers,
     };
 
@@ -151,7 +265,7 @@ async function apiFetch(endpoint, options = {}) {
             headers['Authorization'] = `Bearer ${newTokens.token}`;
             response = await fetch(`${CONFIG.API_BASE_URL}${endpoint}`, { ...options, headers });
         } else {
-            showToast('انتهت الجلسة. يرجى تسجيل الدخول مجدداً.', 'warning');
+            showToast(t('sessionExpired'), 'warning');
             logout();
             return null;
         }
@@ -160,12 +274,9 @@ async function apiFetch(endpoint, options = {}) {
     return response;
 }
 
-
 async function startSignalR() {
-    
     if (typeof signalR === 'undefined') {
         setStatus('error');
-        showToast('مكتبة SignalR الخرجية لم تُحمل بعد. تأكد من جودة الإنترنت.', 'error');
         return;
     }
 
@@ -177,7 +288,6 @@ async function startSignalR() {
                 accessTokenFactory: getToken,
             })
             .withAutomaticReconnect()
-            .configureLogging(signalR.LogLevel.Warning)
             .build();
 
         state.connection.on('ReceiveRideRequest', renderRideRequest);
@@ -202,9 +312,9 @@ function setStatus(type) {
     badge.className = 'status-badge';
 
     const labels = {
-        connected: ['connected', 'متصل بالرادار ✓'],
-        connecting: ['connecting', 'جاري الاتصال…'],
-        error: ['', 'فشل الاتصال بالرادار'],
+        connected: ['connected', t('connected')],
+        connecting: ['connecting', t('connecting')],
+        error: ['', t('connFailed')],
     };
 
     const [cls, text] = labels[type] ?? labels.error;
@@ -212,10 +322,9 @@ function setStatus(type) {
     dom.statusText.textContent = text;
 }
 
-
 async function sendLocation() {
     if (!isConnected()) {
-        showToast('أنت غير متصل بالرادار', 'warning');
+        showToast(t('radarNotConnected'), 'warning');
         return;
     }
 
@@ -223,7 +332,7 @@ async function sendLocation() {
     const lng = parseFloat(dom.lng.value);
 
     if (isNaN(lat) || isNaN(lng)) {
-        showToast('قيم الإحداثيات غير صحيحة', 'warning');
+        showToast(t('invalidCoords'), 'warning');
         return;
     }
 
@@ -231,44 +340,78 @@ async function sendLocation() {
 
     try {
         await state.connection.invoke('UpdateLocation', lat, lng);
-        showToast('تم تحديث موقعك على الرادار ✓', 'success');
+        showToast(t('connected'), 'success');
     } catch {
-        showToast('فشل تحديث الموقع. حاول مرة أخرى.', 'error');
+        showToast(t('networkError'), 'error');
     } finally {
         setButtonLoading(dom.sendBtn, false);
     }
 }
 
-
 function renderRideRequest(data) {
+    console.log("📥 استلام طلب، جاري محاولة فتح النافذة...", data);
     playNotificationSound();
 
-    state.activeRide = data;
+    try {
+        // 1. استخراج البيانات بأمان
+        const rideId = data.rideId || data.RideId || 'غير محدد';
+        const lat = data.lat || data.Lat || '';
+        const lng = data.lng || data.Lng || '';
+        const dropLat = data.dropLat || data.DropLat || 'غير محدد';
+        const dropLng = data.dropLng || data.DropLng || 'غير محدد';
 
-    dom.modalPickup.textContent = `${data.lat}, ${data.lng}`;
-    dom.modalDrop.textContent = `${data.dropLat}, ${data.dropLng}`;
-    dom.modalRideId.textContent = data.rideId;
-    dom.modalMap.src = `https://maps.google.com/maps?saddr=$${data.lat},${data.lng}&daddr=${data.dropLat},${data.dropLng}&output=embed`;
+        state.activeRide = { rideId, lat, lng, dropLat, dropLng };
 
-    openModal();
+        // 2. البحث عن العناصر مباشرة من الـ HTML وتحديثها (لو كانت موجودة)
+        const pickupEl = document.getElementById('modalPickup');
+        const dropEl = document.getElementById('modalDrop');
+        const rideIdEl = document.getElementById('modalRideId');
+        const mapEl = document.getElementById('modalMap');
+
+        if (pickupEl) pickupEl.textContent = `${lat}, ${lng}`;
+        if (dropEl) dropEl.textContent = `${dropLat}, ${dropLng}`;
+        if (rideIdEl) rideIdEl.textContent = rideId;
+        if (mapEl) mapEl.src = `https://maps.google.com/maps?q=${lat},${lng}&z=15&output=embed`;
+
+        openModal();
+
+    } catch (error) {
+        console.error("❌ حدث خطأ أثناء تعبئة النصوص، لكن سنفتح النافذة بالقوة:", error);
+        openModal();
+    }
 }
 
 function openModal() {
-    const modal = dom.rideModal;
+    const modal = document.getElementById('rideModal');
+
+    if (!modal) {
+        console.error("❌ خطأ قاتل: لم يتم العثور على عنصر (rideModal) في الـ HTML!");
+        alert("تنبيه: يوجد طلب تكسي جديد ولكن الـ HTML ينقصه كود النافذة المنبثقة.");
+        return;
+    }
+
+
     modal.hidden = false;
-    modal.getBoundingClientRect();
-    modal.classList.add('is-open');
-    modal.focus();
+    modal.style.display = 'flex';
+    modal.style.zIndex = '999999'; 
+    modal.style.opacity = '1';   
+    modal.style.visibility = 'visible';
+
+    setTimeout(() => {
+        modal.classList.add('is-open');
+        modal.focus();
+    }, 10);
 }
 
 function closeRideModal() {
     const modal = dom.rideModal;
     modal.classList.remove('is-open');
 
-    modal.addEventListener('transitionend', () => {
+    setTimeout(() => {
         modal.hidden = true;
+        modal.style.display = 'none';
         dom.modalMap.src = '';
-    }, { once: true });
+    }, 300);
 }
 
 async function acceptRide() {
@@ -285,18 +428,18 @@ async function acceptRide() {
 
         if (!response) return;
 
-        if (response.ok) {
-            const result = await response.json();
-            showToast(result.message || 'تم قبول الرحلة بنجاح 🎉', 'success');
+        const result = await response.json().catch(() => ({}));
+
+        if (response.ok && result.succeeded) {
+            showToast(result.message, 'success');
             closeRideModal();
             renderActiveRideDashboard(data);
         } else {
-            const errorData = await response.json().catch(() => ({}));
-            showToast(errorData.message || 'سبقك سائق آخر لهذه الرحلة', 'error');
+            showToast(getErrorMessage(result, t('networkError')), 'error');
             closeRideModal();
         }
     } catch {
-        showToast('تعذّر الاتصال. تحقق من الإنترنت.', 'error');
+        showToast(t('networkError'), 'error');
     } finally {
         setButtonLoading(dom.modalAcceptBtn, false);
     }
@@ -308,32 +451,30 @@ async function arriveRide() {
     const btnArrived = document.getElementById('btnArrived');
     if (btnArrived) {
         btnArrived.disabled = true;
-        btnArrived.innerText = "جاري الإرسال...";
+        btnArrived.innerText = t('btnSending');
     }
 
     try {
-        const response = await apiFetch(`/api/v1/Rides/${state.activeRide.rideId}/arrive`, {
-            method: 'POST'
-        });
+        const response = await apiFetch(`/api/v1/Rides/${state.activeRide.rideId}/arrive`, { method: 'POST' });
+        if (!response) return;
 
-        if (response && response.ok) {
-            const result = await response.json();
-            showToast(result.message || 'تم إرسال إشعار الوصول للراكب بنجاح!', 'success');
+        const result = await response.json().catch(() => ({}));
+
+        if (response.ok && result.succeeded) {
+            showToast(result.message, 'success');
             if (btnArrived) btnArrived.style.display = 'none';
         } else {
-            const errorData = response ? await response.json().catch(() => ({})) : {};
-            showToast(errorData.message || 'فشل تحديث الحالة', 'error');
+            showToast(getErrorMessage(result, t('networkError')), 'error');
             if (btnArrived) {
                 btnArrived.disabled = false;
-                btnArrived.innerText = "📍 لقد وصلت (Arrived)";
+                btnArrived.innerText = t('btnArrived');
             }
         }
-    } catch (err) {
-        console.error("Error arriving ride:", err);
-        showToast('حدث خطأ في الاتصال بالخادم.', 'error');
+    } catch {
+        showToast(t('networkError'), 'error');
         if (btnArrived) {
             btnArrived.disabled = false;
-            btnArrived.innerText = "📍 لقد وصلت (Arrived)";
+            btnArrived.innerText = t('btnArrived');
         }
     }
 }
@@ -344,35 +485,32 @@ async function completeRide() {
     const btnComplete = document.getElementById('btnCompleteRide');
     if (btnComplete) {
         btnComplete.disabled = true;
-        btnComplete.innerText = "جاري الإنهاء...";
+        btnComplete.innerText = t('btnFinishing');
     }
 
     try {
-        const response = await apiFetch(`/api/v1/Rides/${state.activeRide.rideId}/complete`, {
-            method: 'POST'
-        });
+        const response = await apiFetch(`/api/v1/Rides/${state.activeRide.rideId}/complete`, { method: 'POST' });
+        if (!response) return;
 
-        if (response && response.ok) {
-            showToast('تم إنهاء الرحلة بنجاح، أنت متاح الآن للطلبات! 🏁', 'success');
-            state.activeRide = null; 
+        const result = await response.json().catch(() => ({}));
 
-
+        if (response.ok && result.succeeded) {
+            showToast(result.message, 'success');
+            state.activeRide = null;
             dom.notificationsArea.innerHTML = '';
             dom.emptyState.hidden = false;
         } else {
-            const errorData = response ? await response.json().catch(() => ({})) : {};
-            showToast(errorData.message || 'فشل إنهاء الرحلة', 'error');
+            showToast(getErrorMessage(result, t('networkError')), 'error');
             if (btnComplete) {
                 btnComplete.disabled = false;
-                btnComplete.innerText = "🏁 إنهاء الرحلة";
+                btnComplete.innerText = t('btnComplete');
             }
         }
-    } catch (err) {
-        console.error("Error completing ride:", err);
-        showToast('حدث خطأ في الاتصال بالخادم.', 'error');
+    } catch {
+        showToast(t('networkError'), 'error');
         if (btnComplete) {
             btnComplete.disabled = false;
-            btnComplete.innerText = "🏁 إنهاء الرحلة";
+            btnComplete.innerText = t('btnComplete');
         }
     }
 }
@@ -381,34 +519,28 @@ function renderActiveRideDashboard(data) {
     dom.emptyState.hidden = true;
     dom.notificationsArea.innerHTML = '';
 
-    const mapsUrl = `https://www.google.com/maps/dir/?api=1&origin=$${data.lat},${data.lng}&destination=${data.dropLat},${data.dropLng}&travelmode=driving`;
+    const mapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${data.lat},${data.lng}&destination=${data.dropLat},${data.dropLng}&travelmode=driving`;
 
     const card = document.createElement('div');
     card.className = 'ride-card';
 
     card.innerHTML = `
-        <p class="ride-card-title">✅ أنت الآن في رحلة نشطة</p>
+        <p class="ride-card-title">${t('activeRideTitle')}</p>
         <div class="ride-card-body">
-            <p><b>📍 الانطلاق:</b> <span></span></p>
-            <p><b>🏁 الوجهة:</b> <span></span></p>
-            <p class="ride-card-id">ID: <code></code></p>
+            <p><b>${t('pickupPoint')}:</b> <span>${data.lat}, ${data.lng}</span></p>
+            <p><b>${t('dropoffPoint')}:</b> <span>${data.dropLat}, ${data.dropLng}</span></p>
+            <p class="ride-card-id">ID: <code>${data.rideId}</code></p>
         </div>
         
         <div class="controls-group" style="margin-top: 15px; display: flex; gap: 10px;">
-            <button id="btnArrived" class="btn btn-warning" onclick="arriveRide()">📍 لقد وصلت (Arrived)</button>
-            <button id="btnCompleteRide" class="btn btn-danger" onclick="completeRide()">🏁 إنهاء الرحلة</button>
+            <button id="btnArrived" class="btn btn-warning" onclick="arriveRide()">${t('btnArrived')}</button>
+            <button id="btnCompleteRide" class="btn btn-danger" onclick="completeRide()">${t('btnComplete')}</button>
         </div>
 
-        <a class="btn-map" target="_blank" rel="noopener noreferrer" style="margin-top: 15px; display: inline-block;">
-            🗺️ بدء التوجيه الصوتي
+        <a class="btn-map" href="${mapsUrl}" target="_blank" rel="noopener noreferrer" style="margin-top: 15px; display: inline-block;">
+            ${t('voiceGuide')}
         </a>
     `;
-
-    const spans = card.querySelectorAll('span');
-    spans[0].textContent = `${data.lat}, ${data.lng}`;
-    spans[1].textContent = `${data.dropLat}, ${data.dropLng}`;
-    card.querySelector('code').textContent = data.rideId;
-    card.querySelector('a').href = mapsUrl;
 
     dom.notificationsArea.appendChild(card);
 }
@@ -453,20 +585,16 @@ function togglePasswordVisibility() {
 
     input.type = isVisible ? 'password' : 'text';
     btn.setAttribute('aria-pressed', String(!isVisible));
-    btn.setAttribute('aria-label', isVisible ? 'إظهار كلمة المرور' : 'إخفاء كلمة المرور');
 }
 
 function bindEvents() {
-
     dom.loginBtn.addEventListener('click', login);
     dom.email.addEventListener('keydown', e => { if (e.key === 'Enter') dom.password.focus(); });
     dom.password.addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
     dom.passwordToggle.addEventListener('click', togglePasswordVisibility);
 
-
     dom.logoutBtn.addEventListener('click', logout);
     dom.sendBtn.addEventListener('click', sendLocation);
-
 
     dom.modalAcceptBtn.addEventListener('click', acceptRide);
     dom.modalDismissBtn.addEventListener('click', closeRideModal);
@@ -476,18 +604,14 @@ function bindEvents() {
     });
 
     document.addEventListener('keydown', e => {
-        if (e.key === 'Escape' && dom.rideModal.classList.contains('is-open')) {
-            closeRideModal();
-        }
+        if (e.key === 'Escape' && dom.rideModal.classList.contains('is-open')) closeRideModal();
     });
 }
 
-
 function init() {
+    applyLanguage();
     cacheDom();
     bindEvents();
-
-
 }
 
 if (document.readyState === 'loading') {

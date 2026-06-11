@@ -7,8 +7,13 @@
     <title>رادار Wasl — بوابة السائق</title>
     <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
     <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="data:,">
 </head>
 <body>
+
+    <button id="langToggleBtn" class="lang-toggle-btn" onclick="toggleLanguage()">
+        English 🌐
+    </button>
 
     <div id="toastContainer" role="status" aria-live="polite" aria-atomic="false"></div>
 
@@ -17,11 +22,11 @@
             <div class="login-brand">
                 <span class="brand-icon" aria-hidden="true">🚕</span>
                 <h1 id="loginHeading" class="login-title">Wasl</h1>
-                <p class="login-subtitle">بوابة السائق للمطورين</p>
+                <p class="login-subtitle" data-i18n="subtitle">بوابة السائق للمطورين</p>
             </div>
 
             <div class="input-group">
-                <label for="email">البريد الإلكتروني</label>
+                <label for="email" data-i18n="emailLabel">البريد الإلكتروني</label>
                 <input type="email"
                        id="email"
                        name="email"
@@ -33,7 +38,7 @@
             </div>
 
             <div class="input-group">
-                <label for="password">كلمة المرور</label>
+                <label for="password" data-i18n="passwordLabel">كلمة المرور</label>
                 <div class="password-wrapper">
                     <input type="password"
                            id="password"
@@ -52,7 +57,7 @@
             </div>
 
             <button class="btn btn-primary" id="loginBtn" type="button">
-                <span class="btn-text">تسجيل الدخول</span>
+                <span class="btn-text" data-i18n="loginBtn">تسجيل الدخول</span>
                 <span class="btn-spinner" aria-hidden="true" hidden></span>
             </button>
         </div>
@@ -62,17 +67,17 @@
 
         <header class="dashboard-header">
             <div class="header-brand">
-                <h2 class="header-title">🚕 رادار Wasl</h2>
+                <h2 class="header-title" data-i18n="radarTitle">🚕 رادار Wasl</h2>
                 <span class="status-badge" id="statusBadge" role="status">
                     <span class="status-dot" aria-hidden="true"></span>
-                    <span id="statusText">جاري الاتصال…</span>
+                    <span id="statusText" data-i18n="connecting">جاري الاتصال…</span>
                 </span>
             </div>
             <button class="btn btn-danger btn-sm"
                     id="logoutBtn"
                     type="button"
                     aria-label="تسجيل الخروج">
-                خروج
+                <span data-i18n="logoutBtn">خروج</span>
                 <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" /></svg>
             </button>
         </header>
@@ -80,33 +85,22 @@
         <section class="card" aria-labelledby="locationHeading">
             <h3 class="card-title" id="locationHeading">
                 <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>
-                موقعك الحالي
+                <span data-i18n="yourLocation">موقعك الحالي</span>
             </h3>
             <div class="row">
                 <div class="col input-group">
                     <label for="lat">خط العرض (Lat)</label>
-                    <input type="number"
-                           id="lat"
-                           value="33.3152"
-                           step="0.0001"
-                           min="-90"
-                           max="90"
-                           aria-describedby="coordsHint">
+                    <input type="number" id="lat" value="33.3152" step="0.0001" min="-90" max="90">
                 </div>
                 <div class="col input-group">
                     <label for="lng">خط الطول (Lng)</label>
-                    <input type="number"
-                           id="lng"
-                           value="44.3661"
-                           step="0.0001"
-                           min="-180"
-                           max="180">
+                    <input type="number" id="lng" value="44.3661" step="0.0001" min="-180" max="180">
                 </div>
             </div>
-            <p id="coordsHint" class="input-hint">القيم الحالية تمثل موقع بغداد، العراق</p>
+            <p id="coordsHint" class="input-hint" data-i18n="locationHint">القيم الحالية تمثل موقع بغداد، العراق</p>
             <button class="btn btn-success" id="sendBtn" type="button">
                 <svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13" /><polygon points="22 2 15 22 11 13 2 9 22 2" /></svg>
-                <span class="btn-text">تحديث الموقع</span>
+                <span class="btn-text" data-i18n="updateLocationBtn">تحديث الموقع</span>
                 <span class="btn-spinner" aria-hidden="true" hidden></span>
             </button>
         </section>
@@ -114,73 +108,53 @@
         <section class="card" aria-labelledby="opsHeading" aria-live="polite">
             <h3 class="card-title" id="opsHeading">
                 <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" /></svg>
-                لوحة العمليات
+                <span data-i18n="operationsPanel">لوحة العمليات</span>
             </h3>
             <div id="notificationsArea">
                 <div id="emptyState" class="empty-state">
                     <svg aria-hidden="true" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.4"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
-                    <p>متصل. في انتظار طلبات العملاء…</p>
+                    <p data-i18n="waitingRides">متصل. في انتظار طلبات العملاء…</p>
                 </div>
             </div>
         </section>
     </div>
 
-    <div id="rideModal"
-         class="modal-overlay"
-         role="dialog"
-         aria-modal="true"
-         aria-labelledby="modalTitle"
-         aria-describedby="modalDesc"
-         hidden>
+    <div id="rideModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle" hidden>
         <div class="modal-content">
             <div class="modal-header">
-                <h3 class="modal-title" id="modalTitle">
-                    طلب رحلة جديد
-                </h3>
-                <span class="pulse-dot" aria-hidden="true">
-                    <span class="pulse-ring"></span>
-                    <span class="pulse-core"></span>
-                </span>
+                <h3 class="modal-title" id="modalTitle" data-i18n="newRideReq">طلب رحلة جديد</h3>
+                <span class="pulse-dot" aria-hidden="true"><span class="pulse-ring"></span><span class="pulse-core"></span></span>
             </div>
 
             <div class="modal-body" id="modalDesc">
-                <div class="map-container" role="img" aria-label="خريطة مسار الرحلة">
-                    <iframe id="modalMap"
-                            title="خريطة مسار الرحلة"
-                            width="100%"
-                            height="100%"
-                            frameborder="0"
-                            loading="lazy"
-                            referrerpolicy="no-referrer-when-downgrade"
-                            allowfullscreen></iframe>
+                <div class="map-container" role="img">
+                    <iframe id="modalMap" width="100%" height="100%" frameborder="0" loading="lazy"></iframe>
                 </div>
                 <div class="modal-details">
                     <div class="detail-row">
                         <span class="detail-icon detail-pickup" aria-hidden="true">●</span>
                         <div>
-                            <span class="detail-label">نقطة الانطلاق</span>
+                            <span class="detail-label" data-i18n="pickupPoint">نقطة الانطلاق</span>
                             <span class="detail-value" id="modalPickup">—</span>
                         </div>
                     </div>
                     <div class="detail-row">
                         <span class="detail-icon detail-drop" aria-hidden="true">●</span>
                         <div>
-                            <span class="detail-label">الوجهة النهائية</span>
+                            <span class="detail-label" data-i18n="dropoffPoint">الوجهة النهائية</span>
                             <span class="detail-value" id="modalDrop">—</span>
                         </div>
                     </div>
-                    <p class="ride-id-label">رقم الرحلة: <code id="modalRideId"></code></p>
+                    <p class="ride-id-label" data-i18n="rideIdStr">رقم الرحلة: <code id="modalRideId"></code></p>
                 </div>
             </div>
 
             <div class="modal-footer">
                 <button class="btn btn-success" id="modalAcceptBtn" type="button">
-                    <span class="btn-text">قبول الرحلة</span>
+                    <span class="btn-text" data-i18n="acceptRideBtn">قبول الرحلة</span>
                     <span class="btn-spinner" aria-hidden="true" hidden></span>
                 </button>
-                <button class="btn btn-ghost" type="button" id="modalDismissBtn" aria-label="تجاهل الطلب">
-                    تجاهل
-                </button>
+                <button class="btn btn-ghost" type="button" id="modalDismissBtn" data-i18n="ignoreBtn">تجاهل</button>
             </div>
         </div>
     </div>
