@@ -144,9 +144,6 @@
   <data name="Auth.TokenRefreshedSuccessfully." xml:space="preserve">
     <value>تم تحديث التوكن بنجاح</value>
   </data>
-  <data name="Auth.CreateUserFeiled" xml:space="preserve">
-    <value>حدث خطأ اثناء انشاء الحساب</value>
-  </data>
   <data name="Auth.UserRegisteredSuccessfully" xml:space="preserve">
     <value>تم تسجيل المستخدم بنجاح</value>
   </data>
@@ -312,34 +309,49 @@
   <data name="Validation.Rides.RideIdMustBeGuid" xml:space="preserve">
     <value>رقم الرحلة يجب ان يكون من نوع GUID</value>
   </data>
-  <data name="Rides.FailedToAcceptFlight" xml:space="preserve">
-    <value>عذراً، تم قبول الرحلة من قبل سائق آخر أو أنك مشغول برحلة حالية</value>
-  </data>
-  <data name="Rides.FlightDoesNotExist" xml:space="preserve">
-    <value>الرحلة غير موجودة</value>
-  </data>
-  <data name="Rides.FlightNotYours" xml:space="preserve">
-    <value>عذراً، لا يمكنك تعديل حالة رحلة لا تخصك</value>
-  </data>
   <data name="Rides.StatusNotAccepted" xml:space="preserve">
     <value>لا يمكن تغيير الحالة، الرحلة ليست قيد الاستلام حالياً</value>
   </data>
   <data name="Rides.ArrivedSeuccesfully" xml:space="preserve">
     <value>تم إشعار الراكب بوصولك بنجاح</value>
   </data>
-  <data name="Rides.FlightAcceptanceSucceeded" xml:space="preserve">
+  <data name="Rides.RideAcceptanceSucceeded" xml:space="preserve">
     <value>مبروك الرحلة من نصيبك</value>
   </data>
   <data name="Rides.StatusAlreadyCompleted" xml:space="preserve">
     <value>هذه الرحلة منتهية أو ملغاة بالفعل</value>
-  </data>
-  <data name="Rides.FlightCompletedSucceeded" xml:space="preserve">
-    <value>تم إنهاء الرحلة بنجاح</value>
   </data>
   <data name="Rides.RequestRideRicevedSuccessfuly" xml:space="preserve">
     <value>تم استلام الطلب، جاري البحث عن أقرب السائقين</value>
   </data>
   <data name="Auth.Unauthenticated" xml:space="preserve">
     <value>المستخدم غير مصادق عليه. يرجى تسجيل الدخول والمحاولة مرة أخرى</value>
+  </data>
+  <data name="Auth.CreateUserFailed" xml:space="preserve">
+    <value>حدث خطأ اثناء انشاء الحساب</value>
+  </data>
+  <data name="Rides.RideDoesNotExist" xml:space="preserve">
+    <value>الرحلة غير موجودة</value>
+  </data>
+  <data name="Rides.FailedToAcceptRide" xml:space="preserve">
+    <value>عذراً، تم قبول الرحلة من قبل سائق آخر أو أنك مشغول برحلة حالية</value>
+  </data>
+  <data name="Rides.RideCompletedSuccessfully" xml:space="preserve">
+    <value>تم إنهاء الرحلة بنجاح</value>
+  </data>
+  <data name="Rides.RideNotYours" xml:space="preserve">
+    <value>عذراً، لا يمكنك تعديل حالة رحلة لا تخصك</value>
+  </data>
+  <data name="DriverProfile.AccountNotApproved" xml:space="preserve">
+    <value>الحساب غير معتمد</value>
+  </data>
+  <data name="Rides.DriverArrivedSuccessfully" xml:space="preserve">
+    <value>وصل السائق بنجاح</value>
+  </data>
+  <data name="Rides.StatusNotArrived" xml:space="preserve">
+    <value>ما زال السائق لم يصل اليك</value>
+  </data>
+  <data name="Rides.RideStartedSuccessfully" xml:space="preserve">
+    <value>بدأت الرحلة الان</value>
   </data>
 </root>

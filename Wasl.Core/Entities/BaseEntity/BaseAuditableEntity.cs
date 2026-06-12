@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Wasl.Core.Entities.BaseEntity
 {
-    public abstract class BaseAuditableEntity<TId> : IEntity<TId>
+    public abstract class BaseAuditableEntity<TId> : IEntity<TId>, IAuditableEntity
     {
         public TId Id { get; set; } = default!;
         public DateTime CreatedAt { get; set; }

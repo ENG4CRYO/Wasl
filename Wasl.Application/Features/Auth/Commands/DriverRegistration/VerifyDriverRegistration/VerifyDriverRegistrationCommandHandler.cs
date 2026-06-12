@@ -2,6 +2,7 @@
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Localization;
+using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Threading;
@@ -10,7 +11,7 @@ using Wasl.Application.Common;
 using Wasl.Application.Dtos.AuthModel;
 using Wasl.Application.Interfaces.Common;
 using Wasl.Application.Interfaces.Helpers;
-using Wasl.Application.Interfaces.Services; 
+using Wasl.Application.Interfaces.Services;
 using Wasl.Application.Resources;
 using Wasl.Core.Constants;
 using Wasl.Core.Entities;
@@ -23,22 +24,21 @@ namespace Wasl.Application.Features.Auth.Commands.DriverRegistration
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IOtpService _otpService;
         private readonly ITokenHelper _tokenHelper;
-        private readonly IMapper _mapper;
         private readonly IStringLocalizer<SharedResource> _localizer;
+ 
         private readonly IApplicationDbContext _context;
 
         public VerifyDriverRegistrationCommandHandler(
             UserManager<ApplicationUser> userManager,
-            IOtpService otpService, 
+            IOtpService otpService,
             ITokenHelper tokenHelper,
-            IMapper mapper,
+
             IStringLocalizer<SharedResource> localizer,
             IApplicationDbContext context)
         {
             _userManager = userManager;
             _otpService = otpService;
             _tokenHelper = tokenHelper;
-            _mapper = mapper;
             _localizer = localizer;
             _context = context;
         }
@@ -72,44 +72,65 @@ namespace Wasl.Application.Features.Auth.Commands.DriverRegistration
                 Balance = 0
             };
 
-            var result = await _userManager.CreateAsync(newUser, request.Password);
-            if (!result.Succeeded)
-            {
-                var errorsDictionary = result.Errors
-                    .GroupBy(e => e.Code)
-                    .ToDictionary(g => g.Key, g => g.Select(e => e.Description).ToList());
+            using var transaction = await ((Microsoft.EntityFrameworkCore.DbContext)_context).Database
+                .BeginTransactionAsync(cancellationToken);
 
-                return ApiResponse<AuthModel>.Failure(_localizer["Auth.CreateUserFeiled"], errorsDictionary);
+            try
+            {
+                var result = await _userManager.CreateAsync(newUser, request.Password);
+                if (!result.Succeeded)
+                {
+                    var errorsDictionary = result.Errors
+                        .GroupBy(e => e.Code)
+                        .ToDictionary(g => g.Key, g => g.Select(e => e.Description).ToList());
+
+                    return ApiResponse<AuthModel>.Failure(_localizer["Auth.CreateUserFailed"], errorsDictionary);
+                }
+
+                await _userManager.AddToRoleAsync(newUser, AspRoles.Driver);
+
+                var driverProfile = new DriverProfile
+                {
+                    UserId = newUser.Id,
+                    ApprovalStatus = DriverApprovalStatus.Pending
+                };
+
+                await _context.DriverProfiles.AddAsync(driverProfile, cancellationToken);
+
+                var newRefreshToken = _tokenHelper.GenerateRefreshToken();
+                newUser.RefreshTokens.Add(newRefreshToken);
+
+                
+                await _context.SaveChangesAsync(cancellationToken);
+
+
+                await transaction.CommitAsync(cancellationToken);
+
+                var roles = await _userManager.GetRolesAsync(newUser);
+                var claims = await _userManager.GetClaimsAsync(newUser);
+                var jwtToken = _tokenHelper.CreateJwtToken(newUser, roles, claims);
+
+                var authModel = new AuthModel
+                {
+                    Email = newUser.Email,
+                    UserName = newUser.UserName,
+                    
+                    Token = new JwtSecurityTokenHandler().WriteToken(jwtToken),
+                    RefreshToken = newRefreshToken.Token,
+                    ExpiresOn = jwtToken.ValidTo,
+                    RefreshTokenExpiration = newRefreshToken.Expires,
+                    IsAuthenticated = true,
+                    Roles = roles.ToList()
+                };
+
+                return ApiResponse<AuthModel>.Success(authModel, _localizer["Auth.UserRegisteredSuccessfully"]);
             }
-
-            await _userManager.AddToRoleAsync(newUser, AspRoles.Driver);
-
-            var driverProfile = new DriverProfile
+            catch (Exception)
             {
-                UserId = newUser.Id,
-                ApprovalStatus = DriverApprovalStatus.Pending
-            };
-
-            await _context.DriverProfiles.AddAsync(driverProfile, cancellationToken);
-            await _context.SaveChangesAsync(cancellationToken);
-
-            var newRefreshToken = _tokenHelper.GenerateRefreshToken();
-            newUser.RefreshTokens.Add(newRefreshToken);
-            await _userManager.UpdateAsync(newUser);
-
-            var roles = await _userManager.GetRolesAsync(newUser);
-            var claims = await _userManager.GetClaimsAsync(newUser);
-            var jwtToken = _tokenHelper.CreateJwtToken(newUser, roles, claims);
-
-            var authModel = _mapper.Map<AuthModel>(newUser);
-            authModel.Token = new JwtSecurityTokenHandler().WriteToken(jwtToken);
-            authModel.RefreshToken = newRefreshToken.Token;
-            authModel.ExpiresOn = jwtToken.ValidTo;
-            authModel.RefreshTokenExpiration = newRefreshToken.Expires;
-            authModel.IsAuthenticated = true;
-            authModel.Roles = roles.ToList();
-
-            return ApiResponse<AuthModel>.Success(authModel, _localizer["Auth.UserRegisteredSuccessfully"]);
+                
+                await transaction.RollbackAsync(cancellationToken);
+                throw; 
+            }
         }
     }
 }

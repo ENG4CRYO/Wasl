@@ -23,7 +23,7 @@ namespace Wasl.Core.Entities
         public PaymentMethod PaymentMethod { get; set; }
         public RideStatus Status { get; set; } = RideStatus.Pending;
 
-        public DateTime RequestedAt { get; set; } = DateTime.UtcNow;
+        public DateTime RequestedAt { get; set; }
         public DateTime? AcceptedAt { get; set; }
         public DateTime? StartedAt { get; set; }
         public DateTime? CompletedAt { get; set; }

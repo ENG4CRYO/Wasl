@@ -9,5 +9,6 @@ namespace Wasl.Application.Dtos.AuthModel
         public string Email { get; set; } = string.Empty;
         public string OtpCode { get; set; } = string.Empty;
         public int FailedAttempts { get; set; } = 0;
+        public string Purpose { get; set; } = "Registration";
     }
 }

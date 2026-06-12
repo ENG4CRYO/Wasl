@@ -1,9 +1,13 @@
-﻿using Wasl.Application.Common;
-using FluentValidation;
+﻿using FluentValidation; 
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
+using System;
 using System.Net;
 using System.Text.Json;
+using System.Threading.Tasks;
+using Wasl.Application.Common;
 
-namespace Wasl.api.Middlewares
+namespace Wasl.API.Middlewares
 {
     public class GlobalErrorHandlerMiddleware
     {
@@ -24,47 +28,47 @@ namespace Wasl.api.Middlewares
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Something went wrong: {Message}", ex.Message);
-                await HandleExceptionAsync(context, ex);
+                
+                _logger.LogError(ex, "An unhandled exception has occurred while executing the request.");
 
+                await HandleExceptionAsync(context, ex);
             }
         }
 
-        private static async Task HandleExceptionAsync(HttpContext context, Exception exception)
+        private static Task HandleExceptionAsync(HttpContext context, Exception exception)
         {
             context.Response.ContentType = "application/json";
 
-            var response = ApiResponse<string>.Failure(exception.Message);
-
+            var response = new ApiResponse<string>();
 
             switch (exception)
             {
-                case KeyNotFoundException e:   
-                    context.Response.StatusCode = (int)HttpStatusCode.NotFound;
-                    break;
-                case UnauthorizedAccessException e:          
-                    context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
-                    break;
-                case ArgumentException e:
+                case ValidationException validationEx:
+                    context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+                    response = ApiResponse<string>.Failure("Validation Error: Please check your inputs.");
                     
-                    context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
                     break;
-                case ValidationException validationException:
-                    context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
 
-                    var errorMessages = string.Join(" | ", validationException.Errors.Select(e => e.ErrorMessage));
-                    response = ApiResponse<string>.Failure(errorMessages);
+                case ArgumentException argEx:
+                    context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+                    response = ApiResponse<string>.Failure(argEx.Message);
                     break;
+
+                case UnauthorizedAccessException:
+                    context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
+                    response = ApiResponse<string>.Failure("Unauthorized access.");
+                    break;
+
                 default:
                     context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-                    response.Message = "Internal Server Error";
+                    response = ApiResponse<string>.Failure("An internal server error occurred. Please try again later.");
                     break;
             }
 
             var jsonOptions = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
-            var json = JsonSerializer.Serialize(response, jsonOptions);
+            var result = JsonSerializer.Serialize(response, jsonOptions);
 
-            await context.Response.WriteAsync(json);
+            return context.Response.WriteAsync(result);
         }
     }
 }

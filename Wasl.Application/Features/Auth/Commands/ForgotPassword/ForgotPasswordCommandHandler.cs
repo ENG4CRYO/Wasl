@@ -1,16 +1,16 @@
-﻿using Wasl.Application.Common;
+﻿using MediatR;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Localization;
+using System;
+using System.Collections.Generic;
+using System.Security.Cryptography;
+using System.Threading;
+using System.Threading.Tasks;
+using Wasl.Application.Common;
 using Wasl.Application.Dtos.AuthModel;
 using Wasl.Application.Interfaces.Infrastructure;
 using Wasl.Application.Resources;
 using Wasl.Core.Entities;
-using MediatR;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Localization;
-using System;
-using System.Security.Cryptography;
-using System.Threading;
-using System.Threading.Tasks;
-
 
 namespace Wasl.Application.Features.Auth.Commands.ForgotPassword
 {
@@ -44,8 +44,9 @@ namespace Wasl.Application.Features.Auth.Commands.ForgotPassword
 
             if (user != null)
             {
-                string otpCode = string.Empty;
+                string otpCode;
                 bool isTestEmail = request.Email.Contains("@test.com");
+
                 if (isTestEmail)
                 {
                     otpCode = "123456";
@@ -55,31 +56,28 @@ namespace Wasl.Application.Features.Auth.Commands.ForgotPassword
                     otpCode = RandomNumberGenerator.GetInt32(100000, 1000000).ToString();
                 }
 
-                var cacheDto = new ResetPasswordCacheDto
+                var cacheDto = new OtpCacheDto
                 {
                     Email = user.Email!,
-                    OtpCode = otpCode
+                    OtpCode = otpCode,
+                    Purpose = "PasswordReset"
                 };
 
                 await _cacheService.SetAsync(resetToken, cacheDto, TimeSpan.FromMinutes(10), cancellationToken);
 
                 if (!isTestEmail)
                 {
-          
                     var emailPlaceholders = new Dictionary<string, string>
                     {
-                        { "FirstName", user.FirstName },
+                        { "FirstName", user.FirstName ?? "User" }, 
                         { "OtpCode", otpCode }
                     };
 
-                  
                     var emailBody = await _templateService.GetTemplateAsync("OtpEmail", emailPlaceholders);
 
- 
                     await _emailService.SendEmailAsync(request.Email, "Your Secure OTP Code", emailBody, cancellationToken);
                 }
             }
-
             return ApiResponse<string>.Success(resetToken, _localizer["Auth.ForgotPasswordSendOtp"]);
         }
     }

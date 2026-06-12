@@ -40,7 +40,8 @@ public class CreateRideRequestCommandHandler : IRequestHandler<CreateRideRequest
 
     public async Task<ApiResponse<Guid>> Handle(CreateRideRequestCommand request, CancellationToken cancellationToken)
     {
-        var newRideId = Guid.NewGuid();
+        var newRideId = Guid.CreateVersion7();
+
         var riderId = _currentUserService.UserId();
         if (string.IsNullOrEmpty(riderId))
         {
@@ -56,6 +57,7 @@ public class CreateRideRequestCommandHandler : IRequestHandler<CreateRideRequest
             DropoffLongitude = request.DropoffLongitude,
             Status = RideStatus.Pending,
             CreatedAt = DateTime.UtcNow,
+            RequestedAt = DateTime.UtcNow,
             RiderId = riderId
         };
 

@@ -9,15 +9,15 @@ using Wasl.Application.Interfaces.Common;
 using Wasl.Application.Resources;
 using Wasl.Core.Enums;
 
-namespace Wasl.Application.Features.Rides.Commands.CompleteRide
+namespace Wasl.Application.Features.Rides.Commands.StartRide
 {
-    public class CompleteRideCommandHandler : IRequestHandler<CompleteRideCommand, ApiResponse<bool>>
+    public class StartRideCommandHandler : IRequestHandler<StartRideCommand, ApiResponse<bool>>
     {
         private readonly IApplicationDbContext _dbContext;
         private readonly IStringLocalizer<SharedResource> _localizer;
         private readonly ICurrentUserService _currentUserService;
 
-        public CompleteRideCommandHandler(
+        public StartRideCommandHandler(
             IApplicationDbContext dbContext,
             IStringLocalizer<SharedResource> localizer,
             ICurrentUserService currentUserService)
@@ -27,9 +27,9 @@ namespace Wasl.Application.Features.Rides.Commands.CompleteRide
             _currentUserService = currentUserService;
         }
 
-        public async Task<ApiResponse<bool>> Handle(CompleteRideCommand request, CancellationToken cancellationToken)
+        public async Task<ApiResponse<bool>> Handle(StartRideCommand request, CancellationToken cancellationToken)
         {
-
+   
             var driverId = _currentUserService.UserId();
             if (string.IsNullOrEmpty(driverId))
             {
@@ -49,10 +49,13 @@ namespace Wasl.Application.Features.Rides.Commands.CompleteRide
                 return ApiResponse<bool>.Failure(_localizer["DriverProfile.AccountNotApproved"]);
             }
 
-            var rideId = Guid.Parse(request.RideId);
+            if (!Guid.TryParse(request.RideId, out var rideId))
+            {
+                return ApiResponse<bool>.Failure("Invalid Ride ID format.");
+            }
+
             var ride = await _dbContext.Rides
                 .FirstOrDefaultAsync(r => r.Id == rideId, cancellationToken);
-
 
             if (ride == null)
             {
@@ -64,17 +67,19 @@ namespace Wasl.Application.Features.Rides.Commands.CompleteRide
                 return ApiResponse<bool>.Failure(_localizer["Rides.RideNotYours"]);
             }
 
-            if (ride.Status == RideStatus.Completed || ride.Status == RideStatus.Cancelled)
+            if (ride.Status != RideStatus.Arrived)
             {
-                return ApiResponse<bool>.Failure(_localizer["Rides.StatusAlreadyCompleted"]);
+                return ApiResponse<bool>.Failure(_localizer["Rides.StatusNotArrived"]);
             }
 
-            ride.Status = RideStatus.Completed;
-            ride.CompletedAt = DateTime.UtcNow; 
+    
+            ride.Status = RideStatus.InProgress;
+            ride.StartedAt = DateTime.UtcNow;
 
             await _dbContext.SaveChangesAsync(cancellationToken);
 
-            return ApiResponse<bool>.Success(true, _localizer["Rides.RideCompletedSuccessfully"]);
+
+            return ApiResponse<bool>.Success(true, _localizer["Rides.RideStartedSuccessfully"]);
         }
     }
 }

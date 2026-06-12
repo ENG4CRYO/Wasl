@@ -144,7 +144,7 @@
   <data name="Auth.TokenRefreshedSuccessfully." xml:space="preserve">
     <value>تم تحديث التوكن بنجاح</value>
   </data>
-  <data name="Auth.CreateUserFeiled" xml:space="preserve">
+  <data name="Auth.CreateUserFailed" xml:space="preserve">
     <value>حدث خطأ اثناء انشاء الحساب</value>
   </data>
   <data name="Auth.UserRegisteredSuccessfully" xml:space="preserve">

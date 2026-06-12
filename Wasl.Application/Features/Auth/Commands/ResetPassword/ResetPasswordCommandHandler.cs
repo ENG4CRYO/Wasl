@@ -1,47 +1,46 @@
-﻿using Wasl.Application.Common;
-using Wasl.Application.Dtos.AuthModel;
-using Wasl.Application.Interfaces.Infrastructure;
-using Wasl.Application.Resources;
-using Wasl.Core.Entities;
-using MediatR;
+﻿using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Localization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Wasl.Application.Common;
+using Wasl.Application.Interfaces.Services;
+using Wasl.Application.Resources;
+using Wasl.Core.Entities;
 
 namespace Wasl.Application.Features.Auth.Commands.ResetPassword
 {
     public class ResetPasswordCommandHandler : IRequestHandler<ResetPasswordCommand, ApiResponse<bool>>
     {
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly ICacheService _cacheService;
+        private readonly IOtpService _otpService; 
         private readonly IStringLocalizer<SharedResource> _localizer;
 
-        public ResetPasswordCommandHandler(UserManager<ApplicationUser> userManager,
-            ICacheService cacheService,
+        public ResetPasswordCommandHandler(
+            UserManager<ApplicationUser> userManager,
+            IOtpService otpService, 
             IStringLocalizer<SharedResource> localizer)
-        { 
+        {
             _userManager = userManager;
-            _cacheService = cacheService;
+            _otpService = otpService;
             _localizer = localizer;
-
         }
 
         public async Task<ApiResponse<bool>> Handle(ResetPasswordCommand request, CancellationToken cancellationToken)
         {
-            var cacheData = await _cacheService.GetAsync<ResetPasswordCacheDto>(request.ResetToken, cancellationToken);
 
-            if (cacheData == null)
+            var verificationResult = await _otpService.VerifyOtpAsync(request.ResetToken, request.OtpCode, cancellationToken);
+
+            if (!verificationResult.IsValid)
             {
-                return ApiResponse<bool>.Failure(_localizer["Auth.SessionExpiredOrInvalidToken"]);
+
+                return ApiResponse<bool>.Failure(_localizer[verificationResult.ErrorMessage!]);
             }
 
-            if (cacheData.OtpCode != request.OtpCode)
-            {
-                return ApiResponse<bool>.Failure(_localizer["Auth.InvalidOTP"]);
-            }
-            var user = await _userManager.FindByEmailAsync(cacheData.Email);
+            string userEmail = verificationResult.Data!.Email;
+
+            var user = await _userManager.FindByEmailAsync(userEmail);
             if (user == null)
             {
                 return ApiResponse<bool>.Failure(_localizer["Auth.UserNotFound"]);
@@ -59,11 +58,9 @@ namespace Wasl.Application.Features.Auth.Commands.ResetPassword
             if (!resetResult.Succeeded)
             {
                 var errors = string.Join(" | ", resetResult.Errors.Select(e => e.Description));
+            
                 return ApiResponse<bool>.Failure(_localizer["Aut.FailedResetPassword"]);
             }
-
-            await _cacheService.RemoveAsync(request.ResetToken, cancellationToken);
-
             return ApiResponse<bool>.Success(true, _localizer["Auth.PasswordResetSuccessfully"]);
         }
     }

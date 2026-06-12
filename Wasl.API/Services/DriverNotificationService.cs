@@ -29,7 +29,7 @@ public class DriverNotificationService : IDriverNotificationService
                 Lng = longitude,
                 DropLat = dropLat,
                 DropLng = dropLng,
-                Message = "Request a new flight near you!"
+                Message = "A new ride request is near you!"
             });
     }
 }

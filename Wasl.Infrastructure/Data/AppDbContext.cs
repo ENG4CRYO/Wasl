@@ -36,30 +36,20 @@ namespace Wasl.Infrastructure.Data
             var userId = _currentUser.UserId() ?? "System";
             var now = DateTime.UtcNow;
 
-            foreach (var entry in ChangeTracker.Entries())
+            foreach (var entry in ChangeTracker.Entries<IAuditableEntity>())
             {
-                if (entry.Entity is null)
-                    continue;
-
-                var baseType = entry.Entity.GetType().BaseType;
-
-                if (baseType != null &&
-                    baseType.IsGenericType &&
-                    baseType.GetGenericTypeDefinition() == typeof(BaseAuditableEntity<>))
+                if (entry.State == EntityState.Added)
                 {
-                    if (entry.State == EntityState.Added)
-                    {
-                        entry.Property("CreatedAt").CurrentValue = now;
-                        entry.Property("CreatedBy").CurrentValue = userId;
-                    }
-                    else if (entry.State == EntityState.Modified)
-                    {
-                        entry.Property("CreatedAt").IsModified = false;
-                        entry.Property("CreatedBy").IsModified = false;
+                    entry.Entity.CreatedAt = now;
+                    entry.Entity.CreatedBy = userId;
+                }
+                else if (entry.State == EntityState.Modified)
+                {
+                    entry.Property(p => p.CreatedAt).IsModified = false;
+                    entry.Property(p => p.CreatedBy).IsModified = false;
 
-                        entry.Property("UpdatedAt").CurrentValue = now;
-                        entry.Property("UpdatedBy").CurrentValue = userId;
-                    }
+                    entry.Entity.UpdatedAt = now;
+                    entry.Entity.UpdatedBy = userId;
                 }
             }
 

@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Text;
 using Wasl.Core.Entities;
 
-namespace Wasl.Infrastructure.Configurtions
+namespace Wasl.Infrastructure.Configurations
 {
     public class RideConfiguration : IEntityTypeConfiguration<Ride>
     {

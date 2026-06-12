@@ -4,7 +4,6 @@ using Wasl.Application.Helpers;
 using Wasl.Application.Interfaces;
 using Wasl.Application.Interfaces.Common;
 using Wasl.Application.Interfaces.Helpers;
-using Wasl.Application.Profiles;
 using Wasl.Application.Services;
 using Wasl.Core.Entities;
 using FluentValidation;
@@ -25,7 +24,6 @@ namespace Wasl.Application.Extensions
         {
             services.AddScoped<JWT>();
             services.AddScoped<ITokenHelper, TokenHelper>();
-            services.AddAutoMapper(cfg => cfg.AddProfile<AuthProfile>());
 
             services.AddHttpContextAccessor();
             services.AddScoped<ICurrentUserService, CurrentUserService>();

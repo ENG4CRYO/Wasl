@@ -11,6 +11,7 @@ using Wasl.Application.Features.Rides.Commands.AcceptRide;
 using Wasl.Application.Features.Rides.Commands.CompleteRide;
 using Wasl.Application.Features.Rides.Commands.DriverArrived;
 using Wasl.Application.Features.Rides.Commands.RequestRide;
+using Wasl.Application.Features.Rides.Commands.StartRide;
 using Wasl.Core.Constants;
 
 namespace Wasl.API.Controllers.V1
@@ -151,6 +152,48 @@ namespace Wasl.API.Controllers.V1
             }
 
             var command = new CompleteRideCommand
+            {
+                RideId = id,
+            };
+
+            var result = await _mediator.Send(command);
+
+            if (!result.Succeeded)
+            {
+                return BadRequest(result);
+            }
+
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Marks the ride as 'InProgress' when the trip actually starts.
+        /// </summary>
+        /// <remarks>
+        /// **Role Required:** Driver
+        /// 
+        /// Validates that the ride is currently in the 'Arrived' state and belongs to the requesting driver, 
+        /// then transitions it to 'InProgress' and records the start time to track the actual trip duration.
+        /// </remarks>
+        /// <param name="id">The unique identifier of the Ride.</param>
+        /// <returns>A success message indicating the ride has started.</returns>
+        [Authorize(Roles = AspRoles.Driver)]
+        [HttpPost("{id}/start")]
+        [Tags("Rides")]
+        [ProducesResponseType(typeof(ApiResponse<bool>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<bool>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        public async Task<IActionResult> StartRide(string id)
+        {
+            var driverId = User.FindFirst("uid")?.Value;
+
+            if (string.IsNullOrEmpty(driverId))
+            {
+                return Unauthorized(ApiResponse<string>.Failure("Unauthorized"));
+            }
+
+            var command = new StartRideCommand
             {
                 RideId = id,
             };

@@ -8,7 +8,7 @@ namespace Wasl.Application.Common
     {
         public bool Succeeded { get; set; }
         public string Message { get; set; }
-        public T Data { get; set; }
+        public T? Data { get; set; }
         public Dictionary<string, List<string>> Errors { get; set; }
 
         
@@ -20,7 +20,7 @@ namespace Wasl.Application.Common
                 Succeeded = true,
                 Message = message,
                 Data = data,
-                Errors = null
+                Errors = null!
             };
         }
 
