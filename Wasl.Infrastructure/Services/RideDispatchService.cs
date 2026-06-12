@@ -32,29 +32,39 @@ public class RideDispatchService : IRideDispatchService
         _dbContext = dbContext;
     }
 
+    [AutomaticRetry(Attempts = 0)]
     public async Task DispatchRideAsync(Guid rideId,
         double latitude, double longitude,
         double currentRadiusKm, List<string> excludedDriverIds)
     {
-
         var ride = await _dbContext.Rides.FindAsync(rideId);
+
         if (ride == null || ride.Status != RideStatus.Pending)
         {
-            return; 
+            return;
         }
+
+        if (ride.CreatedAt < DateTime.UtcNow.AddMinutes(-5))
+        {
+            ride.Status = RideStatus.Cancelled; 
+
+            await _dbContext.SaveChangesAsync();
+
+            return;
+        }
+
         var nearbyDrivers = await _redisCache.GetNearbyDriversAsync(longitude, latitude, currentRadiusKm);
         var driversToNotify = nearbyDrivers.Except(excludedDriverIds ?? new List<string>()).ToList();
 
         if (driversToNotify.Any())
         {
-  
             await _notificationService.NotifyDriversWithRideRequestAsync(
                 driversToNotify,
                 rideId,
                 ride.PickupLatitude,
                 ride.PickupLongitude,
-                ride.DropoffLatitude,  
-                ride.DropoffLongitude 
+                ride.DropoffLatitude,
+                ride.DropoffLongitude
             );
         }
 

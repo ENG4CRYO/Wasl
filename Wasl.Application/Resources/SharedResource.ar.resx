@@ -339,4 +339,7 @@
   <data name="Rides.RequestRideRicevedSuccessfuly" xml:space="preserve">
     <value>تم استلام الطلب، جاري البحث عن أقرب السائقين</value>
   </data>
+  <data name="Auth.Unauthenticated" xml:space="preserve">
+    <value>المستخدم غير مصادق عليه. يرجى تسجيل الدخول والمحاولة مرة أخرى</value>
+  </data>
 </root>

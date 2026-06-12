@@ -3,11 +3,14 @@ using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Localization;
 using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Wasl.Application.Common;
 using Wasl.Application.Dtos.AuthModel;
 using Wasl.Application.Features.Auth.Commands.RiderRegistration.VerifyRiderRegistration;
 using Wasl.Application.Interfaces.Helpers;
-using Wasl.Application.Interfaces.Infrastructure;
+using Wasl.Application.Interfaces.Services; 
 using Wasl.Application.Resources;
 using Wasl.Core.Constants;
 using Wasl.Core.Entities;
@@ -17,20 +20,20 @@ namespace Wasl.Application.Features.Auth.Commands.RiderRegistration
     public class VerifyRiderRegistrationCommandHandler : IRequestHandler<VerifyRiderRegistrationCommand, ApiResponse<AuthModel>>
     {
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly ICacheService _cacheService;
+        private readonly IOtpService _otpService; 
         private readonly ITokenHelper _tokenHelper;
         private readonly IMapper _mapper;
         private readonly IStringLocalizer<SharedResource> _localizer;
 
         public VerifyRiderRegistrationCommandHandler(
             UserManager<ApplicationUser> userManager,
-            ICacheService cacheService,
+            IOtpService otpService, 
             ITokenHelper tokenHelper,
             IMapper mapper,
             IStringLocalizer<SharedResource> localizer)
         {
             _userManager = userManager;
-            _cacheService = cacheService;
+            _otpService = otpService;
             _tokenHelper = tokenHelper;
             _mapper = mapper;
             _localizer = localizer;
@@ -38,19 +41,14 @@ namespace Wasl.Application.Features.Auth.Commands.RiderRegistration
 
         public async Task<ApiResponse<AuthModel>> Handle(VerifyRiderRegistrationCommand request, CancellationToken cancellationToken)
         {
-            var cachedData = await _cacheService.GetAsync<OtpCacheDto>(request.RegisterToken, cancellationToken);
+            var verificationResult = await _otpService.VerifyOtpAsync(request.RegisterToken, request.OtpCode, cancellationToken);
 
-            if (cachedData == null)
+            if (!verificationResult.IsValid)
             {
-                return ApiResponse<AuthModel>.Failure(_localizer["Auth.SessionExpiredOrInvalidToken"]);
+                return ApiResponse<AuthModel>.Failure(_localizer[verificationResult.ErrorMessage!]);
             }
 
-            if (cachedData.OtpCode != request.OtpCode)
-            {
-                return ApiResponse<AuthModel>.Failure(_localizer["Auth.InvalidOTP"]);
-            }
-
-            string userEmail = cachedData.Email;
+            string userEmail = verificationResult.Data!.Email;
 
             var existingUser = await _userManager.FindByEmailAsync(userEmail);
             if (existingUser != null)
@@ -63,7 +61,7 @@ namespace Wasl.Application.Features.Auth.Commands.RiderRegistration
                 FirstName = request.FirstName,
                 LastName = request.LastName,
                 Email = userEmail,
-                UserName = userEmail, 
+                UserName = userEmail,
                 EmailConfirmed = true,
                 Balance = 0
             };
@@ -80,7 +78,7 @@ namespace Wasl.Application.Features.Auth.Commands.RiderRegistration
 
                 return ApiResponse<AuthModel>.Failure(
                     _localizer["Auth.CreateUserFeiled"],
-                    errorsDictionary 
+                    errorsDictionary
                 );
             }
 
@@ -93,8 +91,6 @@ namespace Wasl.Application.Features.Auth.Commands.RiderRegistration
             var roles = await _userManager.GetRolesAsync(newUser);
             var claims = await _userManager.GetClaimsAsync(newUser);
             var jwtToken = _tokenHelper.CreateJwtToken(newUser, roles, claims);
-
-            await _cacheService.RemoveAsync(request.RegisterToken, cancellationToken);
 
             var authModel = _mapper.Map<AuthModel>(newUser);
             authModel.Token = new JwtSecurityTokenHandler().WriteToken(jwtToken);

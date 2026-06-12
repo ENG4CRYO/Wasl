@@ -1,10 +1,11 @@
 ﻿using Microsoft.AspNetCore.Http;
+using Wasl.Application.Common.Models;
 
 namespace Wasl.Application.Interfaces.Infrastructure
 {
     public interface IFileService
     {
-        Task<string> SaveFileAsync(IFormFile file, string folderName, CancellationToken cancellationToken);
+        Task<string> SaveFileAsync(UploadedFile file, string folderName, CancellationToken cancellationToken);
 
         void DeleteFile(string fileUrl);
     }

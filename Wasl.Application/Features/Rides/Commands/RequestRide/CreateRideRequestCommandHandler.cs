@@ -22,22 +22,30 @@ public class CreateRideRequestCommandHandler : IRequestHandler<CreateRideRequest
     private readonly IRideDispatchService _dispatchService;
     private readonly IApplicationDbContext _dbContext;
     private readonly IStringLocalizer<SharedResource> _localizer;
+    private readonly ICurrentUserService _currentUserService;
 
     public CreateRideRequestCommandHandler(
         IBackgroundJobClient backgroundJobClient,
         IRideDispatchService dispatchService,
         IApplicationDbContext dbContext,
-        IStringLocalizer<SharedResource> localizer)
+        IStringLocalizer<SharedResource> localizer,
+        ICurrentUserService currentUserService)
     {
         _backgroundJobClient = backgroundJobClient;
         _dispatchService = dispatchService;
         _dbContext = dbContext;
         _localizer = localizer;
+        _currentUserService = currentUserService;
     }
 
     public async Task<ApiResponse<Guid>> Handle(CreateRideRequestCommand request, CancellationToken cancellationToken)
     {
         var newRideId = Guid.NewGuid();
+        var riderId = _currentUserService.UserId();
+        if (string.IsNullOrEmpty(riderId))
+        {
+            return ApiResponse<Guid>.Failure(_localizer["Auth.Unauthenticated"]);
+        }
 
         var ride = new Ride
         {
@@ -48,7 +56,7 @@ public class CreateRideRequestCommandHandler : IRequestHandler<CreateRideRequest
             DropoffLongitude = request.DropoffLongitude,
             Status = RideStatus.Pending,
             CreatedAt = DateTime.UtcNow,
-            RiderId = request.RiderId 
+            RiderId = riderId
         };
 
         await _dbContext.Rides.AddAsync(ride, cancellationToken);

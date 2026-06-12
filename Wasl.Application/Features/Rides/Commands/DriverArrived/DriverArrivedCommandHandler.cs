@@ -15,10 +15,14 @@ namespace Wasl.Application.Features.Rides.Commands.DriverArrived
     {
         private readonly IApplicationDbContext _dbContext;
         private readonly IStringLocalizer<SharedResource> _localizer;
-        public DriverArrivedCommandHandler(IApplicationDbContext dbContext, IStringLocalizer<SharedResource> localizer)
+        private readonly ICurrentUserService _currentUser;
+        public DriverArrivedCommandHandler(IApplicationDbContext dbContext,
+            IStringLocalizer<SharedResource> localizer,
+            ICurrentUserService currentUser)
         {
             _dbContext = dbContext;
             _localizer = localizer;
+            _currentUser = currentUser;
         }
 
         public async Task<ApiResponse<bool>> Handle(DriverArrivedCommand request, CancellationToken cancellationToken)
@@ -27,36 +31,44 @@ namespace Wasl.Application.Features.Rides.Commands.DriverArrived
             var ride = await _dbContext.Rides
                 .FirstOrDefaultAsync(r => r.Id == rideId, cancellationToken);
 
-            var apiResposne = new ApiResponse<bool>();
-            apiResposne.Data = false;
-            apiResposne.Succeeded = false;
+            var driverId = _currentUser.UserId();
+        
 
+            var apiResponse = new ApiResponse<bool>();
+            apiResponse.Data = false;
+            apiResponse.Succeeded = false;
+
+            if (driverId == null)
+            {
+                apiResponse.Message = _localizer["Auth.Unauthenticated"];
+                return apiResponse;
+            }
 
             if (ride == null)
             {
-                apiResposne.Message = _localizer["Rides.FlightDoesNotExist"];
-                return apiResposne;
+                apiResponse.Message = _localizer["Rides.FlightDoesNotExist"];
+                return apiResponse;
             }
 
-            if (ride.DriverId != request.DriverId)
+            if (ride.DriverId != driverId)
             {
-                apiResposne.Message = _localizer["Rides.FlightNotYours"];
-                return apiResposne;
+                apiResponse.Message = _localizer["Rides.FlightNotYours"];
+                return apiResponse;
             }
 
             if (ride.Status != RideStatus.Accepted)
             {
-                apiResposne.Message = _localizer["Rides.StatusNotAccepted"];
-                return apiResposne;
+                apiResponse.Message = _localizer["Rides.StatusNotAccepted"];
+                return apiResponse;
             }
             ride.Status = RideStatus.Arrived;
 
             await _dbContext.SaveChangesAsync(cancellationToken);
-            apiResposne.Data = true;
-            apiResposne.Succeeded = true;
-            apiResposne.Message = _localizer["Rides.FlightAcceptanceSucceeded"];
+            apiResponse.Data = true;
+            apiResponse.Succeeded = true;
+            apiResponse.Message = _localizer["Rides.FlightAcceptanceSucceeded"];
 
-            return apiResposne;
+            return apiResponse;
         }
     }
 }

@@ -339,4 +339,7 @@
   <data name="Rides.RequestRideRicevedSuccessfuly" xml:space="preserve">
     <value>The request has been received, we are searching for the nearest drivers</value>
   </data>
+  <data name="Auth.Unauthenticated" xml:space="preserve">
+    <value>User is not authenticated. Please sign in and try again</value>
+  </data>
 </root>

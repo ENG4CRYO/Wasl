@@ -47,7 +47,7 @@ namespace Wasl.Application.Features.Auth.Commands.Login
                 return ApiResponse<AuthModel>.Failure(_localizer["Auth.InvalidCredentials"]);
             }
 
-            user.ManageUserTokens(_jwtOptions.RefreshTokenValidityInDays);
+            _tokenHelper.ManageUserSessions(user);
 
 
             var roles = await _userManager.GetRolesAsync(user);

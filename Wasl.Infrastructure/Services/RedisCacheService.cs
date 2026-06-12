@@ -50,6 +50,11 @@ namespace Wasl.Infrastructure.Services
             var lockKey = $"RideLock:{rideId}";
             return await _db.StringSetAsync(lockKey, driverId, TimeSpan.FromMinutes(5), When.NotExists);
         }
+        public async Task ReleaseRideLockAsync(Guid rideId)
+        {
+            var lockKey = $"RideLock:{rideId}";
+            await _db.KeyDeleteAsync(lockKey);
+        }
 
         #endregion
 

@@ -10,18 +10,18 @@ using Wasl.Application.Common;
 using Wasl.Application.Dtos.AuthModel;
 using Wasl.Application.Interfaces.Common;
 using Wasl.Application.Interfaces.Helpers;
-using Wasl.Application.Interfaces.Infrastructure;
+using Wasl.Application.Interfaces.Services; 
 using Wasl.Application.Resources;
 using Wasl.Core.Constants;
 using Wasl.Core.Entities;
-using Wasl.Core.Enums; 
+using Wasl.Core.Enums;
 
 namespace Wasl.Application.Features.Auth.Commands.DriverRegistration
 {
     public class VerifyDriverRegistrationCommandHandler : IRequestHandler<VerifyDriverRegistrationCommand, ApiResponse<AuthModel>>
     {
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly ICacheService _cacheService;
+        private readonly IOtpService _otpService;
         private readonly ITokenHelper _tokenHelper;
         private readonly IMapper _mapper;
         private readonly IStringLocalizer<SharedResource> _localizer;
@@ -29,14 +29,14 @@ namespace Wasl.Application.Features.Auth.Commands.DriverRegistration
 
         public VerifyDriverRegistrationCommandHandler(
             UserManager<ApplicationUser> userManager,
-            ICacheService cacheService,
+            IOtpService otpService, 
             ITokenHelper tokenHelper,
             IMapper mapper,
             IStringLocalizer<SharedResource> localizer,
             IApplicationDbContext context)
         {
             _userManager = userManager;
-            _cacheService = cacheService;
+            _otpService = otpService;
             _tokenHelper = tokenHelper;
             _mapper = mapper;
             _localizer = localizer;
@@ -45,15 +45,14 @@ namespace Wasl.Application.Features.Auth.Commands.DriverRegistration
 
         public async Task<ApiResponse<AuthModel>> Handle(VerifyDriverRegistrationCommand request, CancellationToken cancellationToken)
         {
-            var cachedData = await _cacheService.GetAsync<OtpCacheDto>(request.RegisterToken, cancellationToken);
+            var verificationResult = await _otpService.VerifyOtpAsync(request.RegisterToken, request.OtpCode, cancellationToken);
 
-            if (cachedData == null)
-                return ApiResponse<AuthModel>.Failure(_localizer["Auth.SessionExpiredOrInvalidToken"]);
+            if (!verificationResult.IsValid)
+            {
+                return ApiResponse<AuthModel>.Failure(_localizer[verificationResult.ErrorMessage!]);
+            }
 
-            if (cachedData.OtpCode != request.OtpCode)
-                return ApiResponse<AuthModel>.Failure(_localizer["Auth.InvalidOTP"]);
-
-            string userEmail = cachedData.Email;
+            string userEmail = verificationResult.Data!.Email;
 
             var existingUser = await _userManager.FindByEmailAsync(userEmail);
             if (existingUser != null)
@@ -66,7 +65,7 @@ namespace Wasl.Application.Features.Auth.Commands.DriverRegistration
                 Email = userEmail,
                 UserName = userEmail,
                 PhoneNumber = request.PhoneNumber,
-                City = request.City, 
+                City = request.City,
                 Address = request.Address,
                 IsOnline = false,
                 EmailConfirmed = true,
@@ -102,8 +101,6 @@ namespace Wasl.Application.Features.Auth.Commands.DriverRegistration
             var claims = await _userManager.GetClaimsAsync(newUser);
             var jwtToken = _tokenHelper.CreateJwtToken(newUser, roles, claims);
 
-            await _cacheService.RemoveAsync(request.RegisterToken, cancellationToken);
-
             var authModel = _mapper.Map<AuthModel>(newUser);
             authModel.Token = new JwtSecurityTokenHandler().WriteToken(jwtToken);
             authModel.RefreshToken = newRefreshToken.Token;
@@ -111,8 +108,7 @@ namespace Wasl.Application.Features.Auth.Commands.DriverRegistration
             authModel.RefreshTokenExpiration = newRefreshToken.Expires;
             authModel.IsAuthenticated = true;
             authModel.Roles = roles.ToList();
-            
-            
+
             return ApiResponse<AuthModel>.Success(authModel, _localizer["Auth.UserRegisteredSuccessfully"]);
         }
     }

@@ -9,6 +9,5 @@ namespace Wasl.Application.Features.Rides.Commands.CompleteRide
     public class CompleteRideCommand : IRequest<ApiResponse<bool>>
     {
         public string RideId { get; set; } = string.Empty;
-        public string DriverId { get; set; } = string.Empty;
     }
 }

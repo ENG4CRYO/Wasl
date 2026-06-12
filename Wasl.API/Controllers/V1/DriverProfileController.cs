@@ -3,6 +3,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Wasl.API.Extensions;
 using Wasl.Application.Common;
 using Wasl.Application.Features.DriverProfiles.Commands.SubmitProfile;
 using Wasl.Application.Interfaces.Common;
@@ -47,8 +48,20 @@ namespace Wasl.API.Controllers.V1
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        public async Task<ActionResult<ApiResponse<string>>> SubmitProfile([FromForm] SubmitDriverProfileCommand command)
+        public async Task<IActionResult> SubmitProfile([FromForm] SubmitProfileApiRequest request)
         {
+            var command = new SubmitDriverProfileCommand
+            {
+                VehicleModel = request.VehicleModel,
+                VehicleYear = request.VehicleYear,
+                VinNumber = request.VinNumber,
+
+                VehicleImage = request.VehicleImage?.ToUploadedFile()!,
+                LicenseFrontImage = request.LicenseFrontImage?.ToUploadedFile()!,
+                LicenseBackImage = request.LicenseBackImage?.ToUploadedFile()!,
+                SelfieImage = request.SelfieImage?.ToUploadedFile()!
+            };
+
             var result = await _mediator.Send(command);
             return result.Succeeded ? Ok(result) : BadRequest(result);
         }

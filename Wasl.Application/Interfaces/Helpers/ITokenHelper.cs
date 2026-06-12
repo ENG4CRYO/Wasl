@@ -12,5 +12,6 @@ namespace Wasl.Application.Interfaces.Helpers
     {
         JwtSecurityToken CreateJwtToken(ApplicationUser user, IList<string> roles, IList<Claim> userClaims);
         RefreshToken GenerateRefreshToken();
+        void ManageUserSessions(ApplicationUser user);
     }
 }

@@ -1,9 +1,7 @@
 ﻿using MediatR;
-using Microsoft.AspNetCore.Http;
-using System;
-using System.Collections.Generic;
-using System.Text;
+
 using Wasl.Application.Common;
+using Wasl.Application.Common.Models;
 
 namespace Wasl.Application.Features.DriverProfiles.Commands.SubmitProfile
 {
@@ -13,9 +11,12 @@ namespace Wasl.Application.Features.DriverProfiles.Commands.SubmitProfile
         public int VehicleYear { get; set; }
         public string VinNumber { get; set; } = string.Empty;
 
-        public IFormFile VehicleImage { get; set; } = null!;
-        public IFormFile LicenseFrontImage { get; set; } = null!;
-        public IFormFile LicenseBackImage { get; set; } = null!;
-        public IFormFile SelfieImage { get; set; } = null!;
+        public UploadedFile VehicleImage { get; set; }
+        public UploadedFile LicenseFrontImage { get; set; }
+        public UploadedFile LicenseBackImage { get; set; }
+        public UploadedFile SelfieImage
+        {
+            get; set;
+        }
     }
 }

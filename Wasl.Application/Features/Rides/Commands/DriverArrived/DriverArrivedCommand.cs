@@ -9,6 +9,5 @@ namespace Wasl.Application.Features.Rides.Commands.DriverArrived
     public class DriverArrivedCommand : IRequest<ApiResponse<bool>>
     {
         public string RideId { get; set; } = string.Empty;
-        public string DriverId { get; set; } = string.Empty;
     }
 }

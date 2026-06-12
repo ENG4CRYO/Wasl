@@ -15,6 +15,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
+using Wasl.Application.Interfaces.Services;
 
 namespace Wasl.Application.Extensions
 {
@@ -36,16 +37,15 @@ namespace Wasl.Application.Extensions
             {
                 cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
 
-
                 cfg.AddOpenBehavior(typeof(ValidationBehavior<,>));
             });
 
             services.AddLocalization();
 
+            services.AddScoped<IOtpService,OtpService>();
 
 
-
-            services.AddValidatorsFromAssembly(typeof(ApplicationServiceCollectionExtensions).Assembly);
+          
 
         }
     }

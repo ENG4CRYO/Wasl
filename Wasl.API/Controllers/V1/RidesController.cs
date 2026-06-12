@@ -7,7 +7,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using Wasl.Application.Common;
 using Wasl.Application.Features.Rides.Commands;
-using Wasl.Application.Features.Rides.Commands.AcceptRide; // أضفنا هذا المسار
+using Wasl.Application.Features.Rides.Commands.AcceptRide;
 using Wasl.Application.Features.Rides.Commands.CompleteRide;
 using Wasl.Application.Features.Rides.Commands.DriverArrived;
 using Wasl.Application.Features.Rides.Commands.RequestRide;
@@ -49,15 +49,6 @@ namespace Wasl.API.Controllers.V1
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         public async Task<IActionResult> RequestRide([FromBody] CreateRideRequestCommand command)
         {
-            var riderId = User.FindFirst("uid")?.Value;
-
-            if (string.IsNullOrEmpty(riderId))
-            {
-                return Unauthorized(ApiResponse<string>.Failure("Unauthorized"));
-            }
-
-            command.RiderId = riderId;
-
             var result = await _mediator.Send(command);
 
             return Ok(result);
@@ -84,14 +75,6 @@ namespace Wasl.API.Controllers.V1
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         public async Task<IActionResult> AcceptRide([FromBody] AcceptRideCommand command)
         {
-            var driverId = User.FindFirst("uid")?.Value;
-
-            if (string.IsNullOrEmpty(driverId))
-            {
-                return Unauthorized(ApiResponse<string>.Failure("Unauthorized"));
-            }
-
-            command.DriverId = driverId;
 
             var result = await _mediator.Send(command);
 
@@ -124,17 +107,9 @@ namespace Wasl.API.Controllers.V1
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         public async Task<IActionResult> DriverArrived(string id)
         {
-            var driverId = User.FindFirst("uid")?.Value;
-
-            if (string.IsNullOrEmpty(driverId))
-            {
-                return Unauthorized(ApiResponse<string>.Failure("Unauthorized"));
-            }
-
             var command = new DriverArrivedCommand
             {
-                RideId = id,
-                DriverId = driverId
+                RideId = id
             };
 
             var result = await _mediator.Send(command);
@@ -178,7 +153,6 @@ namespace Wasl.API.Controllers.V1
             var command = new CompleteRideCommand
             {
                 RideId = id,
-                DriverId = driverId
             };
 
             var result = await _mediator.Send(command);

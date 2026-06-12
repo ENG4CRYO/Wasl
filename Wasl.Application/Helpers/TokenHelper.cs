@@ -68,5 +68,30 @@ namespace Wasl.Application.Helpers
                 Created = DateTime.UtcNow
             };
         }
+
+        public void ManageUserSessions(ApplicationUser user)
+        {
+            user.RefreshTokens.RemoveAll(t => t.Expires <= DateTime.UtcNow);
+
+ 
+            const int MaxActiveSessions = 5;
+
+            var activeTokens = user.RefreshTokens
+                .Where(t => t.Revoked == null && t.Expires > DateTime.UtcNow)
+                .OrderBy(t => t.Created)
+                .ToList();
+
+            if (activeTokens.Count >= MaxActiveSessions)
+            {
+                var tokensToRevokeCount = activeTokens.Count - MaxActiveSessions + 1;
+                var tokensToRevoke = activeTokens.Take(tokensToRevokeCount);
+
+                foreach (var token in tokensToRevoke)
+                {
+                    token.Revoked = DateTime.UtcNow;
+                    token.ReasonRevoked = "Exceeded max active sessions";
+                }
+            }
+        }
     }
 }

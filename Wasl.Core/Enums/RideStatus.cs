@@ -11,6 +11,6 @@ namespace Wasl.Core.Enums
         Arrived =3,
         InProgress =4,
         Completed =5,
-        Canceled =6,
+        Cancelled =6,
     }
 }

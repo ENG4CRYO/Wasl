@@ -15,11 +15,15 @@ namespace Wasl.Application.Features.Rides.Commands.CompleteRide
     {
         private readonly IApplicationDbContext _dbContext;
         private readonly IStringLocalizer<SharedResource> _localizer;
+        private readonly ICurrentUserService _currentUser;
 
-        public CompleteRideCommandHandler(IApplicationDbContext dbContext, IStringLocalizer<SharedResource> localizer)
+        public CompleteRideCommandHandler(IApplicationDbContext dbContext,
+            IStringLocalizer<SharedResource> localizer,
+            ICurrentUserService currentUser)
         {
             _dbContext = dbContext;
             _localizer = localizer;
+            _currentUser = currentUser;
         }
 
         public async Task<ApiResponse<bool>> Handle(CompleteRideCommand request, CancellationToken cancellationToken)
@@ -28,9 +32,17 @@ namespace Wasl.Application.Features.Rides.Commands.CompleteRide
             var ride = await _dbContext.Rides
                 .FirstOrDefaultAsync(r => r.Id == rideId, cancellationToken);
 
+            var driverId = _currentUser.UserId();
+
             var apiResponse = new ApiResponse<bool>();
             apiResponse.Data = false;
             apiResponse.Succeeded = false;
+
+            if (driverId == null)
+            {
+                apiResponse.Message = _localizer["Auth.Unauthenticated"];
+                return apiResponse;
+            }
 
             if (ride == null)
             {
@@ -38,14 +50,14 @@ namespace Wasl.Application.Features.Rides.Commands.CompleteRide
                 return apiResponse;
             }
 
-            if (ride.DriverId != request.DriverId)
+            if (ride.DriverId != driverId)
             {
                 apiResponse.Message = _localizer["Rides.FlightNotYours"];
                 return apiResponse;
             }
 
 
-            if (ride.Status == RideStatus.Completed || ride.Status == RideStatus.Canceled)
+            if (ride.Status == RideStatus.Completed || ride.Status == RideStatus.Cancelled)
             {
                 apiResponse.Message = _localizer["Rides.StatusAlreadyCompleted"];
                 return apiResponse;

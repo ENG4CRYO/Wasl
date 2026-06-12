@@ -10,5 +10,6 @@ namespace Wasl.Application.Interfaces.Infrastructure
         Task RemoveDriverLocationAsync(string driverId);
         Task<IEnumerable<string>> GetNearbyDriversAsync(double longitude, double latitude, double radiusInKm);
         Task<bool> AcquireRideLockAsync(Guid rideId, string driverId);
+        Task ReleaseRideLockAsync(Guid rideId);
     }
 }

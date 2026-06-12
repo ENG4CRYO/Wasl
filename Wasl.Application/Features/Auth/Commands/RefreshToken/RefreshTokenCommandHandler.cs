@@ -50,13 +50,16 @@ namespace Wasl.Application.Features.Auth.Commands.RefreshToken
                 return ApiResponse<AuthModel>.Failure(_localizer["Auth.InactiveToken"]);
             }
 
-            existingToken.Revoked = DateTime.UtcNow.AddMinutes(1);
+            existingToken.Revoked = DateTime.UtcNow;
+
 
             var roles = await _userManager.GetRolesAsync(user);
             var claims = await _userManager.GetClaimsAsync(user);
 
             var newJwtToken = _tokenHelper.CreateJwtToken(user, roles, claims);
             var newRefreshToken = _tokenHelper.GenerateRefreshToken();
+
+            existingToken.ReplacedByToken = newRefreshToken.Token;
 
             user.RefreshTokens.Add(newRefreshToken);
             await _userManager.UpdateAsync(user);
@@ -71,7 +74,7 @@ namespace Wasl.Application.Features.Auth.Commands.RefreshToken
                 UserName = user.UserName,
                 Roles = roles.ToList(),
                 ExpiresOn = newJwtToken.ValidTo,
-                RefreshTokenExpiration = newRefreshToken.Expires
+                RefreshTokenExpiration = newRefreshToken.Expires,
             };
 
             return ApiResponse<AuthModel>.Success(authModel, _localizer["Auth.TokenRefreshedSuccessfully."]);

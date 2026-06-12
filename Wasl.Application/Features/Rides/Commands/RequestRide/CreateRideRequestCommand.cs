@@ -11,7 +11,5 @@ public class CreateRideRequestCommand : IRequest<ApiResponse<Guid>>
     public double PickupLongitude { get; set; }
     public double DropoffLatitude { get; set; }
     public double DropoffLongitude { get; set; }
-    [JsonIgnore]
-    public string RiderId { get; set; } = string.Empty;
 
 }
