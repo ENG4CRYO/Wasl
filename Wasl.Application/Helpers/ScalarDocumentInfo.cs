@@ -118,8 +118,6 @@
 
                 ## 🧪 Development & Testing
                 * **Environment:** `Production / Development`
-                * **Test Credentials:** * Email: `wasl@test.com`
-                  * Static OTP: `123456` (Note: Only enabled in Mock/Dev mode).
                 """;
 
             return template;

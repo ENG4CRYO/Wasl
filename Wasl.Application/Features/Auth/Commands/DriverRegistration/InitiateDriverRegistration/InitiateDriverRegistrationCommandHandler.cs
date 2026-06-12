@@ -1,10 +1,12 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Localization;
 using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
-using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using Wasl.Application.Common;
 using Wasl.Application.Dtos.AuthModel;
 using Wasl.Application.Interfaces.Infrastructure;
@@ -20,19 +22,24 @@ namespace Wasl.Application.Features.Auth.Commands.DriverRegistration.InitiateDri
         private readonly IEmailService _emailService;
         private readonly ITemplateService _templateService;
         private readonly IStringLocalizer<SharedResource> _localizer;
+        private readonly IConfiguration _configuration;
+
         public InitiateDriverRegistrationCommandHandler(
             UserManager<ApplicationUser> userManager,
             ICacheService cacheService,
             IEmailService emailService,
             ITemplateService templateService,
-            IStringLocalizer<SharedResource> localizer)
+            IStringLocalizer<SharedResource> localizer,
+            IConfiguration configuration)
         {
             _userManager = userManager;
             _cacheService = cacheService;
             _emailService = emailService;
             _templateService = templateService;
             _localizer = localizer;
+            _configuration = configuration;
         }
+
         public async Task<ApiResponse<string>> Handle(InitiateDriverRegistrationCommand request, CancellationToken cancellationToken)
         {
             var exsitingUser = await _userManager.FindByEmailAsync(request.Email);
@@ -45,10 +52,15 @@ namespace Wasl.Application.Features.Auth.Commands.DriverRegistration.InitiateDri
             string otpCode;
             var registerToken = Guid.NewGuid().ToString();
 
-            bool isTestEmail = request.Email.Contains("@test.com");
-            if (isTestEmail)
+            bool bypassEnabled = _configuration.GetValue<bool>("Testing:BypassOtp");
+            string bypassDomain = _configuration.GetValue<string>("Testing:BypassDomain") ?? "@test.com";
+            string fixedOtp = _configuration.GetValue<string>("Testing:FixedOtpCode") ?? "123456";
+
+            bool isBypassEmail = bypassEnabled && request.Email.EndsWith(bypassDomain, StringComparison.OrdinalIgnoreCase);
+
+            if (isBypassEmail)
             {
-                otpCode = "123456";
+                otpCode = fixedOtp;
             }
             else
             {
@@ -63,7 +75,7 @@ namespace Wasl.Application.Features.Auth.Commands.DriverRegistration.InitiateDri
 
             await _cacheService.SetAsync(registerToken, cacheDto, TimeSpan.FromMinutes(10), cancellationToken);
 
-            if (!isTestEmail)
+            if (!isBypassEmail)
             {
                 var emailPlaceholders = new Dictionary<string, string>
                 {
@@ -76,7 +88,6 @@ namespace Wasl.Application.Features.Auth.Commands.DriverRegistration.InitiateDri
             }
 
             return ApiResponse<string>.Success(registerToken, _localizer["Auth.RegisterSendOtp"]);
-
         }
     }
 }

@@ -1,18 +1,24 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using System;
 
-namespace Wasl.api.Extensions
+namespace Wasl.API.Extensions
 {
     public static class CorsExtension
     {
-        public static IServiceCollection AddGlobalCors(this IServiceCollection services)
+        public static IServiceCollection AddCorsConfiguration(this IServiceCollection services, IConfiguration configuration)
         {
+
+            var allowedOrigins = configuration.GetSection("AllowedOrigins").Get<string[]>() ?? Array.Empty<string>();
+
             services.AddCors(options =>
             {
                 options.AddPolicy("AllowAll", builder =>
-                    builder.SetIsOriginAllowed(_ => true) 
-                           .AllowAnyMethod()             
-                           .AllowAnyHeader()             
-                           .AllowCredentials()); 
+                    builder
+                        .WithOrigins(allowedOrigins)
+                        .AllowAnyMethod()
+                        .AllowAnyHeader()
+                        .AllowCredentials());
             });
 
             return services;

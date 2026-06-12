@@ -139,7 +139,10 @@ try
     app.UseAuthentication();
     app.UseAuthorization();
     app.MapControllers().RequireRateLimiting("IpLimiter");
-    app.UseHangfireDashboard("/hangfire");
+    if (app.Environment.IsDevelopment())
+    {
+        app.UseHangfireDashboard("/hangfire");
+    }
     app.MapHub<TrackingHub>("/hubs/tracking");
 
     app.Run();

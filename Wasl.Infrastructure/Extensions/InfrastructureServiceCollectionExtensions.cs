@@ -11,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Channels;
+using System.Threading.Tasks;
 using Wasl.Application.Helpers;
 using Wasl.Application.Interfaces;
 using Wasl.Application.Interfaces.Common;
@@ -28,40 +29,32 @@ namespace Wasl.Infrastructure.Extensions
     {
         public static IServiceCollection AddInfrastructureService(this IServiceCollection services, IConfiguration configuration)
         {
-            
             var connectionString = configuration.GetConnectionString("DefaultConnection");
 
             if (string.IsNullOrEmpty(connectionString))
             {
-                throw new InvalidOperationException("Connection string 'LocalDb' not found.");
+                throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
             }
 
             services.AddIdentity<ApplicationUser, IdentityRole>()
-            .AddEntityFrameworkStores<AppDbContext>()
-            .AddDefaultTokenProviders();
+                .AddEntityFrameworkStores<AppDbContext>()
+                .AddDefaultTokenProviders();
 
             services.AddDbContext<AppDbContext>(options =>
-                options.UseNpgsql(connectionString,b =>
-                b.MigrationsAssembly(typeof(InfrastructureServiceCollectionExtensions).Assembly.FullName)
+                options.UseNpgsql(connectionString, b =>
+                    b.MigrationsAssembly(typeof(InfrastructureServiceCollectionExtensions).Assembly.FullName)
                 ));
-
 
             services.AddScoped<IApplicationDbContext>(provider => provider.GetRequiredService<AppDbContext>());
 
-      
             services.AddSingleton(Channel.CreateUnbounded<EmailMessage>());
-
             services.AddTransient<IEmailService, EmailService>();
-
             services.AddHostedService<EmailBackgroundSender>();
 
-            services.AddMemoryCache();
-
-            services.AddSingleton<ICacheService, MemoryCacheService>();
 
             services.Configure<MailSettings>(configuration.GetSection("MailSettings"));
-
             services.Configure<JWT>(configuration.GetSection("JWT"));
+
             services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -71,7 +64,6 @@ namespace Wasl.Infrastructure.Extensions
                 var jwtKey = configuration["JWT:Key"];
                 var jwtIssuer = configuration["JWT:Issuer"];
                 var jwtAudience = configuration["JWT:Audience"];
-     
 
                 if (string.IsNullOrEmpty(jwtKey))
                 {
@@ -104,18 +96,21 @@ namespace Wasl.Infrastructure.Extensions
                         return Task.CompletedTask;
                     }
                 };
-            });;
+            });
+
             services.AddTransient<ITemplateService, TemplateService>();
-
-
             services.AddHttpContextAccessor();
             services.AddScoped<IFileService, LocalFileService>();
 
-            var redisConnectionString = configuration.GetConnectionString("Redis");
 
+            var redisConnectionString = configuration.GetConnectionString("Redis");
             services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(redisConnectionString!));
 
-            services.AddScoped<IRedisCacheService, RedisCacheService>();
+
+            services.AddSingleton<RedisCacheService>();
+            services.AddSingleton<ICacheService>(provider => provider.GetRequiredService<RedisCacheService>());
+            services.AddSingleton<IRedisCacheService>(provider => provider.GetRequiredService<RedisCacheService>());
+ 
 
             services.AddHangfire(config => config
                  .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
@@ -127,7 +122,6 @@ namespace Wasl.Infrastructure.Extensions
             services.AddHangfireServer();
 
             services.AddScoped<IRideDispatchService, RideDispatchService>();
-
 
             return services;
         }
