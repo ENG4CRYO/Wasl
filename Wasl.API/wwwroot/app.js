@@ -47,6 +47,8 @@ const TRANSLATIONS = {
         btnSending: "جاري الإرسال...",
         btnFinishing: "جاري الإنهاء...",
         btnArrived: "📍 لقد وصلت (Arrived)",
+        btnStart: "🚀 بدء الرحلة",
+        btnStarting: "جاري البدء...",
         btnComplete: "🏁 إنهاء الرحلة",
         activeRideTitle: "✅ أنت الآن في رحلة نشطة",
         voiceGuide: "🗺️ بدء التوجيه الصوتي"
@@ -81,6 +83,8 @@ const TRANSLATIONS = {
         btnSending: "Sending...",
         btnFinishing: "Completing...",
         btnArrived: "📍 Arrived",
+        btnStart: "🚀 Start Ride",
+        btnStarting: "Starting...",
         btnComplete: "🏁 Complete Ride",
         activeRideTitle: "✅ You are in an active ride",
         voiceGuide: "🗺️ Start Voice Guidance"
@@ -371,7 +375,7 @@ function renderRideRequest(data) {
         if (pickupEl) pickupEl.textContent = `${lat}, ${lng}`;
         if (dropEl) dropEl.textContent = `${dropLat}, ${dropLng}`;
         if (rideIdEl) rideIdEl.textContent = rideId;
-        if (mapEl) mapEl.src = `https://maps.google.com/maps?q=${lat},${lng}&z=15&output=embed`;
+        if (mapEl) mapEl.src = `http://googleusercontent.com/maps.google.com/${lat},${lng}&z=15&output=embed`;
 
         openModal();
 
@@ -390,11 +394,10 @@ function openModal() {
         return;
     }
 
-
     modal.hidden = false;
     modal.style.display = 'flex';
-    modal.style.zIndex = '999999'; 
-    modal.style.opacity = '1';   
+    modal.style.zIndex = '999999';
+    modal.style.opacity = '1';
     modal.style.visibility = 'visible';
 
     setTimeout(() => {
@@ -462,7 +465,12 @@ async function arriveRide() {
 
         if (response.ok && result.succeeded) {
             showToast(result.message, 'success');
+
+            // إخفاء زر الوصول، وإظهار زر البدء
             if (btnArrived) btnArrived.style.display = 'none';
+            const btnStart = document.getElementById('btnStartRide');
+            if (btnStart) btnStart.style.display = 'inline-block';
+
         } else {
             showToast(getErrorMessage(result, t('networkError')), 'error');
             if (btnArrived) {
@@ -475,6 +483,44 @@ async function arriveRide() {
         if (btnArrived) {
             btnArrived.disabled = false;
             btnArrived.innerText = t('btnArrived');
+        }
+    }
+}
+
+async function startRide() {
+    if (!state.activeRide) return;
+
+    const btnStart = document.getElementById('btnStartRide');
+    if (btnStart) {
+        btnStart.disabled = true;
+        btnStart.innerText = t('btnStarting');
+    }
+
+    try {
+        const response = await apiFetch(`/api/v1/Rides/${state.activeRide.rideId}/start`, { method: 'POST' });
+        if (!response) return;
+
+        const result = await response.json().catch(() => ({}));
+
+        if (response.ok && result.succeeded) {
+            showToast(result.message || 'Ride started successfully', 'success');
+
+            // إخفاء زر البدء وإظهار زر الإنهاء
+            if (btnStart) btnStart.style.display = 'none';
+            const btnComplete = document.getElementById('btnCompleteRide');
+            if (btnComplete) btnComplete.style.display = 'inline-block';
+        } else {
+            showToast(getErrorMessage(result, t('networkError')), 'error');
+            if (btnStart) {
+                btnStart.disabled = false;
+                btnStart.innerText = t('btnStart');
+            }
+        }
+    } catch {
+        showToast(t('networkError'), 'error');
+        if (btnStart) {
+            btnStart.disabled = false;
+            btnStart.innerText = t('btnStart');
         }
     }
 }
@@ -519,7 +565,7 @@ function renderActiveRideDashboard(data) {
     dom.emptyState.hidden = true;
     dom.notificationsArea.innerHTML = '';
 
-    const mapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${data.lat},${data.lng}&destination=${data.dropLat},${data.dropLng}&travelmode=driving`;
+    const mapsUrl = `http://googleusercontent.com/maps.google.com/${data.lat},${data.lng}&destination=${data.dropLat},${data.dropLng}&travelmode=driving`;
 
     const card = document.createElement('div');
     card.className = 'ride-card';
@@ -532,9 +578,10 @@ function renderActiveRideDashboard(data) {
             <p class="ride-card-id">ID: <code>${data.rideId}</code></p>
         </div>
         
-        <div class="controls-group" style="margin-top: 15px; display: flex; gap: 10px;">
+        <div class="controls-group" style="margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap;">
             <button id="btnArrived" class="btn btn-warning" onclick="arriveRide()">${t('btnArrived')}</button>
-            <button id="btnCompleteRide" class="btn btn-danger" onclick="completeRide()">${t('btnComplete')}</button>
+            <button id="btnStartRide" class="btn btn-primary" onclick="startRide()" style="display: none;">${t('btnStart')}</button>
+            <button id="btnCompleteRide" class="btn btn-danger" onclick="completeRide()" style="display: none;">${t('btnComplete')}</button>
         </div>
 
         <a class="btn-map" href="${mapsUrl}" target="_blank" rel="noopener noreferrer" style="margin-top: 15px; display: inline-block;">
