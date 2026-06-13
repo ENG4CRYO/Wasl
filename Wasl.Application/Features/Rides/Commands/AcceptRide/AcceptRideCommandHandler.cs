@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
 using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Wasl.Application.Common;
@@ -17,7 +18,7 @@ public class AcceptRideCommandHandler : IRequestHandler<AcceptRideCommand, ApiRe
     private readonly IRedisCacheService _redisCache;
     private readonly IApplicationDbContext _dbContext;
     private readonly IStringLocalizer<SharedResource> _localizer;
-    private readonly ICurrentUserService _currentUserService; 
+    private readonly ICurrentUserService _currentUserService;
 
     public AcceptRideCommandHandler(
         IRedisCacheService redisCache,
@@ -39,15 +40,19 @@ public class AcceptRideCommandHandler : IRequestHandler<AcceptRideCommand, ApiRe
             return ApiResponse<bool>.Failure("Unauthorized access.");
         }
 
-        var driverProfile = await _dbContext.DriverProfiles
-            .FirstOrDefaultAsync(dp => dp.UserId == driverId, cancellationToken);
+       
+        var driverStatus = await _dbContext.DriverProfiles
+            .AsNoTracking()
+            .Where(dp => dp.UserId == driverId)
+            .Select(dp => (DriverApprovalStatus?)dp.ApprovalStatus)
+            .FirstOrDefaultAsync(cancellationToken);
 
-        if (driverProfile == null)
+        if (driverStatus == null)
         {
             return ApiResponse<bool>.Failure(_localizer["Driver.ProfileNotFound"]);
         }
 
-        if (driverProfile.ApprovalStatus != DriverApprovalStatus.Approved)
+        if (driverStatus != DriverApprovalStatus.Approved)
         {
             return ApiResponse<bool>.Failure(_localizer["Driver.AccountNotApproved"]);
         }
@@ -60,26 +65,36 @@ public class AcceptRideCommandHandler : IRequestHandler<AcceptRideCommand, ApiRe
             return ApiResponse<bool>.Failure(_localizer["Rides.FailedToAcceptRide"]);
         }
 
-        var ride = await _dbContext.Rides.FindAsync(new object[] { rideId }, cancellationToken);
-
-        if (ride == null)
+        try
         {
-            await _redisCache.ReleaseRideLockAsync(rideId);
-            return ApiResponse<bool>.Failure(_localizer["Rides.NotFound"]);
+            var ride = await _dbContext.Rides.FindAsync(new object[] { rideId }, cancellationToken);
+
+            if (ride == null)
+            {
+                return ApiResponse<bool>.Failure(_localizer["Rides.NotFound"]);
+            }
+
+            if (ride.Status != RideStatus.Pending)
+            {
+                return ApiResponse<bool>.Failure(_localizer["Rides.AlreadyAccepted"]);
+            }
+
+            ride.DriverId = driverId;
+            ride.Status = RideStatus.Accepted;
+
+            ride.AcceptedAt = DateTime.UtcNow;
+
+            await _dbContext.SaveChangesAsync(cancellationToken);
+
+            return ApiResponse<bool>.Success(true, _localizer["Rides.RideAcceptanceSucceeded"]);
         }
-
-        if (ride.Status != RideStatus.Pending)
+        catch (DbUpdateConcurrencyException)
         {
-            await _redisCache.ReleaseRideLockAsync(rideId);
             return ApiResponse<bool>.Failure(_localizer["Rides.AlreadyAccepted"]);
         }
-
-        ride.DriverId = driverId;
-        ride.Status = RideStatus.Accepted;
-        ride.AcceptedAt = DateTime.UtcNow;
-
-        await _dbContext.SaveChangesAsync(cancellationToken);
-
-        return ApiResponse<bool>.Success(true, _localizer["Rides.RideAcceptanceSucceeded"]);
+        finally
+        {
+            await _redisCache.ReleaseRideLockAsync(rideId);
+        }
     }
 }

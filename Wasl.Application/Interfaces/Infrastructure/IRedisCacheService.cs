@@ -11,5 +11,7 @@ namespace Wasl.Application.Interfaces.Infrastructure
         Task<IEnumerable<string>> GetNearbyDriversAsync(double longitude, double latitude, double radiusInKm);
         Task<bool> AcquireRideLockAsync(Guid rideId, string driverId);
         Task ReleaseRideLockAsync(Guid rideId);
+        Task<List<string>> GetExcludedDriversForRideAsync(Guid rideId);
+        Task AddExcludedDriversToRideAsync(Guid rideId, List<string> driverIds);
     }
 }

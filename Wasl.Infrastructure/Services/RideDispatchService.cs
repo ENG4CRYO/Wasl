@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Wasl.Application.Interfaces;
 using Wasl.Application.Interfaces.Common;
@@ -22,8 +23,7 @@ public class RideDispatchService : IRideDispatchService
         IRedisCacheService redisCache,
         IDriverNotificationService notificationService,
         IBackgroundJobClient backgroundJobClient,
-        IApplicationDbContext dbContext 
-        )
+        IApplicationDbContext dbContext)
     {
         _redisCache = redisCache;
         _notificationService = notificationService;
@@ -34,10 +34,10 @@ public class RideDispatchService : IRideDispatchService
     [AutomaticRetry(Attempts = 0)]
     public async Task DispatchRideAsync(Guid rideId,
         double latitude, double longitude,
-        double currentRadiusKm, List<string> excludedDriverIds,
+        double currentRadiusKm,
         CancellationToken cancellationToken = default)
     {
-        var ride = await _dbContext.Rides.FindAsync(new object[] { rideId });
+        var ride = await _dbContext.Rides.FindAsync(new object[] { rideId }, cancellationToken);
 
         if (ride == null || ride.Status != RideStatus.Pending)
         {
@@ -47,14 +47,16 @@ public class RideDispatchService : IRideDispatchService
         if (ride.CreatedAt < DateTime.UtcNow.AddMinutes(-5))
         {
             ride.Status = RideStatus.Cancelled;
-
             await _dbContext.SaveChangesAsync(cancellationToken);
-
             return;
         }
 
         var nearbyDrivers = await _redisCache.GetNearbyDriversAsync(longitude, latitude, currentRadiusKm);
-        var driversToNotify = nearbyDrivers.Except(excludedDriverIds ?? new List<string>()).ToList();
+
+
+        var excludedDriverIds = await _redisCache.GetExcludedDriversForRideAsync(rideId);
+
+        var driversToNotify = nearbyDrivers.Except(excludedDriverIds).ToList();
 
         if (driversToNotify.Any())
         {
@@ -66,16 +68,16 @@ public class RideDispatchService : IRideDispatchService
                 ride.DropoffLatitude,
                 ride.DropoffLongitude
             );
-        }
 
-        var updatedExcludedList = new List<string>(excludedDriverIds ?? new List<string>());
-        updatedExcludedList.AddRange(driversToNotify);
+            await _redisCache.AddExcludedDriversToRideAsync(rideId, driversToNotify);
+        }
 
         if (currentRadiusKm < 10)
         {
             var nextRadius = currentRadiusKm + 2;
+
             _backgroundJobClient.Schedule(
-                () => DispatchRideAsync(rideId, latitude, longitude, nextRadius, updatedExcludedList),
+                () => DispatchRideAsync(rideId, latitude, longitude, nextRadius, CancellationToken.None),
                 TimeSpan.FromSeconds(60));
         }
     }

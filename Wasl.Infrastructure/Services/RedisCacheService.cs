@@ -84,5 +84,32 @@ namespace Wasl.Infrastructure.Services
         }
 
         #endregion
+
+        public async Task<List<string>> GetExcludedDriversForRideAsync(Guid rideId)
+        {
+            var key = $"ride:{rideId}:excluded";
+
+            var members = await _db.SetMembersAsync(key);
+
+            if (members == null || members.Length == 0)
+                return new List<string>();
+
+            return members.Select(m => m.ToString()).ToList();
+        }
+
+
+        public async Task AddExcludedDriversToRideAsync(Guid rideId, List<string> driverIds)
+        {
+            if (driverIds == null || !driverIds.Any()) return;
+
+            var key = $"ride:{rideId}:excluded";
+
+            var redisValues = driverIds.Select(id => (RedisValue)id).ToArray();
+
+            await _db.SetAddAsync(key, redisValues);
+
+        
+            await _db.KeyExpireAsync(key, TimeSpan.FromMinutes(10));
+        }
     }
 }

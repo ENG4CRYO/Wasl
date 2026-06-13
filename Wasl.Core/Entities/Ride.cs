@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Text;
 using Wasl.Core.Entities.BaseEntity;
 using Wasl.Core.Enums;
@@ -21,6 +22,7 @@ namespace Wasl.Core.Entities
 
         public decimal CalculatedPrice { get; set; }
         public PaymentMethod PaymentMethod { get; set; }
+        [ConcurrencyCheck]
         public RideStatus Status { get; set; } = RideStatus.Pending;
 
         public DateTime RequestedAt { get; set; }

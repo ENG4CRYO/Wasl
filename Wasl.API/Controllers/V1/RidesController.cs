@@ -52,6 +52,11 @@ namespace Wasl.API.Controllers.V1
         {
             var result = await _mediator.Send(command);
 
+            if (!result.Succeeded)
+            {
+                return BadRequest(result);
+            }
+
             return Ok(result);
         }
 

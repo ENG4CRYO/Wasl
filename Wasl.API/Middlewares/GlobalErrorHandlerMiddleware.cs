@@ -1,7 +1,8 @@
-﻿using FluentValidation; 
+﻿using FluentValidation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Linq; 
 using System.Net;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -28,7 +29,7 @@ namespace Wasl.API.Middlewares
             }
             catch (Exception ex)
             {
-                
+              
                 _logger.LogError(ex, "An unhandled exception has occurred while executing the request.");
 
                 await HandleExceptionAsync(context, ex);
@@ -39,29 +40,37 @@ namespace Wasl.API.Middlewares
         {
             context.Response.ContentType = "application/json";
 
-            var response = new ApiResponse<string>();
+            var response = new ApiResponse<object>();
 
             switch (exception)
             {
                 case ValidationException validationEx:
                     context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
-                    response = ApiResponse<string>.Failure("Validation Error: Please check your inputs.");
+
                     
+                    var errors = validationEx.Errors
+                        .GroupBy(x => x.PropertyName)
+                        .ToDictionary(
+                            g => g.Key,
+                            g => g.Select(x => x.ErrorMessage).ToList()
+                        );
+
+                    response = ApiResponse<object>.Failure("Validation Error: Please check your inputs.", errors);
                     break;
 
                 case ArgumentException argEx:
                     context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
-                    response = ApiResponse<string>.Failure(argEx.Message);
+                    response = ApiResponse<object>.Failure(argEx.Message);
                     break;
 
                 case UnauthorizedAccessException:
                     context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
-                    response = ApiResponse<string>.Failure("Unauthorized access.");
+                    response = ApiResponse<object>.Failure("Unauthorized access.");
                     break;
 
                 default:
                     context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-                    response = ApiResponse<string>.Failure("An internal server error occurred. Please try again later.");
+                    response = ApiResponse<object>.Failure("An internal server error occurred. Please try again later.");
                     break;
             }
 
