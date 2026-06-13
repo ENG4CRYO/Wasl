@@ -357,4 +357,7 @@
   <data name="DriverProfiles.MissingRequiredFiles" xml:space="preserve">
     <value>Driver profiles missing required files</value>
   </data>
+  <data name="Rides.StatusNotInProgress" xml:space="preserve">
+    <value>Ride is not in progress</value>
+  </data>
 </root>

@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+﻿
 using Wasl.Application.Common.Behaviors;
 using Wasl.Application.Helpers;
 using Wasl.Application.Interfaces;
@@ -30,7 +30,6 @@ namespace Wasl.Application.Extensions
             services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
             var assembly = Assembly.GetExecutingAssembly();
 
-            services.AddValidatorsFromAssembly(assembly);
 
             services.AddMediatR(cfg =>
             {

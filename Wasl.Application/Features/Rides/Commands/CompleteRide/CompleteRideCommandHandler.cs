@@ -64,6 +64,10 @@ namespace Wasl.Application.Features.Rides.Commands.CompleteRide
                 return ApiResponse<bool>.Failure(_localizer["Rides.RideNotYours"]);
             }
 
+            if (ride.Status != RideStatus.InProgress)
+            {
+                return ApiResponse<bool>.Failure(_localizer["Rides.StatusNotInProgress"]);
+            }
             if (ride.Status == RideStatus.Completed || ride.Status == RideStatus.Cancelled)
             {
                 return ApiResponse<bool>.Failure(_localizer["Rides.StatusAlreadyCompleted"]);

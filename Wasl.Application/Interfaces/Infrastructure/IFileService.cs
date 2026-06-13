@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using Wasl.Application.Common.Models;
+﻿using Wasl.Application.Common.Models;
 
 namespace Wasl.Application.Interfaces.Infrastructure
 {

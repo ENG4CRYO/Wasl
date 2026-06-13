@@ -146,7 +146,8 @@ namespace Wasl.Application.Services
             {
                 Email = email,
                 OtpCode = otpCode,
-                Purpose = "PasswordReset"
+                Purpose = "PasswordReset",
+                ExpiresAt = DateTime.UtcNow.AddMinutes(10)
             };
 
             await _cacheService.SetAsync(resetToken, cacheDto, TimeSpan.FromMinutes(10), cancellationToken);
