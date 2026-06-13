@@ -36,6 +36,8 @@ try
     builder.Services.AddScoped<IDriverNotificationService,DriverNotificationService>();
     builder.Services.AddSingleton<IUserIdProvider, CustomUserIdProvider>();
 
+    builder.Services.AddCorsConfiguration(builder.Configuration);
+
     builder.Services.AddOpenApi(options =>
     {
 

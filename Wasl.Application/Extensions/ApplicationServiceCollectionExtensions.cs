@@ -22,18 +22,19 @@ namespace Wasl.Application.Extensions
     {
         public static void AddApplicationServices(this IServiceCollection services)
         {
-            services.AddScoped<JWT>();
             services.AddScoped<ITokenHelper, TokenHelper>();
 
             services.AddHttpContextAccessor();
             services.AddScoped<ICurrentUserService, CurrentUserService>();
 
             services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
-            services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
+            var assembly = Assembly.GetExecutingAssembly();
+
+            services.AddValidatorsFromAssembly(assembly);
 
             services.AddMediatR(cfg =>
             {
-                cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
+                cfg.RegisterServicesFromAssembly(assembly);
 
                 cfg.AddOpenBehavior(typeof(ValidationBehavior<,>));
             });

@@ -11,10 +11,10 @@ namespace Wasl.Application.Features.DriverProfiles.Commands.SubmitProfile
         public int VehicleYear { get; set; }
         public string VinNumber { get; set; } = string.Empty;
 
-        public UploadedFile VehicleImage { get; set; }
-        public UploadedFile LicenseFrontImage { get; set; }
-        public UploadedFile LicenseBackImage { get; set; }
-        public UploadedFile SelfieImage
+        public UploadedFile? VehicleImage { get; set; }
+        public UploadedFile? LicenseFrontImage { get; set; }
+        public UploadedFile? LicenseBackImage { get; set; }
+        public UploadedFile? SelfieImage
         {
             get; set;
         }

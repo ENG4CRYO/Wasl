@@ -10,5 +10,6 @@ namespace Wasl.Application.Dtos.AuthModel
         public string OtpCode { get; set; } = string.Empty;
         public int FailedAttempts { get; set; } = 0;
         public string Purpose { get; set; } = "Registration";
+        public DateTime ExpiresAt { get; set; }
     }
 }

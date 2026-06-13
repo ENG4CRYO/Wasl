@@ -1,9 +1,10 @@
-﻿using Wasl.Application.Interfaces.Common;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
+using Wasl.Application.Interfaces.Common;
 using Wasl.Core.Entities;
 using Wasl.Core.Entities.AuthEntites;
 using Wasl.Core.Entities.BaseEntity;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore;
 
 namespace Wasl.Infrastructure.Data
 {
@@ -29,6 +30,11 @@ namespace Wasl.Infrastructure.Data
         {
             base.OnModelCreating(modelBuilder);
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
+        }
+
+        public Task<IDbContextTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default)
+        {
+            return Database.BeginTransactionAsync(cancellationToken);
         }
 
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)

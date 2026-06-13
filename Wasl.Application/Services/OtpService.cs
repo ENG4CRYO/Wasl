@@ -64,7 +64,8 @@ namespace Wasl.Application.Services
             var cacheDto = new OtpCacheDto
             {
                 Email = email,
-                OtpCode = otpCode
+                OtpCode = otpCode,
+                ExpiresAt = DateTime.UtcNow.AddMinutes(10)
             };
 
             await _cacheService.SetAsync(registerToken, cacheDto, TimeSpan.FromMinutes(10), cancellationToken);
@@ -89,27 +90,80 @@ namespace Wasl.Application.Services
 
             if (cachedData == null)
             {
-                return (false, "Auth.InvalidOrExpiredToken", null);
+                return (false, "Auth.SessionExpiredOrInvalidToken", null);
+            }
+
+            var remainingTime = cachedData.ExpiresAt - DateTime.UtcNow;
+
+            if (remainingTime <= TimeSpan.Zero)
+            {
+                await _cacheService.RemoveAsync(token, cancellationToken);
+                return (false, "Auth.SessionExpiredOrInvalidToken", null);
+            }
+
+            if (cachedData.FailedAttempts >= 5)
+            {
+                await _cacheService.RemoveAsync(token, cancellationToken);
+                return (false, "Auth.MaxOtpAttemptsReached", null);
             }
 
             if (cachedData.OtpCode != providedOtp)
             {
                 cachedData.FailedAttempts++;
 
-                if (cachedData.FailedAttempts >= 5)
-                {
-                    await _cacheService.RemoveAsync(token, cancellationToken);
-                    return (false, "Auth.MaxOtpAttemptsReached", null);
-                }
-                else
-                {
-                    await _cacheService.SetAsync(token, cachedData, TimeSpan.FromMinutes(10), cancellationToken);
-                    return (false, "Auth.InvalidOtp", null);
-                }
+                
+                await _cacheService.SetAsync(token, cachedData, remainingTime, cancellationToken);
+
+                return (false, "Auth.InvalidOTP", null);
             }
+
             await _cacheService.RemoveAsync(token, cancellationToken);
 
             return (true, null, cachedData);
+        }
+
+        public async Task<string> InitiatePasswordResetAsync(string email, string firstName, CancellationToken cancellationToken = default)
+        {
+            string otpCode;
+            var resetToken = Guid.NewGuid().ToString();
+
+            bool bypassEnabled = _configuration.GetValue<bool>("Testing:BypassOtp");
+            string bypassDomain = _configuration.GetValue<string>("Testing:BypassDomain") ?? "@test.com";
+            string fixedOtp = _configuration.GetValue<string>("Testing:FixedOtpCode") ?? "123456";
+
+            bool isBypassEmail = bypassEnabled && email.EndsWith(bypassDomain, StringComparison.OrdinalIgnoreCase);
+
+            if (isBypassEmail)
+            {
+                otpCode = fixedOtp;
+            }
+            else
+            {
+                otpCode = RandomNumberGenerator.GetInt32(100000, 1000000).ToString();
+            }
+
+            var cacheDto = new OtpCacheDto
+            {
+                Email = email,
+                OtpCode = otpCode,
+                Purpose = "PasswordReset"
+            };
+
+            await _cacheService.SetAsync(resetToken, cacheDto, TimeSpan.FromMinutes(10), cancellationToken);
+
+            if (!isBypassEmail)
+            {
+                var emailPlaceholders = new Dictionary<string, string>
+        {
+             { "FirstName", firstName ?? "User" },
+             { "OtpCode", otpCode }
+        };
+
+                var emailBody = await _templateService.GetTemplateAsync("OtpEmail", emailPlaceholders);
+                await _emailService.SendEmailAsync(email, "Your Secure OTP Code", emailBody, cancellationToken);
+            }
+
+            return resetToken;
         }
     }
 }

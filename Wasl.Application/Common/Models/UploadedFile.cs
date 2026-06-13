@@ -2,7 +2,7 @@
 
 namespace Wasl.Application.Common.Models
 {
-    public class UploadedFile
+    public record UploadedFile
     {
         public Stream Content { get; set; }
         public string FileName { get; set; } = string.Empty;

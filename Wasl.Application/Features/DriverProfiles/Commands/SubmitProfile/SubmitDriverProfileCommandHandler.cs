@@ -56,10 +56,21 @@ namespace Wasl.Application.Features.DriverProfiles.Commands.SubmitProfile
                 return ApiResponse<string>.Failure(_localizer["DriverProfiles.AlreadyApproved"]);
             }
 
-            var vehicleUrl = await _fileService.SaveFileAsync(request.VehicleImage, "drivers/vehicles", cancellationToken);
-            var licenseFrontUrl = await _fileService.SaveFileAsync(request.LicenseFrontImage, "drivers/licenses", cancellationToken);
-            var licenseBackUrl = await _fileService.SaveFileAsync(request.LicenseBackImage, "drivers/licenses", cancellationToken);
-            var selfieUrl = await _fileService.SaveFileAsync(request.SelfieImage, "drivers/selfies", cancellationToken);
+
+            if (request.VehicleImage == null ||
+                request.LicenseFrontImage == null ||
+                request.LicenseBackImage == null ||
+                request.SelfieImage == null)
+            {
+               
+                return ApiResponse<string>.Failure(_localizer["DriverProfiles.MissingRequiredFiles"]);
+            }
+
+
+            var vehicleUrl = await _fileService.SaveFileAsync(request.VehicleImage!, "drivers/vehicles", cancellationToken);
+            var licenseFrontUrl = await _fileService.SaveFileAsync(request.LicenseFrontImage!, "drivers/licenses", cancellationToken);
+            var licenseBackUrl = await _fileService.SaveFileAsync(request.LicenseBackImage!, "drivers/licenses", cancellationToken);
+            var selfieUrl = await _fileService.SaveFileAsync(request.SelfieImage!, "drivers/selfies", cancellationToken);
 
             driverProfile.VehicleModel = request.VehicleModel;
             driverProfile.VehicleYear = request.VehicleYear;

@@ -8,7 +8,6 @@ using Wasl.Application.Interfaces;
 using Wasl.Application.Interfaces.Common;
 using Wasl.Application.Interfaces.Infrastructure;
 using Wasl.Core.Enums;
-using Wasl.Infrastructure.Data;
 
 namespace Wasl.Infrastructure.Services;
 
@@ -17,13 +16,13 @@ public class RideDispatchService : IRideDispatchService
     private readonly IRedisCacheService _redisCache;
     private readonly IDriverNotificationService _notificationService;
     private readonly IBackgroundJobClient _backgroundJobClient;
-    private readonly AppDbContext _dbContext;
+    private readonly IApplicationDbContext _dbContext;
 
     public RideDispatchService(
         IRedisCacheService redisCache,
         IDriverNotificationService notificationService,
         IBackgroundJobClient backgroundJobClient,
-        AppDbContext dbContext
+        IApplicationDbContext dbContext 
         )
     {
         _redisCache = redisCache;
@@ -35,9 +34,10 @@ public class RideDispatchService : IRideDispatchService
     [AutomaticRetry(Attempts = 0)]
     public async Task DispatchRideAsync(Guid rideId,
         double latitude, double longitude,
-        double currentRadiusKm, List<string> excludedDriverIds)
+        double currentRadiusKm, List<string> excludedDriverIds,
+        CancellationToken cancellationToken = default)
     {
-        var ride = await _dbContext.Rides.FindAsync(rideId);
+        var ride = await _dbContext.Rides.FindAsync(new object[] { rideId });
 
         if (ride == null || ride.Status != RideStatus.Pending)
         {
@@ -46,9 +46,9 @@ public class RideDispatchService : IRideDispatchService
 
         if (ride.CreatedAt < DateTime.UtcNow.AddMinutes(-5))
         {
-            ride.Status = RideStatus.Cancelled; 
+            ride.Status = RideStatus.Cancelled;
 
-            await _dbContext.SaveChangesAsync();
+            await _dbContext.SaveChangesAsync(cancellationToken);
 
             return;
         }

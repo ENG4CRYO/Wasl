@@ -72,8 +72,7 @@ namespace Wasl.Application.Features.Auth.Commands.DriverRegistration
                 Balance = 0
             };
 
-            using var transaction = await ((Microsoft.EntityFrameworkCore.DbContext)_context).Database
-                .BeginTransactionAsync(cancellationToken);
+            using var transaction = await _context.BeginTransactionAsync(cancellationToken);
 
             try
             {

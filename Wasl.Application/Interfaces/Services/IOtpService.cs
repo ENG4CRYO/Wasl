@@ -9,5 +9,6 @@ namespace Wasl.Application.Interfaces.Services
     {
         Task<string?> InitiateRegistrationAsync(string email, CancellationToken cancellationToken = default);
         Task<(bool IsValid, string? ErrorMessage, OtpCacheDto? Data)> VerifyOtpAsync(string token, string providedOtp, CancellationToken cancellationToken = default);
+        Task<string> InitiatePasswordResetAsync(string email, string firstName, CancellationToken cancellationToken = default);
     }
 }

@@ -1,5 +1,4 @@
 ﻿using Wasl.Application.Resources;
-using Wasl.Application.Validators.Auth;
 using FluentValidation;
 using Microsoft.Extensions.Localization;
 

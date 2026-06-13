@@ -144,12 +144,6 @@ namespace Wasl.API.Controllers.V1
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         public async Task<IActionResult> CompleteRide(string id)
         {
-            var driverId = User.FindFirst("uid")?.Value;
-
-            if (string.IsNullOrEmpty(driverId))
-            {
-                return Unauthorized(ApiResponse<string>.Failure("Unauthorized"));
-            }
 
             var command = new CompleteRideCommand
             {
@@ -186,13 +180,6 @@ namespace Wasl.API.Controllers.V1
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         public async Task<IActionResult> StartRide(string id)
         {
-            var driverId = User.FindFirst("uid")?.Value;
-
-            if (string.IsNullOrEmpty(driverId))
-            {
-                return Unauthorized(ApiResponse<string>.Failure("Unauthorized"));
-            }
-
             var command = new StartRideCommand
             {
                 RideId = id,

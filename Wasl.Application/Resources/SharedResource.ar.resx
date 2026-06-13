@@ -321,7 +321,7 @@
   <data name="Rides.StatusAlreadyCompleted" xml:space="preserve">
     <value>هذه الرحلة منتهية أو ملغاة بالفعل</value>
   </data>
-  <data name="Rides.RequestRideRicevedSuccessfuly" xml:space="preserve">
+  <data name="Rides.RequestRideReceivedSuccessfully" xml:space="preserve">
     <value>تم استلام الطلب، جاري البحث عن أقرب السائقين</value>
   </data>
   <data name="Auth.Unauthenticated" xml:space="preserve">
@@ -353,5 +353,8 @@
   </data>
   <data name="Rides.RideStartedSuccessfully" xml:space="preserve">
     <value>بدأت الرحلة الان</value>
+  </data>
+  <data name="DriverProfiles.MissingRequiredFiles" xml:space="preserve">
+    <value>ملفات تعريف السائق مفقودة </value>
   </data>
 </root>

@@ -65,9 +65,9 @@ public class CreateRideRequestCommandHandler : IRequestHandler<CreateRideRequest
         await _dbContext.SaveChangesAsync(cancellationToken);
 
         _backgroundJobClient.Enqueue(() =>
-            _dispatchService.DispatchRideAsync(newRideId, request.PickupLatitude, request.PickupLongitude, 3.0, new List<string>())
+            _dispatchService.DispatchRideAsync(newRideId, request.PickupLatitude, request.PickupLongitude, 3.0, new List<string>(),cancellationToken)
         );
 
-        return ApiResponse<Guid>.Success(newRideId, _localizer["Rides.RequestRideRicevedSuccessfuly"]);
+        return ApiResponse<Guid>.Success(newRideId, _localizer["Rides.RequestRideReceivedSuccessfully"]);
     }
 }

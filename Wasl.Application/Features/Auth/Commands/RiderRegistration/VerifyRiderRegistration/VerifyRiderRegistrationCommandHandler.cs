@@ -64,6 +64,7 @@ namespace Wasl.Application.Features.Auth.Commands.RiderRegistration
                 LastName = request.LastName,
                 Email = userEmail,
                 UserName = userEmail,
+                PhoneNumber = request.PhoneNumber,
                 EmailConfirmed = true,
                 Balance = 0
             };
