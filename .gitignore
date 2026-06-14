@@ -369,3 +369,4 @@ drivers
 .gemini
 graphify-out
 GEMINI.md
+/Wasl.API/Properties/launchSettings.json
