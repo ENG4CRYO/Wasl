@@ -357,7 +357,7 @@ function renderRideRequest(data) {
     playNotificationSound();
 
     try {
-        // 1. استخراج البيانات بأمان
+
         const rideId = data.rideId || data.RideId || 'غير محدد';
         const lat = data.lat || data.Lat || '';
         const lng = data.lng || data.Lng || '';
@@ -365,8 +365,6 @@ function renderRideRequest(data) {
         const dropLng = data.dropLng || data.DropLng || 'غير محدد';
 
         state.activeRide = { rideId, lat, lng, dropLat, dropLng };
-
-        // 2. البحث عن العناصر مباشرة من الـ HTML وتحديثها (لو كانت موجودة)
         const pickupEl = document.getElementById('modalPickup');
         const dropEl = document.getElementById('modalDrop');
         const rideIdEl = document.getElementById('modalRideId');
@@ -375,7 +373,7 @@ function renderRideRequest(data) {
         if (pickupEl) pickupEl.textContent = `${lat}, ${lng}`;
         if (dropEl) dropEl.textContent = `${dropLat}, ${dropLng}`;
         if (rideIdEl) rideIdEl.textContent = rideId;
-        if (mapEl) mapEl.src = `http://googleusercontent.com/maps.google.com/${lat},${lng}&z=15&output=embed`;
+        if (mapEl) mapEl.src = `https://maps.google.com/maps?q=${lat},${lng}&z=15&output=embed`;
 
         openModal();
 
@@ -466,7 +464,7 @@ async function arriveRide() {
         if (response.ok && result.succeeded) {
             showToast(result.message, 'success');
 
-            // إخفاء زر الوصول، وإظهار زر البدء
+
             if (btnArrived) btnArrived.style.display = 'none';
             const btnStart = document.getElementById('btnStartRide');
             if (btnStart) btnStart.style.display = 'inline-block';
@@ -505,7 +503,7 @@ async function startRide() {
         if (response.ok && result.succeeded) {
             showToast(result.message || 'Ride started successfully', 'success');
 
-            // إخفاء زر البدء وإظهار زر الإنهاء
+
             if (btnStart) btnStart.style.display = 'none';
             const btnComplete = document.getElementById('btnCompleteRide');
             if (btnComplete) btnComplete.style.display = 'inline-block';
@@ -565,7 +563,11 @@ function renderActiveRideDashboard(data) {
     dom.emptyState.hidden = true;
     dom.notificationsArea.innerHTML = '';
 
-    const mapsUrl = `http://googleusercontent.com/maps.google.com/${data.lat},${data.lng}&destination=${data.dropLat},${data.dropLng}&travelmode=driving`;
+    const mapsUrl =
+        `https://www.google.com/maps/dir/?api=1` +
+        `&origin=${data.lat},${data.lng}` +
+        `&destination=${data.dropLat},${data.dropLng}` +
+        `&travelmode=driving`;
 
     const card = document.createElement('div');
     card.className = 'ride-card';
