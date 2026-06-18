@@ -1,56 +1,51 @@
-﻿
-using MediatR;
+﻿using MediatR;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
-using System;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using Wasl.Application.Common;
 using Wasl.Application.Dtos.AuthModel;
 using Wasl.Application.Features.Auth.Commands.RiderRegistration.VerifyRiderRegistration;
-using Wasl.Application.Interfaces.Common; 
+using Wasl.Application.Interfaces.Common;
 using Wasl.Application.Interfaces.Helpers;
-using Wasl.Application.Interfaces.Services;
+using Wasl.Application.Interfaces.Infrastructure;
 using Wasl.Application.Resources;
 using Wasl.Core.Constants;
 using Wasl.Core.Entities;
 
 namespace Wasl.Application.Features.Auth.Commands.RiderRegistration
 {
-    public class VerifyRiderRegistrationCommandHandler : IRequestHandler<VerifyRiderRegistrationCommand, ApiResponse<AuthModel>>
+    public class CompleteRiderRegistrationCommandHandler : IRequestHandler<CompleteRiderRegistrationCommand, ApiResponse<AuthModel>>
     {
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly IOtpService _otpService;
+        private readonly ICacheService _cacheService;
         private readonly ITokenHelper _tokenHelper;
         private readonly IStringLocalizer<SharedResource> _localizer;
-        private readonly IApplicationDbContext _context; 
+        private readonly IApplicationDbContext _context;
 
-        public VerifyRiderRegistrationCommandHandler(
+        public CompleteRiderRegistrationCommandHandler(
             UserManager<ApplicationUser> userManager,
-            IOtpService otpService,
+            ICacheService cacheService, 
             ITokenHelper tokenHelper,
             IStringLocalizer<SharedResource> localizer,
-            IApplicationDbContext context) 
+            IApplicationDbContext context)
         {
             _userManager = userManager;
-            _otpService = otpService;
+            _cacheService = cacheService; 
             _tokenHelper = tokenHelper;
             _localizer = localizer;
             _context = context;
         }
 
-        public async Task<ApiResponse<AuthModel>> Handle(VerifyRiderRegistrationCommand request, CancellationToken cancellationToken)
+        public async Task<ApiResponse<AuthModel>> Handle(CompleteRiderRegistrationCommand request, CancellationToken cancellationToken)
         {
-            var verificationResult = await _otpService.VerifyOtpAsync(request.RegisterToken, request.OtpCode, cancellationToken);
 
-            if (!verificationResult.IsValid)
+            var userEmail = await _cacheService.GetAsync<string>($"ValidatedSession:{request.RegisterToken}", cancellationToken);
+
+            if (string.IsNullOrEmpty(userEmail))
             {
-                return ApiResponse<AuthModel>.Failure(_localizer[verificationResult.ErrorMessage!]);
+                return ApiResponse<AuthModel>.Failure(_localizer["Auth.RegistrationSessionExpiredOrInvalid"]);
             }
-
-            string userEmail = verificationResult.Data!.Email;
 
             var existingUser = await _userManager.FindByEmailAsync(userEmail);
             if (existingUser != null)
@@ -69,7 +64,7 @@ namespace Wasl.Application.Features.Auth.Commands.RiderRegistration
                 Balance = 0
             };
 
-            using var transaction = await ((Microsoft.EntityFrameworkCore.DbContext)_context).Database.BeginTransactionAsync(cancellationToken);
+            using var transaction = await ((DbContext)_context).Database.BeginTransactionAsync(cancellationToken);
 
             try
             {
@@ -85,13 +80,15 @@ namespace Wasl.Application.Features.Auth.Commands.RiderRegistration
 
                 await _userManager.AddToRoleAsync(newUser, AspRoles.Rider);
 
-
                 var newRefreshToken = _tokenHelper.GenerateRefreshToken();
                 newUser.RefreshTokens.Add(newRefreshToken);
 
                 await _context.SaveChangesAsync(cancellationToken);
 
                 await transaction.CommitAsync(cancellationToken);
+
+
+                await _cacheService.RemoveAsync($"ValidatedSession:{request.RegisterToken}", cancellationToken);
 
                 var roles = await _userManager.GetRolesAsync(newUser);
                 var claims = await _userManager.GetClaimsAsync(newUser);

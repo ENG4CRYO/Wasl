@@ -6,12 +6,14 @@ using Wasl.Application.Common;
 using Wasl.Application.Dtos.AuthModel;
 using Wasl.Application.Features.Auth.Commands.DriverRegistration;
 using Wasl.Application.Features.Auth.Commands.DriverRegistration.InitiateDriverRegistration;
+using Wasl.Application.Features.Auth.Commands.DriverRegistration.VerifyDriverOtp;
 using Wasl.Application.Features.Auth.Commands.ForgotPassword;
 using Wasl.Application.Features.Auth.Commands.Login;
 using Wasl.Application.Features.Auth.Commands.RefreshToken;
 using Wasl.Application.Features.Auth.Commands.ResetPassword;
 using Wasl.Application.Features.Auth.Commands.RevokeToken;
 using Wasl.Application.Features.Auth.Commands.RiderRegistration.InitiateRiderRegistration;
+using Wasl.Application.Features.Auth.Commands.RiderRegistration.VerifyRiderOtp;
 using Wasl.Application.Features.Auth.Commands.RiderRegistration.VerifyRiderRegistration;
 
 namespace Wasl.API.Controllers.V1
@@ -37,8 +39,8 @@ namespace Wasl.API.Controllers.V1
         /// Step 1: Initiate Rider Registration (OTP Flow).
         /// </summary>
         /// <remarks>
-        /// Receives basic rider info (Email/Phone) and sends a 6-digit OTP asynchronously. 
-        /// Returns a 'RegisterToken' (GUID) which must be kept by the client for Step 2.
+        /// Receives Email and sends a 6-digit OTP asynchronously. 
+        /// Returns a 'SessionToken' (GUID) which must be kept by the client for Step 2.
         /// </remarks>
         /// <param name="command">Rider's basic registration details.</param>
         /// <returns>A unique RegisterToken to proceed with verification.</returns>
@@ -52,24 +54,36 @@ namespace Wasl.API.Controllers.V1
             return result.Succeeded ? Ok(result) : BadRequest(result);
         }
 
+
         /// <summary>
-        /// Step 2: Verify OTP and Complete Rider Registration.
+        /// Step 2: Verify OTP.
         /// </summary>
         /// <remarks>
-        /// Takes the 'RegisterToken' received from Step 1 along with the 6-digit OTP sent to the user.
-        /// If valid, creates the database record and issues access/refresh tokens.
+        /// Receives SessionToken and sends RegisterToken. 
+        /// RegisterToken is required for Step 3 to complete registration.
         /// </remarks>
-        /// <param name="command">Contains RegisterToken, OTP, and final account details.</param>
-        /// <returns>Authentication model containing JWT and Refresh Token.</returns>
-        [HttpPost("rider/verify-registration")]
+        [HttpPost("rider/verify-otp")]
         [Tags("Rider Auth")]
-        [ProducesResponseType(typeof(ApiResponse<AuthModel>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ApiResponse<AuthModel>), StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<ApiResponse<AuthModel>>> VerifyRiderRegistration([FromBody] VerifyRiderRegistrationCommand command)
+        public async Task<ActionResult<ApiResponse<string>>> VerifyRiderOtp([FromBody] VerifyRiderOtpCommand command)
         {
             var result = await _mediator.Send(command);
             return result.Succeeded ? Ok(result) : BadRequest(result);
         }
+
+        /// <summary>
+        /// Step 3: Complete Rider Registration.
+        /// </summary>
+        /// <remarks>
+        /// final step take information of rider and register him in the system and return jwt token and refresh token
+        /// </remarks>
+        [HttpPost("rider/complete-registration")]
+        [Tags("Rider Auth")]
+        public async Task<ActionResult<ApiResponse<AuthModel>>> CompleteRiderRegistration([FromBody] CompleteRiderRegistrationCommand command)
+        {
+            var result = await _mediator.Send(command);
+            return result.Succeeded ? Ok(result) : BadRequest(result);
+        }
+       
 
         #endregion
 
@@ -94,18 +108,29 @@ namespace Wasl.API.Controllers.V1
         }
 
         /// <summary>
-        /// Step 2: Verify OTP and Complete Driver Registration.
+        /// Step 2: Verify Driver OTP.
         /// </summary>
         /// <remarks>
-        /// Validates the OTP and creates the Driver profile. Note: Drivers might require admin approval before becoming active.
+        /// Receives SessionToken and sends RegisterToken. 
+        /// RegisterToken is required for Step 3 to complete registration.
         /// </remarks>
-        /// <param name="command">Contains RegisterToken, OTP, and driver-specific details (e.g., license).</param>
-        /// <returns>Authentication model containing JWT and Refresh Token.</returns>
-        [HttpPost("driver/verify-registration")]
+        [HttpPost("driver/verify-otp")]
         [Tags("Driver Auth")]
-        [ProducesResponseType(typeof(ApiResponse<AuthModel>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ApiResponse<AuthModel>), StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<ApiResponse<AuthModel>>> VerifyDriverRegistration([FromBody] VerifyDriverRegistrationCommand command)
+        public async Task<ActionResult<ApiResponse<string>>> VerifyDriverOtp([FromBody] VerifyDriverOtpCommand command)
+        {
+            var result = await _mediator.Send(command);
+            return result.Succeeded ? Ok(result) : BadRequest(result);
+        }
+
+        /// <summary>
+        /// Step 3: Complete Driver Registration.
+        /// </summary>
+        /// <remarks>
+        /// final step take information of driver and register him in the system and return jwt token and refresh token
+        /// </remarks>
+        [HttpPost("driver/complete-registration")]
+        [Tags("Driver Auth")]
+        public async Task<ActionResult<ApiResponse<AuthModel>>> CompleteDriverRegistration([FromBody] CompleteDriverRegistrationCommand command)
         {
             var result = await _mediator.Send(command);
             return result.Succeeded ? Ok(result) : BadRequest(result);

@@ -7,17 +7,15 @@ using Wasl.Application.Resources;
 
 namespace Wasl.Application.Features.Auth.Commands.DriverRegistration.VerifyDriverRegistration
 {
-    public class VerifyDriverRegistrationCommandValidator : AbstractValidator<VerifyDriverRegistrationCommand>
+    public class CompleteDriverRegistrationCommandValidator : AbstractValidator<CompleteDriverRegistrationCommand>
     {
         private readonly IStringLocalizer<SharedResource> _localizer;
-        public VerifyDriverRegistrationCommandValidator(IStringLocalizer<SharedResource> localizer)
+        public CompleteDriverRegistrationCommandValidator(IStringLocalizer<SharedResource> localizer)
         {
             _localizer = localizer;
             RuleLevelCascadeMode = CascadeMode.Stop;
             RuleFor(x => x.RegisterToken)
                 .NotEmpty().WithMessage(_localizer["Validation.Auth.RegisterTokenRequired"]);
-
-            RuleFor(x => x.OtpCode).NotEmpty().Length(6).WithMessage(_localizer["Validation.Auth.OTPRequired"]);
 
             RuleFor(x => x.FirstName)
              .NotEmpty().WithMessage(_localizer["Validation.Auth.FirstNameRequired"])

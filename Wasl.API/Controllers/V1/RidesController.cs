@@ -70,17 +70,21 @@ namespace Wasl.API.Controllers.V1
         /// If successful, the ride status changes to 'Accepted' and the rider is notified. 
         /// If another driver already accepted it (Race Condition), a 400 BadRequest is returned.
         /// </remarks>
-        /// <param name="command">Contains the Ride ID that the driver wishes to accept.</param>
+        /// <param name="id">Contains the Ride ID that the driver wishes to accept.</param>
         /// <returns>A success message if the ride is assigned, or an error if already taken.</returns>
         [Authorize(Roles = AspRoles.Driver)]
-        [HttpPost("accept")]
+        [HttpPost("{id}/accept")]
         [Tags("Rides")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        public async Task<IActionResult> AcceptRide([FromBody] AcceptRideCommand command)
+        public async Task<IActionResult> AcceptRide(string id)
         {
+            var command = new AcceptRideCommand
+            {
+                RideId = id
+            };
 
             var result = await _mediator.Send(command);
 

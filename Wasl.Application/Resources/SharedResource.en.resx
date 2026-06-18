@@ -360,4 +360,10 @@
   <data name="Rides.StatusNotInProgress" xml:space="preserve">
     <value>Ride is not in progress</value>
   </data>
+  <data name="Auth.RegistrationSessionExpiredOrInvalid" xml:space="preserve">
+    <value>Registration session expired or invalid. Please verify your email again</value>
+  </data>
+  <data name="Auth.OtpVerified" xml:space="preserve">
+    <value>OTP Verified. Please proceed to complete registration</value>
+  </data>
 </root>

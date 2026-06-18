@@ -360,4 +360,10 @@
   <data name="Rides.StatusNotInProgress" xml:space="preserve">
     <value>لرحلة ليست قيد التقدم</value>
   </data>
+  <data name="Auth.RegistrationSessionExpiredOrInvalid" xml:space="preserve">
+    <value>انتهت صلاحية جلسة التسجيل أو أنها غير صالحة. يرجى التحقق من بريدك الإلكتروني مرة أخرى.</value>
+  </data>
+  <data name="Auth.OtpVerified" xml:space="preserve">
+    <value>تم التأكيد من رمز التحقق . يرجى المتابعة لإكمال التسجيل</value>
+  </data>
 </root>

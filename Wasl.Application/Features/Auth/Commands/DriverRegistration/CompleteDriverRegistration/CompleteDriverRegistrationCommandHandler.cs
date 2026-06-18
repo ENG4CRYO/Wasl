@@ -1,5 +1,4 @@
-﻿
-using MediatR;
+﻿using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Localization;
 using System;
@@ -11,7 +10,7 @@ using Wasl.Application.Common;
 using Wasl.Application.Dtos.AuthModel;
 using Wasl.Application.Interfaces.Common;
 using Wasl.Application.Interfaces.Helpers;
-using Wasl.Application.Interfaces.Services;
+using Wasl.Application.Interfaces.Infrastructure;
 using Wasl.Application.Resources;
 using Wasl.Core.Constants;
 using Wasl.Core.Entities;
@@ -19,40 +18,36 @@ using Wasl.Core.Enums;
 
 namespace Wasl.Application.Features.Auth.Commands.DriverRegistration
 {
-    public class VerifyDriverRegistrationCommandHandler : IRequestHandler<VerifyDriverRegistrationCommand, ApiResponse<AuthModel>>
+    public class CompleteDriverRegistrationCommandHandler : IRequestHandler<CompleteDriverRegistrationCommand, ApiResponse<AuthModel>>
     {
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly IOtpService _otpService;
+        private readonly ICacheService _cacheService;
         private readonly ITokenHelper _tokenHelper;
         private readonly IStringLocalizer<SharedResource> _localizer;
- 
         private readonly IApplicationDbContext _context;
 
-        public VerifyDriverRegistrationCommandHandler(
+        public CompleteDriverRegistrationCommandHandler(
             UserManager<ApplicationUser> userManager,
-            IOtpService otpService,
+            ICacheService cacheService,
             ITokenHelper tokenHelper,
-
             IStringLocalizer<SharedResource> localizer,
             IApplicationDbContext context)
         {
             _userManager = userManager;
-            _otpService = otpService;
+            _cacheService = cacheService; 
             _tokenHelper = tokenHelper;
             _localizer = localizer;
             _context = context;
         }
 
-        public async Task<ApiResponse<AuthModel>> Handle(VerifyDriverRegistrationCommand request, CancellationToken cancellationToken)
+        public async Task<ApiResponse<AuthModel>> Handle(CompleteDriverRegistrationCommand request, CancellationToken cancellationToken)
         {
-            var verificationResult = await _otpService.VerifyOtpAsync(request.RegisterToken, request.OtpCode, cancellationToken);
+            var userEmail = await _cacheService.GetAsync<string>($"ValidatedDriverSession:{request.RegisterToken}", cancellationToken);
 
-            if (!verificationResult.IsValid)
+            if (string.IsNullOrEmpty(userEmail))
             {
-                return ApiResponse<AuthModel>.Failure(_localizer[verificationResult.ErrorMessage!]);
+                return ApiResponse<AuthModel>.Failure(_localizer["Auth.RegistrationSessionExpiredOrInvalid"]);
             }
-
-            string userEmail = verificationResult.Data!.Email;
 
             var existingUser = await _userManager.FindByEmailAsync(userEmail);
             if (existingUser != null)
@@ -99,11 +94,11 @@ namespace Wasl.Application.Features.Auth.Commands.DriverRegistration
                 var newRefreshToken = _tokenHelper.GenerateRefreshToken();
                 newUser.RefreshTokens.Add(newRefreshToken);
 
-                
                 await _context.SaveChangesAsync(cancellationToken);
 
-
                 await transaction.CommitAsync(cancellationToken);
+
+                await _cacheService.RemoveAsync($"ValidatedDriverSession:{request.RegisterToken}", cancellationToken);
 
                 var roles = await _userManager.GetRolesAsync(newUser);
                 var claims = await _userManager.GetClaimsAsync(newUser);
@@ -113,7 +108,7 @@ namespace Wasl.Application.Features.Auth.Commands.DriverRegistration
                 {
                     Email = newUser.Email,
                     UserName = newUser.UserName,
-                    
+
                     Token = new JwtSecurityTokenHandler().WriteToken(jwtToken),
                     RefreshToken = newRefreshToken.Token,
                     ExpiresOn = jwtToken.ValidTo,
@@ -126,9 +121,8 @@ namespace Wasl.Application.Features.Auth.Commands.DriverRegistration
             }
             catch (Exception)
             {
-                
                 await transaction.RollbackAsync(cancellationToken);
-                throw; 
+                throw;
             }
         }
     }
