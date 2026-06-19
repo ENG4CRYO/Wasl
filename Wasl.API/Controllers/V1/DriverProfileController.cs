@@ -6,8 +6,10 @@ using Microsoft.AspNetCore.Mvc;
 using Wasl.API.Extensions;
 using Wasl.Application.Common;
 using Wasl.Application.Features.DriverProfiles.Commands.SubmitProfile;
+using Wasl.Application.Features.DriverProfiles.Queries.GetDriverStatus;
 using Wasl.Application.Interfaces.Common;
 using Wasl.Core.Constants;
+using Wasl.Core.Enums;
 
 namespace Wasl.API.Controllers.V1
 {
@@ -63,6 +65,19 @@ namespace Wasl.API.Controllers.V1
             };
 
             var result = await _mediator.Send(command);
+            return result.Succeeded ? Ok(result) : BadRequest(result);
+        }
+
+        /// <summary>
+        /// Gets the current approval status of the logged-in driver.
+        /// 1 = Pending, 2 = Under Review, 3 = Approved, 4 = Rejected.
+        /// </summary>
+        [HttpGet("status")]
+        [Authorize(Roles = AspRoles.Driver)] 
+        [Tags("Driver Profile")]
+        public async Task<ActionResult<ApiResponse<DriverApprovalStatus>>> GetDriverStatus()
+        {
+            var result = await _mediator.Send(new GetDriverStatusQuery());
             return result.Succeeded ? Ok(result) : BadRequest(result);
         }
 
