@@ -51,7 +51,9 @@ const TRANSLATIONS = {
         btnStarting: "جاري البدء...",
         btnComplete: "🏁 إنهاء الرحلة",
         activeRideTitle: "✅ أنت الآن في رحلة نشطة",
-        voiceGuide: "🗺️ بدء التوجيه الصوتي"
+        voiceGuide: "🗺️ بدء التوجيه الصوتي",
+        priceLabel: "السعر التقديري:",
+        currency: "د.ع"
     },
     en: {
         langToggleBtn: "العربية",
@@ -87,7 +89,9 @@ const TRANSLATIONS = {
         btnStarting: "Starting...",
         btnComplete: "🏁 Complete Ride",
         activeRideTitle: "✅ You are in an active ride",
-        voiceGuide: "🗺️ Start Voice Guidance"
+        voiceGuide: "🗺️ Start Voice Guidance",
+        priceLabel: "Estimated Fare:",
+        currency: "IQD"
     }
 };
 
@@ -357,22 +361,31 @@ function renderRideRequest(data) {
     playNotificationSound();
 
     try {
-
         const rideId = data.rideId || data.RideId || 'غير محدد';
         const lat = data.lat || data.Lat || '';
         const lng = data.lng || data.Lng || '';
         const dropLat = data.dropLat || data.DropLat || 'غير محدد';
         const dropLng = data.dropLng || data.DropLng || 'غير محدد';
 
-        state.activeRide = { rideId, lat, lng, dropLat, dropLng };
+
+        const price = data.calculatedPrice || data.CalculatedPrice || data.price || data.Price || 0;
+
+
+        state.activeRide = { rideId, lat, lng, dropLat, dropLng, price };
+
         const pickupEl = document.getElementById('modalPickup');
         const dropEl = document.getElementById('modalDrop');
         const rideIdEl = document.getElementById('modalRideId');
         const mapEl = document.getElementById('modalMap');
+        const priceEl = document.getElementById('modalPrice');
 
         if (pickupEl) pickupEl.textContent = `${lat}, ${lng}`;
         if (dropEl) dropEl.textContent = `${dropLat}, ${dropLng}`;
         if (rideIdEl) rideIdEl.textContent = rideId;
+
+
+        if (priceEl) priceEl.textContent = `${price} ${t('currency')}`;
+
         if (mapEl) mapEl.src = `https://maps.google.com/maps?q=${lat},${lng}&z=15&output=embed`;
 
         openModal();
@@ -422,9 +435,8 @@ async function acceptRide() {
     setButtonLoading(dom.modalAcceptBtn, true);
 
     try {
-        const response = await apiFetch('/api/v1/rides/accept', {
-            method: 'POST',
-            body: JSON.stringify({ rideId: data.rideId }),
+        const response = await apiFetch(`/api/v1/Rides/${data.rideId}/accept`, {
+            method: 'POST'
         });
 
         if (!response) return;
@@ -464,7 +476,6 @@ async function arriveRide() {
         if (response.ok && result.succeeded) {
             showToast(result.message, 'success');
 
-
             if (btnArrived) btnArrived.style.display = 'none';
             const btnStart = document.getElementById('btnStartRide');
             if (btnStart) btnStart.style.display = 'inline-block';
@@ -502,7 +513,6 @@ async function startRide() {
 
         if (response.ok && result.succeeded) {
             showToast(result.message || 'Ride started successfully', 'success');
-
 
             if (btnStart) btnStart.style.display = 'none';
             const btnComplete = document.getElementById('btnCompleteRide');
@@ -572,11 +582,13 @@ function renderActiveRideDashboard(data) {
     const card = document.createElement('div');
     card.className = 'ride-card';
 
+
     card.innerHTML = `
         <p class="ride-card-title">${t('activeRideTitle')}</p>
         <div class="ride-card-body">
             <p><b>${t('pickupPoint')}:</b> <span>${data.lat}, ${data.lng}</span></p>
             <p><b>${t('dropoffPoint')}:</b> <span>${data.dropLat}, ${data.dropLng}</span></p>
+            <p><b>${t('priceLabel')}</b> <span style="color: #28a745; font-weight: bold; font-size: 1.1em;">${data.price} ${t('currency')}</span></p>
             <p class="ride-card-id">ID: <code>${data.rideId}</code></p>
         </div>
         

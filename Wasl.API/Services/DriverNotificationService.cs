@@ -19,7 +19,7 @@ public class DriverNotificationService : IDriverNotificationService
 
     public async Task NotifyDriversWithRideRequestAsync(List<string> driverIds,
         Guid rideId, double latitude, double longitude,
-        double dropLat, double dropLng)
+        double dropLat, double dropLng, decimal price)
     {
         await _hubContext.Clients.Users(driverIds)
             .SendAsync("ReceiveRideRequest", new
@@ -29,6 +29,7 @@ public class DriverNotificationService : IDriverNotificationService
                 Lng = longitude,
                 DropLat = dropLat,
                 DropLng = dropLng,
+                calculatedPrice = price,
                 Message = "A new ride request is near you!"
             });
     }

@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Wasl.Application.Common;
 using Wasl.Application.Interfaces.Common;
 using Wasl.Application.Interfaces.Infrastructure;
+using Wasl.Application.Interfaces.Services;
 using Wasl.Application.Resources;
 using Wasl.Core.Entities;
 using Wasl.Core.Enums;
@@ -23,19 +24,22 @@ public class CreateRideRequestCommandHandler : IRequestHandler<CreateRideRequest
     private readonly IApplicationDbContext _dbContext;
     private readonly IStringLocalizer<SharedResource> _localizer;
     private readonly ICurrentUserService _currentUserService;
+    private readonly IRideFareCalculator _priceCalculator;
 
     public CreateRideRequestCommandHandler(
         IBackgroundJobClient backgroundJobClient,
         IRideDispatchService dispatchService,
         IApplicationDbContext dbContext,
         IStringLocalizer<SharedResource> localizer,
-        ICurrentUserService currentUserService)
+        ICurrentUserService currentUserService,
+        IRideFareCalculator priceCalculator)
     {
         _backgroundJobClient = backgroundJobClient;
         _dispatchService = dispatchService;
         _dbContext = dbContext;
         _localizer = localizer;
         _currentUserService = currentUserService;
+        _priceCalculator = priceCalculator;
     }
 
     public async Task<ApiResponse<Guid>> Handle(CreateRideRequestCommand request, CancellationToken cancellationToken)
@@ -47,7 +51,9 @@ public class CreateRideRequestCommandHandler : IRequestHandler<CreateRideRequest
         {
             return ApiResponse<Guid>.Failure(_localizer["Auth.Unauthenticated"]);
         }
-
+        var (fare, distance) = _priceCalculator.CalculateFare(
+        request.PickupLatitude, request.PickupLongitude,
+        request.DropoffLatitude, request.DropoffLongitude);
         var ride = new Ride
         {
             Id = newRideId,
@@ -58,6 +64,7 @@ public class CreateRideRequestCommandHandler : IRequestHandler<CreateRideRequest
             Status = RideStatus.Pending,
             CreatedAt = DateTime.UtcNow,
             RequestedAt = DateTime.UtcNow,
+            CalculatedPrice = fare,
             RiderId = riderId
         };
 

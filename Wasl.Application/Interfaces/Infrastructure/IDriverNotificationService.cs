@@ -8,6 +8,6 @@ namespace Wasl.Application.Interfaces.Infrastructure
     {
         Task NotifyDriversWithRideRequestAsync(List<string> driverIds,
             Guid rideId, double latitude, double longitude,
-            double dropLat, double dropLng);
+            double dropLat, double dropLng, decimal price);
     }
 }

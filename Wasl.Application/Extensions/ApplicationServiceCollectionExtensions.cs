@@ -42,6 +42,8 @@ namespace Wasl.Application.Extensions
 
             services.AddScoped<IOtpService,OtpService>();
 
+            services.AddScoped<IRideFareCalculator, RideFareCalculator>();
+
 
           
 

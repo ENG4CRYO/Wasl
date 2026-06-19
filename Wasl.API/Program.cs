@@ -15,6 +15,7 @@ using Wasl.API.Hubs;
 using Wasl.API.Middlewares;
 using Wasl.API.Services;
 using Wasl.Application.Common;
+using Wasl.Application.Common.Models;
 using Wasl.Application.Extensions;
 using Wasl.Application.Helpers;
 using Wasl.Application.Interfaces.Infrastructure;
@@ -56,6 +57,9 @@ try
             return Task.CompletedTask;
         });
     });
+    builder.Services.Configure<RidePricingSettings>(
+    builder.Configuration.GetSection("RidePricingSettings"));
+
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddOpenApiConfig(builder.Configuration);
 
