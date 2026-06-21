@@ -366,4 +366,19 @@
   <data name="Auth.OtpVerified" xml:space="preserve">
     <value>OTP Verified. Please proceed to complete registration</value>
   </data>
+  <data name="Rides.CannotCancelRideAfterStart" xml:space="preserve">
+    <value>You cannot cancel the trip after the customer has boarded and the ride has actually started</value>
+  </data>
+  <data name="Rides.AlreadyCancelled" xml:space="preserve">
+    <value>The rides has been cancelled in advance.</value>
+  </data>
+  <data name="Rides.RideCancelledByDriver" xml:space="preserve">
+    <value>We apologize, the driver had to cancel the ride. Please request a new ride</value>
+  </data>
+  <data name="Rides.CancelledSuccefully" xml:space="preserve">
+    <value>Ride cancelled succesfully</value>
+  </data>
+  <data name="Rides.RideCancelledByCustomer" xml:space="preserve">
+    <value>The customer has unfortunately cancelled the ride. Your account is now available to receive new requests.</value>
+  </data>
 </root>

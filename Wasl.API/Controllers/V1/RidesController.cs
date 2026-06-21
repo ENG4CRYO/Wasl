@@ -8,6 +8,8 @@ using System.Threading.Tasks;
 using Wasl.Application.Common;
 using Wasl.Application.Features.Rides.Commands;
 using Wasl.Application.Features.Rides.Commands.AcceptRide;
+using Wasl.Application.Features.Rides.Commands.CancelRideByDriver;
+using Wasl.Application.Features.Rides.Commands.CancelRideByRider;
 using Wasl.Application.Features.Rides.Commands.CompleteRide;
 using Wasl.Application.Features.Rides.Commands.DriverArrived;
 using Wasl.Application.Features.Rides.Commands.RequestRide;
@@ -202,6 +204,45 @@ namespace Wasl.API.Controllers.V1
             }
 
             return Ok(result);
+        }
+
+
+        /// <summary>
+        /// Marks the ride as 'Cancelled' 
+        /// </summary>
+        /// <remarks>
+        /// **Role Required:** Rider
+        /// </remarks>
+        [HttpPost("{id}/rider-cancel")]
+        [Tags("Rides")]
+        [Authorize(Roles = AspRoles.Rider)]
+        [ProducesResponseType(typeof(ApiResponse<bool>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<bool>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        public async Task<ActionResult> CancelByRider(Guid id)
+        {
+            var result = await _mediator.Send(new CancelRideByRiderCommand { RideId = id });
+            return result.Succeeded ? Ok(result) : BadRequest(result);
+        }
+
+        /// <summary>
+        /// Cancel a ride by the assigned Driver.
+        /// </summary>
+        /// <remarks>
+        /// **Role Required:** Driver
+        /// </remarks>
+        [HttpPost("{id}/driver-cancel")]
+        [Authorize(Roles = AspRoles.Driver)]
+        [ProducesResponseType(typeof(ApiResponse<bool>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<bool>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [Tags("Rides")]
+        public async Task<ActionResult<ApiResponse<bool>>> CancelByDriver(Guid id)
+        {
+            var result = await _mediator.Send(new CancelRideByDriverCommand { RideId = id });
+            return result.Succeeded ? Ok(result) : BadRequest(result);
         }
     }
 }

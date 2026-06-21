@@ -366,4 +366,19 @@
   <data name="Auth.OtpVerified" xml:space="preserve">
     <value>تم التأكيد من رمز التحقق . يرجى المتابعة لإكمال التسجيل</value>
   </data>
+  <data name="Rides.CannotCancelRideAfterStart" xml:space="preserve">
+    <value>لا يمكنك إلغاء الرحلة بعد أن صعد الزبون وبدأت الرحلة فعلياً</value>
+  </data>
+  <data name="Rides.AlreadyCancelled" xml:space="preserve">
+    <value>الرحلة ملغاة مسبقاً</value>
+  </data>
+  <data name="Rides.RideCancelledByDriver" xml:space="preserve">
+    <value>نعتذر، لقد اضطر السائق لإلغاء الرحلة. يرجى طلب رحلة جديدة</value>
+  </data>
+  <data name="Rides.CancelledSuccefully" xml:space="preserve">
+    <value>تم الغاء الرحلة بنجاح</value>
+  </data>
+  <data name="Rides.RideCancelledByCustomer" xml:space="preserve">
+    <value>لقد قام الزبون بإلغاء الرحلة للأسف. حسابك متاح الآن لاستقبال طلبات جديدة</value>
+  </data>
 </root>

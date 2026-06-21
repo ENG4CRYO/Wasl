@@ -50,6 +50,8 @@ const TRANSLATIONS = {
         btnStart: "🚀 بدء الرحلة",
         btnStarting: "جاري البدء...",
         btnComplete: "🏁 إنهاء الرحلة",
+        btnCancel: "❌ إلغاء الرحلة",
+        btnCancelling: "جاري الإلغاء...",
         activeRideTitle: "✅ أنت الآن في رحلة نشطة",
         voiceGuide: "🗺️ بدء التوجيه الصوتي",
         priceLabel: "السعر التقديري:",
@@ -88,6 +90,8 @@ const TRANSLATIONS = {
         btnStart: "🚀 Start Ride",
         btnStarting: "Starting...",
         btnComplete: "🏁 Complete Ride",
+        btnCancel: "❌ Cancel Ride",
+        btnCancelling: "Cancelling...",
         activeRideTitle: "✅ You are in an active ride",
         voiceGuide: "🗺️ Start Voice Guidance",
         priceLabel: "Estimated Fare:",
@@ -299,6 +303,24 @@ async function startSignalR() {
             .build();
 
         state.connection.on('ReceiveRideRequest', renderRideRequest);
+        state.connection.on('HideRideRequest', (canceledRideId) => {
+            console.log("🚫 إخفاء الرحلة:", canceledRideId);
+            if (state.activeRide && state.activeRide.rideId === canceledRideId) {
+                closeRideModal();
+                state.activeRide = null;
+            }
+        });
+
+        state.connection.on('RideCancelled', (message) => {
+            console.log("⚠️ تم إلغاء الرحلة النشطة:", message);
+            playNotificationSound();
+            showToast(message, 'warning');
+
+            closeRideModal();
+            state.activeRide = null;
+            dom.notificationsArea.innerHTML = '';
+            dom.emptyState.hidden = false;
+        });
 
         state.connection.onreconnecting(() => setStatus('connecting'));
         state.connection.onreconnected(() => setStatus('connected'));
@@ -367,9 +389,7 @@ function renderRideRequest(data) {
         const dropLat = data.dropLat || data.DropLat || 'غير محدد';
         const dropLng = data.dropLng || data.DropLng || 'غير محدد';
 
-
         const price = data.calculatedPrice || data.CalculatedPrice || data.price || data.Price || 0;
-
 
         state.activeRide = { rideId, lat, lng, dropLat, dropLng, price };
 
@@ -382,7 +402,6 @@ function renderRideRequest(data) {
         if (pickupEl) pickupEl.textContent = `${lat}, ${lng}`;
         if (dropEl) dropEl.textContent = `${dropLat}, ${dropLng}`;
         if (rideIdEl) rideIdEl.textContent = rideId;
-
 
         if (priceEl) priceEl.textContent = `${price} ${t('currency')}`;
 
@@ -517,6 +536,11 @@ async function startRide() {
             if (btnStart) btnStart.style.display = 'none';
             const btnComplete = document.getElementById('btnCompleteRide');
             if (btnComplete) btnComplete.style.display = 'inline-block';
+
+
+            const btnCancel = document.getElementById('btnCancelRide');
+            if (btnCancel) btnCancel.style.display = 'none';
+
         } else {
             showToast(getErrorMessage(result, t('networkError')), 'error');
             if (btnStart) {
@@ -569,6 +593,42 @@ async function completeRide() {
     }
 }
 
+async function cancelRide() {
+    if (!state.activeRide) return;
+
+    const btnCancel = document.getElementById('btnCancelRide');
+    if (btnCancel) {
+        btnCancel.disabled = true;
+        btnCancel.innerText = t('btnCancelling');
+    }
+
+    try {
+        const response = await apiFetch(`/api/v1/Rides/${state.activeRide.rideId}/driver-cancel`, { method: 'POST' });
+        if (!response) return;
+
+        const result = await response.json().catch(() => ({}));
+
+        if (response.ok && result.succeeded) {
+            showToast(result.message || 'Ride cancelled', 'success');
+            state.activeRide = null;
+            dom.notificationsArea.innerHTML = '';
+            dom.emptyState.hidden = false;
+        } else {
+            showToast(getErrorMessage(result, t('networkError')), 'error');
+            if (btnCancel) {
+                btnCancel.disabled = false;
+                btnCancel.innerText = t('btnCancel');
+            }
+        }
+    } catch {
+        showToast(t('networkError'), 'error');
+        if (btnCancel) {
+            btnCancel.disabled = false;
+            btnCancel.innerText = t('btnCancel');
+        }
+    }
+}
+
 function renderActiveRideDashboard(data) {
     dom.emptyState.hidden = true;
     dom.notificationsArea.innerHTML = '';
@@ -581,7 +641,6 @@ function renderActiveRideDashboard(data) {
 
     const card = document.createElement('div');
     card.className = 'ride-card';
-
 
     card.innerHTML = `
         <p class="ride-card-title">${t('activeRideTitle')}</p>
@@ -596,6 +655,7 @@ function renderActiveRideDashboard(data) {
             <button id="btnArrived" class="btn btn-warning" onclick="arriveRide()">${t('btnArrived')}</button>
             <button id="btnStartRide" class="btn btn-primary" onclick="startRide()" style="display: none;">${t('btnStart')}</button>
             <button id="btnCompleteRide" class="btn btn-danger" onclick="completeRide()" style="display: none;">${t('btnComplete')}</button>
+            <button id="btnCancelRide" class="btn btn-ghost" onclick="cancelRide()" style="color: #dc3545; border: 1px solid #dc3545;">${t('btnCancel')}</button>
         </div>
 
         <a class="btn-map" href="${mapsUrl}" target="_blank" rel="noopener noreferrer" style="margin-top: 15px; display: inline-block;">

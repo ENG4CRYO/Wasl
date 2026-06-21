@@ -17,6 +17,13 @@ public class DriverNotificationService : IDriverNotificationService
         _hubContext = hubContext;
     }
 
+    public async Task HideRideRequestFromDriversAsync(List<string> driverIds, Guid rideId)
+    {
+        if (driverIds == null || driverIds.Count == 0) return;
+
+        await _hubContext.Clients.Users(driverIds).SendAsync("HideRideRequest", rideId.ToString());
+    }
+
     public async Task NotifyDriversWithRideRequestAsync(List<string> driverIds,
         Guid rideId, double latitude, double longitude,
         double dropLat, double dropLng, decimal price)
@@ -32,5 +39,11 @@ public class DriverNotificationService : IDriverNotificationService
                 calculatedPrice = price,
                 Message = "A new ride request is near you!"
             });
+    }
+
+    public async Task NotifyUserRideCancelledAsync(string userId, string message)
+    {
+        if (string.IsNullOrEmpty(userId)) return;
+        await _hubContext.Clients.User(userId).SendAsync("RideCancelled", message);
     }
 }
