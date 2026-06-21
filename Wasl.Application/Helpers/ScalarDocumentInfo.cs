@@ -54,7 +54,7 @@
 
                 ### 🗺️ 5. Radar Simulator (Testing Tool)
                 We provide a built-in web simulator to test live tracking without a mobile app.
-                - **Simulator Link:** `/driver_radar_simulation.html`
+                - **Simulator Link:** `https://apiservice.ddns.net/wasl/driver_radar_simulation.html`
                 - **Usage:** Login as a Driver. The simulator will automatically connect to SignalR and start broadcasting mock GPS movements on the map, and can receive ride requests.
 
                 ---
