@@ -25,36 +25,48 @@
 
                 ---
 
-                ## 📡 Real-Time Location Tracking (SignalR)
-                The platform uses **SignalR** backed by **Redis** for high-performance, real-time location tracking and broadcasting.
+                ## 📡 Real-Time Communication (SignalR)
+                The platform relies heavily on **SignalR** backed by **Redis** for high-performance, real-time location tracking and ride lifecycle management. Front-end applications MUST implement these listeners to function correctly.
 
                 ### 🔌 1. Connecting to the Hub
-                - **Endpoint URL:** `https://apiservice.ddns.net/wasl/hubs/tracking`
+                - **Endpoint URL:** `https://apiservice.ddns.net/hubs/tracking`
                 - **Authentication:** Standard browser WebSockets do not support HTTP Headers. You **must** pass the JWT Access Token in the URL query string:
                   `?access_token=YOUR_JWT_TOKEN`
-                  *(The backend automatically intercepts this and authenticates the session).*
 
-                ### 🎧 2. Client Listening Events (Frontend -> Listen)
-                Register these listeners **before** starting the connection:
-                - `ReceiveLocationUpdate(double latitude, double longitude)`: Triggered when a driver updates their location.
+                ### 🚕 2. For DRIVERS: Listening Events (On)
+                Drivers must listen to these events to receive and manage ride requests:
+                * `ReceiveRideRequest`: Triggered when a new ride is requested nearby.
+                    * **Payload (JSON):** `{ "rideId": "guid", "lat": double, "lng": double, "dropLat": double, "dropLng": double, "price": decimal }`
+                * `HideRideRequest`: Triggered when a Rider cancels a *Pending* ride. The frontend MUST close the request popup if the ID matches.
+                    * **Payload (String):** `rideId`
+                * `RideCancelled`: Triggered when a Rider cancels a ride *after* the driver has accepted it.
+                    * **Payload (String):** `message` 
 
-                ### 🚀 3. Client Invoking Events (Frontend -> Send)
-                Once connected, invoke these backend methods:
-                - `UpdateLocation(double latitude, double longitude)`: Broadcasts the Driver's current GPS coordinates to the system.
+                ### 👤 3. For RIDERS: Listening Events (On)
+                Riders must listen to this specific event regarding cancellations:
+                * `RideCancelled`: Triggered if the driver cancels the active trip.
+                    * **Payload (String):** `message` 
+                *(Note: Ride status updates like Accepted, Arrived, and Completed are currently managed via standard REST endpoints and polling/status checks).*
 
-                ### 🗺️ 4. Radar Simulator (Testing Tool)
+                ### 🚀 4. Client Invoking Events (Send)
+                Once connected, clients can send data to the server directly via SignalR:
+                * `UpdateLocation(double latitude, double longitude)`: **(Drivers Only)** Broadcasts the Driver's current GPS coordinates. Should be called periodically (e.g., every 5-10 seconds) while online or in an active ride.
+
+                ### 🗺️ 5. Radar Simulator (Testing Tool)
                 We provide a built-in web simulator to test live tracking without a mobile app.
-                - **Simulator Link:** [https://apiservice.ddns.net/wasl/driver_radar_simulation.html](https://apiservice.ddns.net/wasl/driver_radar_simulation.html)
-                - **Usage:** Login as a Driver. The simulator will automatically connect to SignalR and start broadcasting mock GPS movements on the map.
+                - **Simulator Link:** `/driver_radar_simulation.html`
+                - **Usage:** Login as a Driver. The simulator will automatically connect to SignalR and start broadcasting mock GPS movements on the map, and can receive ride requests.
 
                 ---
 
                 ## 🚖 Ride Lifecycle & Business Logic
                 To maintain data integrity, a strict state machine is enforced:
                 1. **Pending:** Ride requested by the Rider.
-                2. **Accepted:** Driver accepts the ride. *(Validation: A Driver cannot accept a new ride if they already have an Active/Accepted ride).*
-                3. **InProgress:** The trip is ongoing.
-                4. **Completed:** The Driver finishes the trip using the `complete` endpoint, freeing them to accept new requests.
+                2. **Accepted:** Driver accepts the ride via `POST /api/v1/Rides/{id}/accept`.
+                3. **DriverArrived:** Driver reaches the pickup location via `POST /api/v1/Rides/{id}/arrive`.
+                4. **Started:** The passenger is in the car and the trip begins via `POST /api/v1/Rides/{id}/start`.
+                5. **Completed:** The Driver finishes the trip via `POST /api/v1/Rides/{id}/complete`.
+                6. **Cancelled:** Can be triggered by Rider or Driver using their specific endpoints.
 
                 ---
 
@@ -66,7 +78,7 @@
                 - Validation errors are also localized automatically.
 
                 ### 📧 Background Jobs
-                Email sending is non-blocking. We use **System.Threading.Channels** to queue emails and process them in a background worker, ensuring the API responds instantly.
+                Email sending is non-blocking. We use background workers to queue emails and process them asynchronously, ensuring the API responds instantly.
 
                 ---
 
@@ -74,16 +86,7 @@
                 | Header Name | Value | Description | Required? |
                 | :--- | :--- | :----- | :--- |
                 | **Authorization** | `Bearer {token}` | Standard JWT. | Yes (Secured) |
-                | **Accept-Language** | `en` or `ar` | Default is `en`. | Optional |
-                | **X-Api-Version** | `1.0` | API versioning control. | Yes |
-                | **X-App-Version** | `1.0.0` | Mobile/Web app version. | Yes |
-
-                ---
-
-                ## ⏳ Rate Limiting
-                To protect against DDoS and Brute-force:
-                * **Global:** 200 requests / 10 seconds.
-                * **Auth (Login/OTP):** 5 requests / 30 seconds per IP.
+                | **Accept-Language** | `en` or `ar` | Default is `ar`. | Optional |
 
                 ---
 
@@ -113,11 +116,6 @@
                   "data": null 
                 }
                 ```
-
-                ---
-
-                ## 🧪 Development & Testing
-                * **Environment:** `Production / Development`
                 """;
 
             return template;
