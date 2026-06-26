@@ -1,0 +1,169 @@
+﻿<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>وصل - لوحة الإدارة</title>
+    <link rel="stylesheet" href="AdminStyle.css">
+    <script src="Admin.js" defer></script>
+</head>
+<body>
+
+    <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+    <div id="app-loading" class="app-loading">
+        <span class="spinner-large"></span>
+    </div>
+
+    <main id="login-screen" class="screen d-none">
+        <div class="auth-card">
+            <div class="brand">
+                <h1>🚕 Wasl Admin</h1>
+                <p>بوابة مدير النظام</p>
+            </div>
+
+            <form id="login-form" novalidate>
+                <div class="input-group">
+                    <label for="email">البريد الإلكتروني</label>
+                    <input type="email" id="email" placeholder="admin@wasl.com" autocomplete="username" required>
+                </div>
+                <div class="input-group">
+                    <label for="password">كلمة المرور</label>
+                    <div class="password-wrapper">
+                        <input type="password" id="password" placeholder="••••••••" autocomplete="current-password" required>
+                        <button type="button" id="toggle-password" class="btn-icon" aria-label="إظهار كلمة المرور" tabindex="-1">
+                            👁️
+                        </button>
+                    </div>
+                </div>
+                <button type="submit" id="login-btn" class="btn btn-primary w-100">
+                    <span class="btn-text">تسجيل الدخول</span>
+                    <span class="spinner d-none"></span>
+                </button>
+            </form>
+        </div>
+    </main>
+
+    <main id="dashboard-screen" class="screen layout-dashboard d-none">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>Wasl Admin</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <button class="nav-item active">السائقون المعلقون</button>
+            </nav>
+            <div class="sidebar-footer">
+                <button id="logout-btn" class="btn btn-ghost text-danger w-100">تسجيل الخروج</button>
+            </div>
+        </aside>
+
+        <section class="main-content">
+            <header class="topbar">
+                <h3>مراجعة طلبات الانضمام</h3>
+                <div class="user-profile">
+                    <span>مدير النظام</span>
+                    <div class="avatar">A</div>
+                </div>
+            </header>
+
+            <div class="content-body">
+                <div class="card table-card">
+                    <div class="table-responsive">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>الاسم الكامل</th>
+                                    <th>البريد الإلكتروني</th>
+                                    <th>رقم الهاتف</th>
+                                    <th>تاريخ التقديم</th>
+                                    <th>الإجراء</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-body">
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="pagination">
+                        <button id="prev-page-btn" class="btn btn-secondary btn-sm" disabled>السابق</button>
+                        <span id="page-info">صفحة 1</span>
+                        <button id="next-page-btn" class="btn btn-secondary btn-sm" disabled>التالي</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div id="review-modal" class="modal-overlay d-none" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+        <div class="modal-backdrop" id="modal-backdrop"></div>
+
+        <div class="modal-content modal-lg">
+            <div class="modal-header">
+                <h3 id="modal-title">تفاصيل طلب الكابتن</h3>
+                <button class="close-btn" id="close-modal-btn" aria-label="إغلاق">&times;</button>
+            </div>
+
+            <div class="modal-body">
+                <div id="modal-loading" class="loader-container">
+                    <span class="spinner-large dark-spinner"></span>
+                </div>
+
+                <div id="modal-data" class="driver-details-grid d-none">
+                    <div class="detail-section">
+                        <h4>👤 المعلومات الشخصية</h4>
+                        <p><b>الاسم:</b> <span id="det-name"></span></p>
+                        <p><b>الهاتف:</b> <span id="det-phone" dir="ltr"></span></p>
+                        <p><b>المدينة:</b> <span id="det-city"></span></p>
+                        <p><b>العنوان:</b> <span id="det-address"></span></p>
+                    </div>
+
+                    <div class="detail-section">
+                        <h4>🚗 تفاصيل السيارة</h4>
+                        <p><b>الموديل:</b> <span id="det-car-model"></span></p>
+                        <p><b>سنة الصنع:</b> <span id="det-car-year"></span></p>
+                        <p><b>رقم الشاصي:</b> <span id="det-vin"></span></p>
+                    </div>
+
+                    <div class="detail-section full-width attachments-grid">
+                        <div class="attachment">
+                            <p>صورة السائق</p>
+                            <img id="img-selfie" src="" alt="صورة السائق" class="managed-image">
+                        </div>
+                        <div class="attachment">
+                            <p>إجازة السوق (أمامي)</p>
+                            <img id="img-license-front" src="" alt="إجازة السوق" class="managed-image">
+                        </div>
+                        <div class="attachment">
+                            <p>إجازة السوق (خلفي)</p>
+                            <img id="img-license-back" src="" alt="إجازة السوق خلفي" class="managed-image">
+                        </div>
+                        <div class="attachment">
+                            <p>صورة السيارة</p>
+                            <img id="img-car" src="" alt="صورة السيارة" class="managed-image">
+                        </div>
+                    </div>
+                </div>
+
+                <div id="rejection-area" class="rejection-area d-none">
+                    <label for="rejection-reason" class="text-danger">⚠️ يرجى كتابة سبب الرفض (سيتم إرساله للسائق):</label>
+                    <textarea id="rejection-reason" rows="3" placeholder="مثال: صورة إجازة السوق غير واضحة..."></textarea>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-success" id="btn-approve">
+                    <span class="btn-text">✅ قبول الكابتن</span>
+                    <span class="spinner d-none"></span>
+                </button>
+                <button class="btn btn-danger" id="btn-reject">❌ رفض الطلب</button>
+
+                <button class="btn btn-danger d-none" id="btn-confirm-reject">
+                    <span class="btn-text">تأكيد وإرسال الرفض</span>
+                    <span class="spinner d-none"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

@@ -12,7 +12,6 @@ namespace Wasl.Core.Entities
         public string LastName { get; set; } = string.Empty;    
         public decimal Balance { get; set; }
         public string ProfilePictureUrls { get; set; } = string.Empty;
-
         public string? City { get; set; }
         public string? Address { get; set; }
         public bool? IsOnline { get; set; }

@@ -1,5 +1,6 @@
 ﻿using Hangfire;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
@@ -19,6 +20,7 @@ using Wasl.Application.Common.Models;
 using Wasl.Application.Extensions;
 using Wasl.Application.Helpers;
 using Wasl.Application.Interfaces.Infrastructure;
+using Wasl.Core.Entities;
 using Wasl.Infrastructure.Extensions;
 
 SerilogExtension.SetupBootstrapLogger();
@@ -86,6 +88,25 @@ try
     builder.Services.AddSignalR();
 
     var app = builder.Build();
+
+    using (var scope = app.Services.CreateScope())
+    {
+        var services = scope.ServiceProvider;
+        try
+        {
+            var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
+            var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+            var configuration = services.GetRequiredService<IConfiguration>();
+
+            await Wasl.Infrastructure.Data.Seeders.AdminSeeder.SeedAdminAsync(userManager, roleManager, configuration);
+        }
+        catch (System.Exception ex)
+        {
+
+            var logger = services.GetRequiredService<Microsoft.Extensions.Logging.ILogger<Program>>();
+            logger.LogError(ex, "حدث خطأ أثناء بذر بيانات مدير النظام.");
+        }
+    }
 
     app.UseRequestLocalization(localizationOptions);
 
