@@ -17,17 +17,20 @@ namespace Wasl.Application.Features.DriverProfiles.Commands.SubmitProfile
         private readonly ICurrentUserService _currentUserService;
         private readonly IFileService _fileService;
         private readonly IStringLocalizer<SharedResource> _localizer;
+        private readonly ICacheService _cacheService;
 
         public SubmitDriverProfileCommandHandler(
             IApplicationDbContext context,
             ICurrentUserService currentUserService,
             IFileService fileService,
-            IStringLocalizer<SharedResource> localizer)
+            IStringLocalizer<SharedResource> localizer,
+             ICacheService cacheService)
         {
             _context = context;
             _currentUserService = currentUserService;
             _fileService = fileService;
             _localizer = localizer;
+            _cacheService = cacheService;
         }
 
         public async Task<ApiResponse<string>> Handle(SubmitDriverProfileCommand request, CancellationToken cancellationToken)
@@ -82,7 +85,7 @@ namespace Wasl.Application.Features.DriverProfiles.Commands.SubmitProfile
             driverProfile.SelfieUrl = selfieUrl;
 
             driverProfile.ApprovalStatus = DriverApprovalStatus.UnderReview;
-
+            await _cacheService.RemoveAsync($"DriverStatus:{userId}", cancellationToken);
             await _context.SaveChangesAsync(cancellationToken);
 
             return ApiResponse<string>.Success(_localizer["DriverProfiles.SubmitSuccess"]);
