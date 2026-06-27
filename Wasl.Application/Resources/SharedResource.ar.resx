@@ -381,4 +381,7 @@
   <data name="Rides.RideCancelledByCustomer" xml:space="preserve">
     <value>لقد قام الزبون بإلغاء الرحلة للأسف. حسابك متاح الآن لاستقبال طلبات جديدة</value>
   </data>
+  <data name="SignalRReceiveRideRequest" xml:space="preserve">
+    <value>هناك طلب جديد لرحلة بالقرب منك!</value>
+  </data>
 </root>

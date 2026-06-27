@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Localization;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Wasl.API.Hubs;
+using Wasl.API.Resources;
 using Wasl.Application.Interfaces;
 using Wasl.Application.Interfaces.Infrastructure;
 
@@ -11,10 +13,13 @@ namespace Wasl.API.Services;
 public class DriverNotificationService : IDriverNotificationService
 {
     private readonly IHubContext<TrackingHub> _hubContext;
+    private readonly IStringLocalizer<SharedResource> _localizer;
 
-    public DriverNotificationService(IHubContext<TrackingHub> hubContext)
+    public DriverNotificationService(IHubContext<TrackingHub> hubContext,
+        IStringLocalizer<SharedResource> localizer)
     {
         _hubContext = hubContext;
+        _localizer = localizer;
     }
 
     public async Task HideRideRequestFromDriversAsync(List<string> driverIds, Guid rideId)
@@ -37,7 +42,7 @@ public class DriverNotificationService : IDriverNotificationService
                 DropLat = dropLat,
                 DropLng = dropLng,
                 calculatedPrice = price,
-                Message = "A new ride request is near you!"
+                Message = _localizer["SignalRReceiveRideRequest"]
             });
     }
 

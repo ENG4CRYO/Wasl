@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.SignalR;
 using System.Security.Claims;
 using Wasl.Application.Interfaces.Infrastructure;
 using Wasl.Core.Constants;
+using Wasl.Core.Enums;
 
 namespace Wasl.API.Hubs
 {
@@ -10,10 +11,11 @@ namespace Wasl.API.Hubs
     public class TrackingHub : Hub
     {
         private readonly IRedisCacheService _redisCache;
-
-        public TrackingHub(IRedisCacheService redisCache)
+        private readonly ICacheService _cacheService;
+        public TrackingHub(IRedisCacheService redisCache, ICacheService cacheService)
         {
             _redisCache = redisCache;
+            _cacheService = cacheService;
         }
 
         public async Task UpdateLocation(double latitude, double longitude)
@@ -22,8 +24,37 @@ namespace Wasl.API.Hubs
 
             if (!string.IsNullOrEmpty(driverId))
             {
-                await _redisCache.UpdateDriverLocationAsync(driverId, longitude, latitude);
+
+                var status = await _cacheService.GetAsync<DriverApprovalStatus>($"DriverStatus:{driverId}", CancellationToken.None);
+
+                if (status == DriverApprovalStatus.Approved)
+                {
+                    await _redisCache.UpdateDriverLocationAsync(driverId, longitude, latitude);
+                }
+                else
+                {
+                    Context.Abort();
+                }
             }
+        }
+
+        public override async Task OnConnectedAsync()
+        {
+            var driverId = Context.User?.FindFirst("uid")?.Value;
+
+            if (!string.IsNullOrEmpty(driverId))
+            {
+
+                var status = await _cacheService.GetAsync<DriverApprovalStatus>($"DriverStatus:{driverId}", CancellationToken.None);
+
+                if (status != DriverApprovalStatus.Approved)
+                {
+                    Context.Abort();
+                    return;
+                }
+            }
+
+            await base.OnConnectedAsync();
         }
 
         public override async Task OnDisconnectedAsync(Exception? exception)
