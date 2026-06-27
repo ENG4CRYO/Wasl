@@ -41,6 +41,9 @@
                     * **Payload (String):** `rideId`
                 * `RideCancelled`: Triggered when a Rider cancels a ride *after* the driver has accepted it.
                     * **Payload (String):** `message` 
+                * `ProfileReviewed`: Triggered instantly when an Admin approves or rejects your submitted profile.
+                    * **Payload (JSON):** `{ "isApproved": boolean, "message": string }`
+                    * *(Note: If `isApproved` is true, the driver account is fully activated. If false, the `message` will contain the rejection reason so the driver can fix the issues).*
 
                 ### 👤 3. For RIDERS: Listening Events (On)
                 Riders must listen to this specific event regarding cancellations:

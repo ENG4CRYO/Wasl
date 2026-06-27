@@ -329,6 +329,23 @@ async function startSignalR() {
             if (err?.statusCode === 401) logout();
         });
 
+        state.connection.on('ProfileReviewed', (data) => {
+            console.log("🔔 إشعار مراجعة الملف:", data);
+
+            playNotificationSound();
+
+            if (data.isApproved) {
+                showToast(data.message, 'success');
+
+            } else {
+                showToast(data.message, 'error');
+
+                setTimeout(() => {
+                    logout();
+                }, 5000);
+            }
+        });
+
         await state.connection.start();
         setStatus('connected');
     } catch (err) {

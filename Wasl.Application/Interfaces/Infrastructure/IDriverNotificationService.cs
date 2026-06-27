@@ -12,5 +12,7 @@ namespace Wasl.Application.Interfaces.Infrastructure
 
         Task HideRideRequestFromDriversAsync(List<string> driverIds, Guid rideId);
         Task NotifyUserRideCancelledAsync(string userId, string message);
+
+        Task SendProfileReviewedNotificationAsync(string driverId, bool isApproved, string message);
     }
 }

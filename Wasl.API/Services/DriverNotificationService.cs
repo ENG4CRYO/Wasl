@@ -46,4 +46,13 @@ public class DriverNotificationService : IDriverNotificationService
         if (string.IsNullOrEmpty(userId)) return;
         await _hubContext.Clients.User(userId).SendAsync("RideCancelled", message);
     }
+
+    public async Task SendProfileReviewedNotificationAsync(string driverId, bool isApproved, string message)
+    {
+        await _hubContext.Clients.User(driverId).SendAsync("ProfileReviewed", new
+        {
+            IsApproved = isApproved,
+            Message = message
+        });
+    }
 }

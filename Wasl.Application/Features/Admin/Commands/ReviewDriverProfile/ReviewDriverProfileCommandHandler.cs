@@ -13,16 +13,19 @@ namespace Wasl.Application.Features.Admin.Commands.ReviewDriverProfile
     {
         private readonly IApplicationDbContext _context;
         private readonly ICacheService _cacheService;
-        private readonly IEmailService _emailService; 
+        private readonly IEmailService _emailService;
+        private readonly IDriverNotificationService _notificationService;
 
         public ReviewDriverProfileCommandHandler(
             IApplicationDbContext context,
             ICacheService cacheService,
-            IEmailService emailService)
+            IEmailService emailService,
+            IDriverNotificationService notificationService)
         {
             _context = context;
             _cacheService = cacheService;
             _emailService = emailService;
+            _notificationService = notificationService;
         }
 
         public async Task<ApiResponse<bool>> Handle(ReviewDriverProfileCommand request, CancellationToken cancellationToken)
@@ -62,6 +65,12 @@ namespace Wasl.Application.Features.Admin.Commands.ReviewDriverProfile
                 : $"مرحباً {driverProfile.User.FirstName}،\nنعتذر، لم نتمكن من الموافقة على طلبك للأسباب التالية:\n{request.RejectionReason}\nيمكنك تصحيح البيانات وإعادة التقديم.";
 
             await _emailService.SendEmailAsync(driverProfile.User.Email, subject, body,cancellationToken);
+
+            await _notificationService.SendProfileReviewedNotificationAsync(
+                driverId: request.DriverId,
+                isApproved: request.IsApproved,
+                message: body
+            );
 
             return ApiResponse<bool>.Success(true, request.IsApproved ? "تم قبول السائق بنجاح." : "تم رفض السائق وإرسال الإشعار.");
         }
