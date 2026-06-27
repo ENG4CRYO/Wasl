@@ -1,14 +1,18 @@
 ﻿using Asp.Versioning;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using Wasl.Application.Common;
 using Wasl.Application.Dtos.Admin;
+using Wasl.Application.Features.Admin.Commands.ChangeDriverStatus;
 using Wasl.Application.Features.Admin.Commands.ReviewDriverProfile;
+using Wasl.Application.Features.Admin.Queries.GetAllDrivers;
 using Wasl.Application.Features.Admin.Queries.GetPendingDriverDetails;
 using Wasl.Application.Features.Admin.Queries.GetPendingDrivers;
 using Wasl.Core.Constants;
+using Wasl.Core.Enums;
 
 namespace Wasl.API.Controllers.V1
 {
@@ -56,6 +60,37 @@ namespace Wasl.API.Controllers.V1
         {
             var result = await _mediator.Send(command);
             return result.Succeeded ? Ok(result) : BadRequest(result);
+        }
+
+        /// <summary>
+        /// Get list of all drivers.
+        /// </summary>
+        [HttpGet("all-drivers")]
+        public async Task<IActionResult> GetAllDrivers(
+            [FromQuery] int pageNumber = 1,
+            [FromQuery] int pageSize = 10,
+            [FromQuery] string? searchTerm = null,
+            [FromQuery] DriverApprovalStatus? statusFilter = null)
+        {
+            var query = new GetAllDriversQuery
+            {
+                PageNumber = pageNumber,
+                PageSize = pageSize,
+                SearchTerm = searchTerm,
+                StatusFilter = statusFilter
+            };
+            var response = await _mediator.Send(query);
+            return response.Succeeded ? Ok(response) : BadRequest(response);
+        }
+
+        /// <summary>
+        /// Change status of a driver .
+        /// </summary>
+        [HttpPut("change-driver-status")]
+        public async Task<IActionResult> ChangeDriverStatus([FromBody] ChangeDriverStatusCommand command)
+        {
+            var response = await _mediator.Send(command);
+            return response.Succeeded ? Ok(response) : BadRequest(response);
         }
     }
 }

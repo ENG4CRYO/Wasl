@@ -6,6 +6,13 @@ export const DOM = {
         login: document.getElementById('login-screen'),
         dashboard: document.getElementById('dashboard-screen')
     },
+    views: {
+        'view-pending': document.getElementById('view-pending'),
+        'view-all-drivers': document.getElementById('view-all-drivers')
+    },
+    sidebar: {
+        navItems: document.querySelectorAll('.sidebar-nav .nav-item')
+    },
     login: {
         form: document.getElementById('login-form'),
         email: document.getElementById('email'),
@@ -19,6 +26,14 @@ export const DOM = {
         nextBtn: document.getElementById('next-page-btn'),
         pageInfo: document.getElementById('page-info'),
         logoutBtn: document.getElementById('logout-btn')
+    },
+    allDrivers: {
+        tableBody: document.getElementById('all-drivers-tbody'),
+        prevBtn: document.getElementById('all-prev-btn'),
+        nextBtn: document.getElementById('all-next-btn'),
+        pageInfo: document.getElementById('all-page-info'),
+        searchInput: document.getElementById('search-driver'),
+        statusFilter: document.getElementById('filter-status')
     },
     modal: {
         overlay: document.getElementById('review-modal'),
@@ -37,8 +52,20 @@ export const DOM = {
 
 export const UI = {
     switchScreen(targetScreen) {
-        Object.values(DOM.screens).forEach(screen => screen.classList.add('d-none'));
+        Object.values(DOM.screens).forEach(screen => screen?.classList.add('d-none'));
         if (DOM.screens[targetScreen]) DOM.screens[targetScreen].classList.remove('d-none');
+    },
+
+    switchView(targetViewId) {
+
+        Object.values(DOM.views).forEach(view => view?.classList.add('d-none'));
+
+        if (DOM.views[targetViewId]) DOM.views[targetViewId].classList.remove('d-none');
+
+        DOM.sidebar.navItems.forEach(btn => {
+            if (btn.dataset.target === targetViewId) btn.classList.add('active');
+            else btn.classList.remove('active');
+        });
     },
 
     showToast(message, type = 'error') {
@@ -57,7 +84,6 @@ export const UI = {
     setBtnLoading(btn, isLoading) {
         const textSpan = btn.querySelector('.btn-text');
         const spinnerSpan = btn.querySelector('.spinner');
-
         btn.disabled = isLoading;
         if (textSpan) textSpan.classList.toggle('d-none', isLoading);
         if (spinnerSpan) spinnerSpan.classList.toggle('d-none', !isLoading);

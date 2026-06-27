@@ -21,7 +21,6 @@
                 <h1>🚕 Wasl Admin</h1>
                 <p>بوابة مدير النظام</p>
             </div>
-
             <form id="login-form" novalidate>
                 <div class="input-group">
                     <label for="email">البريد الإلكتروني</label>
@@ -31,9 +30,7 @@
                     <label for="password">كلمة المرور</label>
                     <div class="password-wrapper">
                         <input type="password" id="password" placeholder="••••••••" autocomplete="current-password" required>
-                        <button type="button" id="toggle-password" class="btn-icon" aria-label="إظهار كلمة المرور" tabindex="-1">
-                            👁️
-                        </button>
+                        <button type="button" id="toggle-password" class="btn-icon" aria-label="إظهار كلمة المرور" tabindex="-1">👁️</button>
                     </div>
                 </div>
                 <button type="submit" id="login-btn" class="btn btn-primary w-100">
@@ -50,7 +47,8 @@
                 <h2>Wasl Admin</h2>
             </div>
             <nav class="sidebar-nav">
-                <button class="nav-item active">السائقون المعلقون</button>
+                <button class="nav-item active" data-target="view-pending">الطلبات المعلقة</button>
+                <button class="nav-item" data-target="view-all-drivers">جميع السائقين</button>
             </nav>
             <div class="sidebar-footer">
                 <button id="logout-btn" class="btn btn-ghost text-danger w-100">تسجيل الخروج</button>
@@ -59,7 +57,7 @@
 
         <section class="main-content">
             <header class="topbar">
-                <h3>مراجعة طلبات الانضمام</h3>
+                <h3>لوحة التحكم</h3>
                 <div class="user-profile">
                     <span>مدير النظام</span>
                     <div class="avatar">A</div>
@@ -67,36 +65,72 @@
             </header>
 
             <div class="content-body">
-                <div class="card table-card">
-                    <div class="table-responsive">
-                        <table class="data-table">
-                            <thead>
-                                <tr>
-                                    <th>الاسم الكامل</th>
-                                    <th>البريد الإلكتروني</th>
-                                    <th>رقم الهاتف</th>
-                                    <th>تاريخ التقديم</th>
-                                    <th>الإجراء</th>
-                                </tr>
-                            </thead>
-                            <tbody id="table-body">
-                            </tbody>
-                        </table>
-                    </div>
 
-                    <div class="pagination">
-                        <button id="prev-page-btn" class="btn btn-secondary btn-sm" disabled>السابق</button>
-                        <span id="page-info">صفحة 1</span>
-                        <button id="next-page-btn" class="btn btn-secondary btn-sm" disabled>التالي</button>
+                <div id="view-pending" class="view-section">
+                    <div class="card table-card">
+                        <div class="table-responsive">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>الاسم الكامل</th>
+                                        <th>البريد الإلكتروني</th>
+                                        <th>رقم الهاتف</th>
+                                        <th>تاريخ التقديم</th>
+                                        <th>الإجراء</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="table-body"></tbody>
+                            </table>
+                        </div>
+
+                        <div class="pagination">
+                            <button id="prev-page-btn" class="btn btn-secondary btn-sm" disabled>السابق</button>
+                            <span id="page-info">صفحة 1</span>
+                            <button id="next-page-btn" class="btn btn-secondary btn-sm" disabled>التالي</button>
+                        </div>
                     </div>
                 </div>
+
+                <div id="view-all-drivers" class="view-section d-none">
+                    <div class="filters-bar" style="display: flex; gap: 10px; margin-bottom: 15px;">
+                        <input type="text" id="search-driver" placeholder="بحث بالاسم أو الهاتف..." class="form-input" style="max-width: 300px;">
+                        <select id="filter-status" class="form-input" style="max-width: 200px;">
+                            <option value="">جميع الحالات</option>
+                            <option value="1">لم يرفع ملفه (Pending)</option>
+                            <option value="2">قيد المراجعة</option>
+                            <option value="3">مقبول</option>
+                            <option value="4">مرفوض/موقوف</option>
+                        </select>
+                    </div>
+
+                    <div class="card table-card">
+                        <div class="table-responsive">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>الاسم الكامل</th>
+                                        <th>الهاتف</th>
+                                        <th>الحالة</th>
+                                        <th>تغيير الحالة</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="all-drivers-tbody"></tbody>
+                            </table>
+                        </div>
+                        <div class="pagination">
+                            <button id="all-prev-btn" class="btn btn-secondary btn-sm" disabled>السابق</button>
+                            <span id="all-page-info">صفحة 1</span>
+                            <button id="all-next-btn" class="btn btn-secondary btn-sm" disabled>التالي</button>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </section>
     </main>
 
-    <div id="review-modal" class="modal-overlay d-none" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div id="review-modal" class="modal-overlay d-none" role="dialog" aria-modal="true">
         <div class="modal-backdrop" id="modal-backdrop"></div>
-
         <div class="modal-content modal-lg">
             <div class="modal-header">
                 <h3 id="modal-title">تفاصيل طلب الكابتن</h3>
@@ -145,8 +179,8 @@
                 </div>
 
                 <div id="rejection-area" class="rejection-area d-none">
-                    <label for="rejection-reason" class="text-danger">⚠️ يرجى كتابة سبب الرفض (سيتم إرساله للسائق):</label>
-                    <textarea id="rejection-reason" rows="3" placeholder="مثال: صورة إجازة السوق غير واضحة..."></textarea>
+                    <label for="rejection-reason" class="text-danger">⚠️ يرجى كتابة سبب الرفض:</label>
+                    <textarea id="rejection-reason" rows="3"></textarea>
                 </div>
             </div>
 
@@ -164,6 +198,5 @@
             </div>
         </div>
     </div>
-
 </body>
 </html>
