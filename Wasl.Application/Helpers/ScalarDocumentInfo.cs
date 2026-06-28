@@ -46,10 +46,26 @@
                     * *(Note: If `isApproved` is true, the driver account is fully activated. If false, the `message` will contain the rejection reason so the driver can fix the issues).*
 
                 ### 👤 3. For RIDERS: Listening Events (On)
-                Riders must listen to this specific event regarding cancellations:
-                * `RideCancelled`: Triggered if the driver cancels the active trip.
-                    * **Payload (String):** `message` 
-                *(Note: Ride status updates like Accepted, Arrived, and Completed are currently managed via standard REST endpoints and polling/status checks).*
+                Riders must listen to these specific events regarding their active trips to automatically update the UI without polling the server:
+
+                * `ReceiveDriverLocation`: Triggered whenever the driver updates their live location on the map. *(Note: The rider must call `TrackRide` first to join the room).*
+                    * **Payload (Double, Double):** `latitude`, `longitude`
+
+                * `RideAccepted`: Triggered immediately when a driver accepts the requested trip. The app should transition from the "finding driver" state to showing driver details.
+                    * **Payload (Object):** `{ "rideId": "guid", "driverId": "string", "message": "string" }`
+
+                * `DriverArrived`: Triggered when the driver taps the "Arrived" button. The app should display a notification for the rider to head out.
+                    * **Payload (Object):** `{ "rideId": "guid", "message": "string" }`
+
+                * `RideStarted`: Triggered when the rider boards the car and the trip officially begins. The app should transition to the "In Transit" state.
+                    * **Payload (Object):** `{ "rideId": "guid", "message": "string" }`
+
+                * `RideCompleted`: Triggered when the driver successfully ends the trip. The app should close the map and display the receipt and rating screen.
+                    * **Payload (Object):** `{ "rideId": "guid", "message": "string" }`
+
+                * `RideCancelled`: Triggered if the driver or the system cancels the active trip. The app should return to the home screen and display the reason.
+                    * **Payload (String):** `message`
+
 
                 ### 🚀 4. Client Invoking Events (Send)
                 Once connected, clients can send data to the server directly via SignalR:

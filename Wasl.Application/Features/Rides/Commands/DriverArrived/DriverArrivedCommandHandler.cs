@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Wasl.Application.Common;
 using Wasl.Application.Interfaces.Common;
+using Wasl.Application.Interfaces.Infrastructure;
 using Wasl.Application.Resources;
 using Wasl.Core.Enums;
 
@@ -16,15 +17,18 @@ namespace Wasl.Application.Features.Rides.Commands.DriverArrived
         private readonly IApplicationDbContext _dbContext;
         private readonly IStringLocalizer<SharedResource> _localizer;
         private readonly ICurrentUserService _currentUserService;
+        private readonly IDriverNotificationService _driverNotification;
 
         public DriverArrivedCommandHandler(
             IApplicationDbContext dbContext,
             IStringLocalizer<SharedResource> localizer,
-            ICurrentUserService currentUserService)
+            ICurrentUserService currentUserService,
+            IDriverNotificationService driverNotification)
         {
             _dbContext = dbContext;
             _localizer = localizer;
             _currentUserService = currentUserService;
+            _driverNotification = driverNotification;
         }
 
         public async Task<ApiResponse<bool>> Handle(DriverArrivedCommand request, CancellationToken cancellationToken)
@@ -70,8 +74,9 @@ namespace Wasl.Application.Features.Rides.Commands.DriverArrived
             ride.Status = RideStatus.Arrived;
 
             await _dbContext.SaveChangesAsync(cancellationToken);
+            await _driverNotification.NotifyRiderDriverArrivedAsync(ride.RiderId, ride.Id);
 
-      
+
             return ApiResponse<bool>.Success(true, _localizer["Rides.DriverArrivedSuccessfully"]);
         }
     }

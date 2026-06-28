@@ -10,7 +10,7 @@ using Wasl.Core.Enums;
 
 namespace Wasl.API.Hubs
 {
-    [Authorize (Roles = AspRoles.Driver)]
+    [Authorize(Roles = $"{AspRoles.Driver},{AspRoles.Rider}")]
     public class TrackingHub : Hub
     {
         private readonly IRedisCacheService _redisCache;

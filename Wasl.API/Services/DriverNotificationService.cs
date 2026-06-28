@@ -60,4 +60,47 @@ public class DriverNotificationService : IDriverNotificationService
             Message = message
         });
     }
+
+    public async Task NotifyRiderRideAcceptedAsync(string riderId, Guid rideId, string driverId)
+    {
+        if (string.IsNullOrEmpty(riderId)) return;
+        await _hubContext.Clients.User(riderId).SendAsync("RideAccepted", new
+        {
+            RideId = rideId,
+            DriverId = driverId,
+            Message = _localizer["Rides.RideAcceptedByDriver"] ?? "تم قبول رحلتك، السائق في الطريق إليك."
+        });
+    }
+
+    public async Task NotifyRiderDriverArrivedAsync(string riderId, Guid rideId)
+    {
+        if (string.IsNullOrEmpty(riderId)) return;
+        await _hubContext.Clients.User(riderId).SendAsync("DriverArrived", new
+        {
+            RideId = rideId,
+            Message = _localizer["Rides.DriverArrived"] ?? "السائق وصل وهو في انتظارك بالخارج."
+        });
+    }
+
+    public async Task NotifyRiderRideStartedAsync(string riderId, Guid rideId)
+    {
+        if (string.IsNullOrEmpty(riderId)) return;
+        await _hubContext.Clients.User(riderId).SendAsync("RideStarted", new
+        {
+            RideId = rideId,
+            Message = _localizer["Rides.RideStarted"] ?? "بدأت الرحلة، نتمنى لك طريقاً آمناً."
+        });
+    }
+
+    public async Task NotifyRiderRideCompletedAsync(string riderId, Guid rideId)
+    {
+        if (string.IsNullOrEmpty(riderId)) return;
+        await _hubContext.Clients.User(riderId).SendAsync("RideCompleted", new
+        {
+            RideId = rideId,
+            Message = _localizer["Rides.RideCompleted"] ?? "انتهت الرحلة، شكراً لاستخدامك وصل."
+        });
+    }
+
+
 }

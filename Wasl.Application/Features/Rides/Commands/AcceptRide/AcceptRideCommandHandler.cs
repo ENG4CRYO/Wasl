@@ -19,17 +19,20 @@ public class AcceptRideCommandHandler : IRequestHandler<AcceptRideCommand, ApiRe
     private readonly IApplicationDbContext _dbContext;
     private readonly IStringLocalizer<SharedResource> _localizer;
     private readonly ICurrentUserService _currentUserService;
+    private readonly IDriverNotificationService _driverNotification;
 
     public AcceptRideCommandHandler(
         IRedisCacheService redisCache,
         IApplicationDbContext dbContext,
         IStringLocalizer<SharedResource> localizer,
-        ICurrentUserService currentUserService)
+        ICurrentUserService currentUserService,
+        IDriverNotificationService driverNotification)
     {
         _redisCache = redisCache;
         _dbContext = dbContext;
         _localizer = localizer;
         _currentUserService = currentUserService;
+        _driverNotification = driverNotification;
     }
 
     public async Task<ApiResponse<bool>> Handle(AcceptRideCommand request, CancellationToken cancellationToken)
@@ -85,6 +88,7 @@ public class AcceptRideCommandHandler : IRequestHandler<AcceptRideCommand, ApiRe
             ride.AcceptedAt = DateTime.UtcNow;
 
             await _dbContext.SaveChangesAsync(cancellationToken);
+            await _driverNotification.NotifyRiderRideAcceptedAsync(ride.RiderId, ride.Id, driverId);
 
             return ApiResponse<bool>.Success(true, _localizer["Rides.RideAcceptanceSucceeded"]);
         }
