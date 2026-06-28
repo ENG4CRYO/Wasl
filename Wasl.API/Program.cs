@@ -21,6 +21,7 @@ using Wasl.Application.Extensions;
 using Wasl.Application.Helpers;
 using Wasl.Application.Interfaces.Infrastructure;
 using Wasl.Core.Entities;
+using Wasl.Infrastructure.Data.Seeders;
 using Wasl.Infrastructure.Extensions;
 
 SerilogExtension.SetupBootstrapLogger();
@@ -100,12 +101,12 @@ try
             var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
             var configuration = services.GetRequiredService<IConfiguration>();
 
-            await Wasl.Infrastructure.Data.Seeders.AdminSeeder.SeedAdminAsync(userManager, roleManager, configuration);
+            await AdminSeeder.SeedAdminAsync(userManager, roleManager, configuration);
         }
         catch (System.Exception ex)
         {
 
-            var logger = services.GetRequiredService<Microsoft.Extensions.Logging.ILogger<Program>>();
+            var logger = services.GetRequiredService<ILogger<Program>>();
             logger.LogError(ex, "حدث خطأ أثناء بذر بيانات مدير النظام.");
         }
     }
@@ -161,12 +162,13 @@ try
 
     app.UseSecurityHeaders(PolicyCollection.policyCollection(app));
     app.UseGlobalHealthChecks();
-    app.UseRateLimiter();
     app.UseRouting();
     app.UseCors("AllowAll");
 
     app.UseAuthentication();
     app.UseAuthorization();
+
+    app.UseRateLimiter();
     app.MapControllers().RequireRateLimiting("IpLimiter");
     if (app.Environment.IsDevelopment())
     {
