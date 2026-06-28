@@ -39,14 +39,13 @@ export const AllDriversManager = {
     },
 
     getStatusBadge(statusValue) {
-
         const statuses = {
-            1: '<span style="color: #64748b; font-size:12px; padding: 4px 8px; background: #e2e8f0; border-radius: 12px;">لم يرفع ملفه</span>',
-            2: '<span style="color: #d97706; font-size:12px; padding: 4px 8px; background: #fef3c7; border-radius: 12px;">قيد المراجعة</span>',
-            3: '<span style="color: #059669; font-size:12px; padding: 4px 8px; background: #d1fae5; border-radius: 12px;">مقبول يعمل</span>',
-            4: '<span style="color: #dc2626; font-size:12px; padding: 4px 8px; background: #fee2e2; border-radius: 12px;">مرفوض/موقوف</span>'
+            1: '<span class="status-badge badge-pending">لم يرفع ملفه</span>',
+            2: '<span class="status-badge badge-review">قيد المراجعة</span>',
+            3: '<span class="status-badge badge-approved">مقبول يعمل</span>',
+            4: '<span class="status-badge badge-rejected">مرفوض/موقوف</span>'
         };
-        return statuses[statusValue] || 'غير معروف';
+        return statuses[statusValue] || '<span class="status-badge">غير معروف</span>';
     },
 
     renderTable(drivers) {

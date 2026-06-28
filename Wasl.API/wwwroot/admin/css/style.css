@@ -1,20 +1,25 @@
-﻿
-:root {
-    --primary: #2563eb;
-    --primary-hover: #1d4ed8;
-    --success: #16a34a;
-    --success-hover: #15803d;
-    --danger: #dc2626;
-    --danger-hover: #b91c1c;
-    --bg-body: #f1f5f9;
-    --bg-card: #ffffff;
-    --bg-sidebar: #0f172a;
-    --text-main: #334155;
-    --text-muted: #64748b;
-    --border: #e2e8f0;
-    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+﻿:root {
+    /* 🚕 ألوان ثيم "وصل" الداكن (مأخوذة من الرادار) */
+    --primary: #3b82f6;
+    --primary-hover: #2563eb;
+    --success: #10b981;
+    --success-hover: #059669;
+    --danger: #ef4444;
+    --danger-hover: #dc2626;
+    /* 🌑 خلفيات الثيم الداكن */
+    --bg-body: #0f172a; /* الخلفية الرئيسية */
+    --bg-card: #1e293b; /* خلفية البطاقات والجداول */
+    --bg-sidebar: #0f172a; /* القائمة الجانبية */
+    --bg-input: #0f172a; /* خلفية حقول الإدخال */
+    /* 📝 النصوص */
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+    /* 🔲 الحدود والظلال */
+    --border: #334155;
+    --border-focus: #3b82f6;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,.3), 0 1px 2px rgba(0,0,0,.2);
+    --shadow-md: 0 4px 12px rgba(0,0,0,.35);
+    --shadow-lg: 0 20px 40px rgba(0,0,0,.55);
     --radius: 8px;
     --font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     --transition: all 0.2s ease-in-out;
@@ -51,7 +56,7 @@ body {
 }
 
 h1, h2, h3, h4 {
-    color: #0f172a;
+    color: var(--text-main);
     font-weight: 600;
     margin-bottom: 0.5rem;
 }
@@ -72,7 +77,7 @@ h1, h2, h3, h4 {
 }
 
     .btn:disabled {
-        opacity: 0.65;
+        opacity: 0.55;
         cursor: not-allowed;
     }
 
@@ -109,7 +114,7 @@ h1, h2, h3, h4 {
     }
 
 .btn-secondary {
-    background-color: white;
+    background-color: var(--bg-input);
     border-color: var(--border);
     color: var(--text-main);
 }
@@ -124,7 +129,7 @@ h1, h2, h3, h4 {
 }
 
     .btn-ghost:not(:disabled):hover {
-        background-color: rgba(0,0,0,0.05);
+        background-color: rgba(255, 255, 255, 0.05);
     }
 
 .input-group {
@@ -135,30 +140,30 @@ h1, h2, h3, h4 {
         display: block;
         margin-bottom: 0.5rem;
         font-weight: 500;
-        color: #1e293b;
+        color: var(--text-muted);
     }
 
 input[type="email"],
 input[type="password"],
 input[type="text"],
-textarea {
+textarea,
+select {
     width: 100%;
     padding: 0.625rem 0.875rem;
     font-family: inherit;
     font-size: 0.875rem;
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    background-color: white;
+    background-color: var(--bg-input);
     transition: var(--transition);
     color: var(--text-main);
 }
 
-    input:focus, textarea:focus {
+    input:focus, textarea:focus, select:focus {
         outline: none;
-        border-color: var(--primary);
-        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+        border-color: var(--border-focus);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
     }
-
 
 .password-wrapper {
     position: relative;
@@ -170,7 +175,7 @@ textarea {
 
 .btn-icon {
     position: absolute;
-    left: 0.5rem; 
+    left: 0.5rem;
     top: 50%;
     transform: translateY(-50%);
     background: transparent;
@@ -253,6 +258,7 @@ textarea {
     padding: 2.5rem;
     border-radius: 12px;
     box-shadow: var(--shadow-lg);
+    border: 1px solid var(--border);
 }
 
 .brand {
@@ -275,7 +281,6 @@ textarea {
     overflow: hidden;
 }
 
-
 .sidebar {
     width: 260px;
     background-color: var(--bg-sidebar);
@@ -283,11 +288,12 @@ textarea {
     display: flex;
     flex-direction: column;
     flex-shrink: 0;
+    border-left: 1px solid var(--border);
 }
 
 .sidebar-header {
     padding: 1.5rem;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
+    border-bottom: 1px solid var(--border);
 }
 
 .sidebar-nav {
@@ -303,23 +309,22 @@ textarea {
     background: transparent;
     border: none;
     padding: 0.875rem 1.5rem;
-    color: #cbd5e1;
+    color: var(--text-muted);
     font-size: 0.95rem;
     cursor: pointer;
     transition: 0.2s;
 }
 
     .nav-item:hover, .nav-item.active {
-        background-color: rgba(255,255,255,0.05);
-        color: white;
+        background-color: rgba(59, 130, 246, 0.1);
+        color: var(--primary);
         border-right: 4px solid var(--primary);
     }
 
 .sidebar-footer {
     padding: 1.25rem;
-    border-top: 1px solid rgba(255,255,255,0.1);
+    border-top: 1px solid var(--border);
 }
-
 
 .main-content {
     flex: 1;
@@ -371,6 +376,7 @@ textarea {
     background: var(--bg-card);
     border-radius: var(--radius);
     box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border);
 }
 
 .table-responsive {
@@ -389,7 +395,7 @@ textarea {
     }
 
     .data-table th {
-        background-color: #f8fafc;
+        background-color: var(--bg-input);
         color: var(--text-muted);
         font-size: 0.75rem;
         text-transform: uppercase;
@@ -397,7 +403,7 @@ textarea {
     }
 
     .data-table tbody tr:hover {
-        background-color: #f8fafc;
+        background-color: rgba(255, 255, 255, 0.03);
     }
 
 .pagination {
@@ -423,13 +429,14 @@ textarea {
 .modal-backdrop {
     position: absolute;
     inset: 0;
-    background-color: rgba(15, 23, 42, 0.6);
-    backdrop-filter: blur(2px);
+    background-color: rgba(15, 23, 42, 0.8);
+    backdrop-filter: blur(4px);
 }
 
 .modal-content {
     position: relative;
     background: var(--bg-card);
+    border: 1px solid var(--border);
     width: 90%;
     max-width: 500px;
     border-radius: 12px;
@@ -507,7 +514,12 @@ textarea {
 
 .detail-section p {
     margin-bottom: 0.5rem;
+    color: var(--text-muted);
 }
+
+    .detail-section p b {
+        color: var(--text-main);
+    }
 
 .full-width {
     grid-column: 1 / -1;
@@ -532,17 +544,16 @@ textarea {
     object-fit: cover;
     border-radius: var(--radius);
     border: 1px solid var(--border);
-    background-color: #f8fafc;
+    background-color: var(--bg-input);
 }
 
 .rejection-area {
-    background-color: #fef2f2;
-    border: 1px solid #f87171;
+    background-color: rgba(239, 68, 68, 0.1);
+    border: 1px solid var(--danger);
     border-radius: var(--radius);
     padding: 1rem;
     margin-top: 1rem;
 }
-
 
 .spinner {
     width: 16px;
@@ -562,7 +573,7 @@ textarea {
 }
 
 .dark-spinner {
-    border-color: rgba(0,0,0,0.1);
+    border-color: rgba(255,255,255,0.1);
     border-top-color: var(--primary);
 }
 
@@ -578,14 +589,13 @@ textarea {
     }
 }
 
-
 .skeleton-row td {
     padding: 1rem 1.5rem;
     border-bottom: 1px solid var(--border);
 }
 
 .skeleton {
-    background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%);
+    background: linear-gradient(90deg, #334155 25%, #475569 50%, #334155 75%);
     background-size: 200% 100%;
     animation: skeleton-loading 1.5s infinite linear;
 }
