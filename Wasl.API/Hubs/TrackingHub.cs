@@ -1,11 +1,12 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using Wasl.Application.Interfaces.Common;
 using Wasl.Application.Interfaces.Infrastructure;
 using Wasl.Core.Constants;
+using Wasl.Core.Entities;
 using Wasl.Core.Enums;
-using Microsoft.EntityFrameworkCore;
 
 namespace Wasl.API.Hubs
 {
@@ -23,7 +24,7 @@ namespace Wasl.API.Hubs
             _cacheService = cacheService;
         }
 
-        public async Task UpdateLocation(double latitude, double longitude)
+        public async Task UpdateLocation(double latitude, double longitude, string? rideId = null)
         {
             var driverId = Context.User?.FindFirst("uid")?.Value;
 
@@ -48,6 +49,11 @@ namespace Wasl.API.Hubs
                 {
                     await _redisCache.UpdateDriverLocationAsync(driverId, longitude, latitude);
                     await _cacheService.SetAsync($"DriverStatus:{driverId}", status, TimeSpan.FromHours(24), CancellationToken.None);
+
+                    if (!string.IsNullOrEmpty(rideId))
+                    {
+                        await Clients.Group($"Ride_{rideId}").SendAsync("ReceiveDriverLocation", latitude, longitude);
+                    }
                 }
                 else
                 {
@@ -56,7 +62,10 @@ namespace Wasl.API.Hubs
                 }
             }
         }
-
+        public async Task TrackRide(string rideId)
+        {
+            await Groups.AddToGroupAsync(Context.ConnectionId, $"Ride_{rideId}");
+        }
         public override async Task OnConnectedAsync()
         {
             var driverId = Context.User?.FindFirst("uid")?.Value;

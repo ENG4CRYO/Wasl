@@ -149,7 +149,8 @@ export const SignalRHandler = {
         UI.setButtonLoading(DOM.sendBtn, true);
 
         try {
-            await State.connection.invoke('UpdateLocation', lat, lng);
+            const currentRideId = State.activeRide ? State.activeRide.rideId : null;
+            await State.connection.invoke('UpdateLocation', lat, lng,currentRideId);
             UI.showToast(t('connected'), 'success');
         } catch {
             UI.showToast(t('networkError'), 'error');

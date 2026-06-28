@@ -53,7 +53,7 @@
 
                 ### 🚀 4. Client Invoking Events (Send)
                 Once connected, clients can send data to the server directly via SignalR:
-                * `UpdateLocation(double latitude, double longitude)`: **(Drivers Only)** Broadcasts the Driver's current GPS coordinates. Should be called periodically (e.g., every 5-10 seconds) while online or in an active ride.
+                * `UpdateLocation(double latitude, double longitude, string currnetRideId)`: **(Drivers Only)** Broadcasts the Driver's current GPS coordinates. Should be called periodically (every 3-10 seconds) while online or in an active ride ,Send rideId only when the driver have an active ride.
 
                 ### 🗺️ 5. Radar Simulator (Testing Tool)
                 We provide a built-in web simulator to test live tracking without a mobile app.
