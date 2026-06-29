@@ -68,7 +68,7 @@ public class DriverNotificationService : IDriverNotificationService
         {
             RideId = rideId,
             DriverId = driverId,
-            Message = _localizer["Rides.RideAcceptedByDriver"] ?? "تم قبول رحلتك، السائق في الطريق إليك."
+            Message = _localizer["Rides.RideAcceptedByDriver"]
         });
     }
 
@@ -78,7 +78,7 @@ public class DriverNotificationService : IDriverNotificationService
         await _hubContext.Clients.User(riderId).SendAsync("DriverArrived", new
         {
             RideId = rideId,
-            Message = _localizer["Rides.DriverArrived"] ?? "السائق وصل وهو في انتظارك بالخارج."
+            Message = _localizer["Rides.DriverArrived"] 
         });
     }
 
@@ -88,7 +88,7 @@ public class DriverNotificationService : IDriverNotificationService
         await _hubContext.Clients.User(riderId).SendAsync("RideStarted", new
         {
             RideId = rideId,
-            Message = _localizer["Rides.RideStarted"] ?? "بدأت الرحلة، نتمنى لك طريقاً آمناً."
+            Message = _localizer["Rides.RideStarted"] 
         });
     }
 
@@ -98,7 +98,7 @@ public class DriverNotificationService : IDriverNotificationService
         await _hubContext.Clients.User(riderId).SendAsync("RideCompleted", new
         {
             RideId = rideId,
-            Message = _localizer["Rides.RideCompleted"] ?? "انتهت الرحلة، شكراً لاستخدامك وصل."
+            Message = _localizer["Rides.RideCompleted"] 
         });
     }
 

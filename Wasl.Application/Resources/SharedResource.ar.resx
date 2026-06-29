@@ -384,4 +384,22 @@
   <data name="SignalRReceiveRideRequest" xml:space="preserve">
     <value>هناك طلب جديد لرحلة بالقرب منك!</value>
   </data>
+  <data name="Validation.Rides.PriceCalculated" xml:space="preserve">
+    <value>تم حساب التسعيرة بنجاح</value>
+  </data>
+  <data name="Currency" xml:space="preserve">
+    <value>د.ع</value>
+  </data>
+  <data name="Rides.RideAcceptedByDriver" xml:space="preserve">
+    <value>تم قبول رحلتك، السائق في الطريق إليك</value>
+  </data>
+  <data name="Rides.DriverArrived" xml:space="preserve">
+    <value>السائق وصل وهو في انتظارك بالخارج</value>
+  </data>
+  <data name="Rides.RideStarted" xml:space="preserve">
+    <value>بدأت الرحلة، نتمنى لك طريقاً آمناً</value>
+  </data>
+  <data name="Rides.RideCompleted" xml:space="preserve">
+    <value>انتهت الرحلة، شكراً لاستخدامك وصل</value>
+  </data>
 </root>

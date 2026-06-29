@@ -384,4 +384,22 @@
   <data name="SignalRReceiveRideRequest" xml:space="preserve">
     <value>A new ride request is near you!</value>
   </data>
+  <data name="Validation.Rides.PriceCalculated" xml:space="preserve">
+    <value>The price quote has been successfully calculated.</value>
+  </data>
+  <data name="Currency" xml:space="preserve">
+    <value>IQD</value>
+  </data>
+  <data name="Rides.RideAcceptedByDriver" xml:space="preserve">
+    <value>Your ride has been accepted the driver is on the way to you.</value>
+  </data>
+  <data name="Rides.DriverArrived" xml:space="preserve">
+    <value>The driver has arrived and is waiting for you outside.</value>
+  </data>
+  <data name="Rides.RideStarted" xml:space="preserve">
+    <value>The ride has begun we wish you a safe ride.</value>
+  </data>
+  <data name="Rides.RideCompleted" xml:space="preserve">
+    <value>The ride has ended. Thank you for using Wasel.</value>
+  </data>
 </root>
