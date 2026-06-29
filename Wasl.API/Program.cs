@@ -79,9 +79,6 @@ try
     });
 
 
-
-
-
     var supportedCultures = new[] { "en", "ar" };
     var localizationOptions = new RequestLocalizationOptions()
         .SetDefaultCulture(supportedCultures[0])

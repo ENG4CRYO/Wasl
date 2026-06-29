@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Wasl.Application.Common;
+using Wasl.Application.Dtos.Rides;
 using Wasl.Application.Features.Rides.Commands;
 using Wasl.Application.Features.Rides.Commands.AcceptRide;
 using Wasl.Application.Features.Rides.Commands.CancelRideByDriver;
@@ -14,6 +15,7 @@ using Wasl.Application.Features.Rides.Commands.CompleteRide;
 using Wasl.Application.Features.Rides.Commands.DriverArrived;
 using Wasl.Application.Features.Rides.Commands.RequestRide;
 using Wasl.Application.Features.Rides.Commands.StartRide;
+using Wasl.Application.Features.Rides.Queries.EstimateFare;
 using Wasl.Core.Constants;
 
 namespace Wasl.API.Controllers.V1
@@ -244,5 +246,53 @@ namespace Wasl.API.Controllers.V1
             var result = await _mediator.Send(new CancelRideByDriverCommand { RideId = id });
             return result.Succeeded ? Ok(result) : BadRequest(result);
         }
+
+        /// <summary>
+        /// Estimates the fare and distance for a ride before requesting it.
+        /// </summary>
+        /// <remarks>
+        /// **Role Required:** Rider
+        /// 
+        /// This endpoint calculates the straight-line distance between the pickup and drop-off 
+        /// coordinates, and returns the estimated price and distance based on the system's pricing rules.
+        /// It is typically called when the rider selects their destination, before confirming the ride.
+        /// </remarks>
+        /// <param name="pickupLat">The latitude of the pickup location.</param>
+        /// <param name="pickupLng">The longitude of the pickup location.</param>
+        /// <param name="dropoffLat">The latitude of the drop-off location.</param>
+        /// <param name="dropoffLng">The longitude of the drop-off location.</param>
+        /// <returns>An estimated price, distance, and currency for the ride.</returns>
+        [Authorize(Roles = AspRoles.Rider)]
+        [HttpGet("estimate")]
+        [Tags("Rides")]
+        [ProducesResponseType(typeof(ApiResponse<RideEstimateDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<RideEstimateDto>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        public async Task<IActionResult> EstimateFare(
+            [FromQuery] double pickupLat,
+            [FromQuery] double pickupLng,
+            [FromQuery] double dropoffLat,
+            [FromQuery] double dropoffLng)
+        {
+            var query = new EstimateRideFareQuery
+            {
+                PickupLat = pickupLat,
+                PickupLng = pickupLng,
+                DropoffLat = dropoffLat,
+                DropoffLng = dropoffLng
+            };
+
+            var result = await _mediator.Send(query);
+
+            if (!result.Succeeded)
+            {
+                return BadRequest(result);
+            }
+
+            return Ok(result);
+        }
+
+
     }
 }
