@@ -7,9 +7,9 @@ namespace Wasl.Application.Features.Rides.Commands.RequestRide;
 
 public class CreateRideRequestCommand : IRequest<ApiResponse<Guid>>
 {
-    public double PickupLatitude { get; set; }
-    public double PickupLongitude { get; set; }
-    public double DropoffLatitude { get; set; }
-    public double DropoffLongitude { get; set; }
+    public double pickupLat { get; set; }
+    public double pickupLng { get; set; }
+    public double dropoffLat { get; set; }
+    public double dropoffLng { get; set; }
 
 }

@@ -15,11 +15,11 @@ namespace Wasl.Application.Features.Rides.Commands.RequestRide
             _localizer = localizer;
             RuleLevelCascadeMode = CascadeMode.Stop;
 
-            RuleFor(x => x.PickupLatitude)
+            RuleFor(x => x.pickupLat)
                 .NotNull().WithMessage(_localizer["Validation.Rides.LatitudeNotNull"])
                 .NotEmpty().WithMessage(_localizer["Validation.Rides.LatitudeNotEmpty"]);
 
-            RuleFor(x => x.PickupLongitude)
+            RuleFor(x => x.pickupLng)
                 .NotNull().WithMessage(_localizer["Validation.Rides.LongitudeNotNull"])
                 .NotEmpty().WithMessage(_localizer["Validation.Rides.LongitudeNotEmpty"]);
 

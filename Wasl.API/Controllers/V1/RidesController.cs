@@ -267,8 +267,8 @@ namespace Wasl.API.Controllers.V1
         [Tags("Rides")]
         [ProducesResponseType(typeof(ApiResponse<RideEstimateDto>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<RideEstimateDto>), StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(typeof(ApiResponse<RideEstimateDto>), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ApiResponse<RideEstimateDto>), StatusCodes.Status403Forbidden)]
         public async Task<IActionResult> EstimateFare(
             [FromQuery] double pickupLat,
             [FromQuery] double pickupLng,

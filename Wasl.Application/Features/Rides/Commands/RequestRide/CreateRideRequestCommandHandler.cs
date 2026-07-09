@@ -52,15 +52,15 @@ public class CreateRideRequestCommandHandler : IRequestHandler<CreateRideRequest
             return ApiResponse<Guid>.Failure(_localizer["Auth.Unauthenticated"]);
         }
         var (fare, distance) = _priceCalculator.CalculateFare(
-        request.PickupLatitude, request.PickupLongitude,
-        request.DropoffLatitude, request.DropoffLongitude);
+        request.pickupLat, request.pickupLng,
+        request.dropoffLat, request.dropoffLng);
         var ride = new Ride
         {
             Id = newRideId,
-            PickupLatitude = request.PickupLatitude,
-            PickupLongitude = request.PickupLongitude,
-            DropoffLatitude = request.DropoffLatitude,
-            DropoffLongitude = request.DropoffLongitude,
+            PickupLatitude = request.pickupLat,
+            PickupLongitude = request.pickupLng,
+            DropoffLatitude = request.dropoffLat,
+            DropoffLongitude = request.dropoffLng,
             Status = RideStatus.Pending,
             CreatedAt = DateTime.UtcNow,
             RequestedAt = DateTime.UtcNow,
@@ -72,7 +72,7 @@ public class CreateRideRequestCommandHandler : IRequestHandler<CreateRideRequest
         await _dbContext.SaveChangesAsync(cancellationToken);
 
         _backgroundJobClient.Enqueue(() =>
-            _dispatchService.DispatchRideAsync(newRideId, request.PickupLatitude, request.PickupLongitude, 3.0,CancellationToken.None)
+            _dispatchService.DispatchRideAsync(newRideId, request.pickupLat, request.pickupLng, 3.0,CancellationToken.None)
         );
 
         return ApiResponse<Guid>.Success(newRideId, _localizer["Rides.RequestRideReceivedSuccessfully"]);
