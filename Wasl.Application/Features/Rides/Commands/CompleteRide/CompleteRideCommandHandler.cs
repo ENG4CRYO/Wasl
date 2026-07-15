@@ -81,7 +81,7 @@ namespace Wasl.Application.Features.Rides.Commands.CompleteRide
             ride.CompletedAt = DateTime.UtcNow; 
 
             await _dbContext.SaveChangesAsync(cancellationToken);
-            await _driverNotification.NotifyRiderRideStartedAsync(ride.RiderId, ride.Id);
+            await _driverNotification.NotifyRiderRideCompletedAsync(ride.RiderId, ride.Id);
 
             return ApiResponse<bool>.Success(true, _localizer["Rides.RideCompletedSuccessfully"]);
         }
