@@ -57,7 +57,7 @@ namespace Wasl.API.Hubs
                 }
                 else
                 {
-            
+
                     Context.Abort();
                 }
             }
@@ -68,8 +68,15 @@ namespace Wasl.API.Hubs
         }
         public override async Task OnConnectedAsync()
         {
-            var driverId = Context.User?.FindFirst("uid")?.Value;
 
+            bool isRider = Context.User?.IsInRole(AspRoles.Rider) ?? false;
+            if (isRider)
+            {
+                await base.OnConnectedAsync();
+                return;
+            }
+
+            var driverId = Context.User?.FindFirst("uid")?.Value;
 
             if (string.IsNullOrEmpty(driverId))
             {
@@ -89,7 +96,6 @@ namespace Wasl.API.Hubs
                 if (driver != null)
                 {
                     status = driver.ApprovalStatus;
-
                     await _cacheService.SetAsync($"DriverStatus:{driverId}", status, TimeSpan.FromHours(24), CancellationToken.None);
                 }
             }
@@ -106,12 +112,15 @@ namespace Wasl.API.Hubs
 
         public override async Task OnDisconnectedAsync(Exception? exception)
         {
-            var driverId = Context.User?.FindFirst("uid")?.Value;
+            bool isDriver = Context.User?.IsInRole(AspRoles.Driver) ?? false;
 
-            if (!string.IsNullOrEmpty(driverId))
+            if (isDriver)
             {
-
-                await _redisCache.RemoveDriverLocationAsync(driverId);
+                var driverId = Context.User?.FindFirst("uid")?.Value;
+                if (!string.IsNullOrEmpty(driverId))
+                {
+                    await _redisCache.RemoveDriverLocationAsync(driverId);
+                }
             }
 
             await base.OnDisconnectedAsync(exception);
