@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Wasl.Infrastructure.Data;
@@ -11,9 +12,11 @@ using Wasl.Infrastructure.Data;
 namespace Wasl.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260721173107_AddedAvgRatingToRide")]
+    partial class AddedAvgRatingToRide
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -320,9 +323,6 @@ namespace Wasl.Infrastructure.Migrations
                     b.Property<int>("ApprovalStatus")
                         .HasColumnType("integer");
 
-                    b.Property<decimal>("AverageRating")
-                        .HasColumnType("numeric");
-
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -337,9 +337,6 @@ namespace Wasl.Infrastructure.Migrations
 
                     b.Property<string>("SelfieUrl")
                         .HasColumnType("text");
-
-                    b.Property<int>("TotalReviews")
-                        .HasColumnType("integer");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -381,6 +378,9 @@ namespace Wasl.Infrastructure.Migrations
 
                     b.Property<DateTime?>("AcceptedAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<decimal>("AvgRating")
+                        .HasColumnType("numeric");
 
                     b.Property<decimal>("CalculatedPrice")
                         .HasColumnType("decimal(18,2)");

@@ -6,6 +6,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
 
 	  <GenerateDocumentationFile>true</GenerateDocumentationFile>
+		  <NuGetAudit>false</NuGetAudit>
+	 
 	  <NoWarn>$(NoWarn);1591</NoWarn>
 	  
   </PropertyGroup>
@@ -17,7 +19,7 @@
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
     <PackageReference Include="MediatR" Version="14.1.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.6" />
-    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.6" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.10" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.6" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.6">
       <PrivateAssets>all</PrivateAssets>

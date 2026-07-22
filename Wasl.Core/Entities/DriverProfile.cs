@@ -17,7 +17,8 @@ namespace Wasl.Core.Entities
         public string? LicenseFrontUrl { get; set; }
         public string? LicenseBackUrl { get; set; }
         public string? SelfieUrl { get; set; }
-
+        public decimal AverageRating { get; set; }
+        public int TotalReviews { get; set; }
         public DriverApprovalStatus ApprovalStatus { get; set; } = DriverApprovalStatus.Pending;
 
     }

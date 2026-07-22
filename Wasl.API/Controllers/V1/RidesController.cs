@@ -14,6 +14,7 @@ using Wasl.Application.Features.Rides.Commands.CancelRideByRider;
 using Wasl.Application.Features.Rides.Commands.CompleteRide;
 using Wasl.Application.Features.Rides.Commands.DriverArrived;
 using Wasl.Application.Features.Rides.Commands.RequestRide;
+using Wasl.Application.Features.Rides.Commands.ReviewRide;
 using Wasl.Application.Features.Rides.Commands.StartRide;
 using Wasl.Application.Features.Rides.Queries.EstimateFare;
 using Wasl.Core.Constants;
@@ -284,6 +285,45 @@ namespace Wasl.API.Controllers.V1
             };
 
             var result = await _mediator.Send(query);
+
+            if (!result.Succeeded)
+            {
+                return BadRequest(result);
+            }
+
+            return Ok(result);
+        }
+
+
+        /// <summary>
+        /// Submits a review and rating for a completed ride.
+        /// </summary>
+        /// <remarks>
+        /// **Role Required:** Rider
+        /// 
+        /// Validates that the ride belongs to the caller, is completed, and has not been reviewed yet.
+        /// The driver ID is securely inferred from the ride details on the server side.
+        /// </remarks>
+        /// <param name="id">The unique identifier of the Ride to review.</param>
+        /// <param name="dto">Contains the rating (1-5) and an optional comment.</param>
+        /// <returns>A success message indicating the review was saved.</returns>
+        [Authorize(Roles = AspRoles.Rider)]
+        [HttpPost("{id}/review")]
+        [Tags("Rides")]
+        [ProducesResponseType(typeof(ApiResponse<bool>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<bool>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        public async Task<IActionResult> ReviewRide(Guid id, [FromBody] ReviewRideRequestDto dto)
+        {
+            var command = new ReviewRideCommand
+            {
+                RideId = id,
+                Rating = dto.Rating,
+                Comment = dto.Comment
+            };
+
+            var result = await _mediator.Send(command);
 
             if (!result.Succeeded)
             {
