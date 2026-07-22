@@ -402,4 +402,22 @@
   <data name="Rides.RideCompleted" xml:space="preserve">
     <value>The ride has ended. Thank you for using Wasel.</value>
   </data>
+  <data name="Validation.Rides.RatingRange" xml:space="preserve">
+    <value>Rating must be between 1 and 5</value>
+  </data>
+  <data name="Validation.Rides.CommentMaxLength" xml:space="preserve">
+    <value>Comment cannot exceed 500 characters</value>
+  </data>
+  <data name="Rides.ReviewNotOwnRide" xml:space="preserve">
+    <value>You do not have permission to review a ride that is not yours.</value>
+  </data>
+  <data name="Rides.ReviewOnlyCompleted" xml:space="preserve">
+    <value>Only completed rides can be reviewed.</value>
+  </data>
+  <data name="Rides.AlreadyReviewed" xml:space="preserve">
+    <value>You have already reviewed this ride.</value>
+  </data>
+  <data name="Rides.ReviewSubmittedSuccessfully" xml:space="preserve">
+    <value>Review submitted successfully.</value>
+  </data>
 </root>

@@ -402,4 +402,22 @@
   <data name="Rides.RideCompleted" xml:space="preserve">
     <value>انتهت الرحلة، شكراً لاستخدامك وصل</value>
   </data>
+  <data name="Validation.Rides.RatingRange" xml:space="preserve">
+    <value>التقييم يجب أن يكون بين 1 و 5</value>
+  </data>
+  <data name="Validation.Rides.CommentMaxLength" xml:space="preserve">
+    <value>التعليق لا يمكن أن يتجاوز 500 حرف</value>
+  </data>
+  <data name="Rides.ReviewNotOwnRide" xml:space="preserve">
+    <value>لا تملك صلاحية تقييم رحلة لا تخصك.</value>
+  </data>
+  <data name="Rides.ReviewOnlyCompleted" xml:space="preserve">
+    <value>لا يمكن تقييم إلا الرحلات المكتملة.</value>
+  </data>
+  <data name="Rides.AlreadyReviewed" xml:space="preserve">
+    <value>لقد قمت بتقييم هذه الرحلة مسبقاً.</value>
+  </data>
+  <data name="Rides.ReviewSubmittedSuccessfully" xml:space="preserve">
+    <value>تم إرسال التقييم بنجاح.</value>
+  </data>
 </root>
