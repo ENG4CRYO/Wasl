@@ -6,7 +6,7 @@ namespace Wasl.Application.Dtos.Rides
 {
     public class ReviewRideRequestDto
     {
-        public int Rating { get; set; } 
-        public string? Comment { get; set; }
+        public int Rating { get; set; }
+        public string Comment { get; set; } = default!;
     }
 }
