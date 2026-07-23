@@ -26,55 +26,89 @@
                 ---
 
                 ## 📡 Real-Time Communication (SignalR)
-                The platform relies heavily on **SignalR** backed by **Redis** for high-performance, real-time location tracking and ride lifecycle management. Front-end applications MUST implement these listeners to function correctly.
+                The platform relies heavily on **SignalR** with **Redis geo-location** for high-performance, real-time location tracking and ride lifecycle management. Front-end applications MUST implement these listeners to function correctly.
 
                 ### 🔌 1. Connecting to the Hub
-                - **Endpoint URL:** `https://apiservice.ddns.net/hubs/tracking`
+                - **Endpoint URL:** `https://apiservice.ddns.net/wasl/hubs/tracking`
                 - **Authentication:** Standard browser WebSockets do not support HTTP Headers. You **must** pass the JWT Access Token in the URL query string:
                   `?access_token=YOUR_JWT_TOKEN`
+                - **User Identity:** SignalR maps users via the `uid` claim in the JWT. This is used by `Clients.User(userId)` to send targeted events.
+                - **Reconnection:** The client should use `.withAutomaticReconnect()` (built-in retry: 0s, 2s, 10s, 30s then exponential backoff). Listen for:
+                  - `onreconnecting` → Show "Reconnecting..." UI state
+                  - `onreconnected` → Restore connected state
+                  - `onclose` → Show "Disconnected" UI state; if 401, redirect to login
 
-                ### 🚕 2. For DRIVERS: Listening Events (On)
+                ### 📍 2. Client-Callable Hub Methods (Invoke)
+
+                | Method | Parameters | Who | Description |
+                |--------|-----------|-----|-------------|
+                | `UpdateLocation` | `(double latitude, double longitude, string? rideId)` | **Driver** | Updates GPS in Redis GEO index. Call every 3–10s while online. Pass `rideId` only during an active ride to broadcast location to rider. If driver is not Approved, connection is aborted. |
+                | `TrackRide` | `(string rideId)` | **Rider** | Joins the `Ride_{rideId}` group to start receiving live driver location updates. Must be called once after ride is accepted. |
+
+                ### 🚕 3. For DRIVERS: Listening Events (On)
                 Drivers must listen to these events to receive and manage ride requests:
                 * `ReceiveRideRequest`: Triggered when a new ride is requested nearby.
-                    * **Payload (JSON):** `{ "rideId": "guid", "lat": double, "lng": double, "dropLat": double, "dropLng": double, "price": decimal }`
+                    * **Payload (JSON):** `{ "rideId": "guid", "lat": double, "lng": double, "dropLat": double, "dropLng": double, "calculatedPrice": decimal, "message": string }`
                 * `HideRideRequest`: Triggered when a Rider cancels a *Pending* ride. The frontend MUST close the request popup if the ID matches.
                     * **Payload (String):** `rideId`
-                * `RideCancelled`: Triggered when a Rider cancels a ride *after* the driver has accepted it.
-                    * **Payload (String):** `message` 
+                * `RideCancelled`: Triggered when a Rider cancels a ride *after* the driver has accepted it, or when the ride auto-cancels after 5 minutes.
+                    * **Payload (String):** `message`
                 * `ProfileReviewed`: Triggered instantly when an Admin approves or rejects your submitted profile.
                     * **Payload (JSON):** `{ "isApproved": boolean, "message": string }`
                     * *(Note: If `isApproved` is true, the driver account is fully activated. If false, the `message` will contain the rejection reason so the driver can fix the issues).*
 
-                ### 👤 3. For RIDERS: Listening Events (On)
+                ### 👤 4. For RIDERS: Listening Events (On)
                 Riders must listen to these specific events regarding their active trips to automatically update the UI without polling the server:
 
-                * `ReceiveDriverLocation`: Triggered whenever the driver updates their live location on the map. *(Note: The rider must call `TrackRide` first to join the room).*
-                    * **Payload (Double, Double):** `latitude`, `longitude`
+                * `ReceiveDriverLocation`: Triggered whenever the driver updates their live location on the map. *(Note: The rider must call `TrackRide` first to join the group).*
+                    * **Payload (two positional arguments):** `latitude` (double), `longitude` (double)
 
                 * `RideAccepted`: Triggered immediately when a driver accepts the requested trip. The app should transition from the "finding driver" state to showing driver details.
-                    * **Payload (Object):** `{ "rideId": "guid", "driverId": "string", "message": "string" }`
+                    * **Payload (JSON):** `{ "rideId": "guid", "driverId": "string", "message": "string" }`
 
                 * `DriverArrived`: Triggered when the driver taps the "Arrived" button. The app should display a notification for the rider to head out.
-                    * **Payload (Object):** `{ "rideId": "guid", "message": "string" }`
+                    * **Payload (JSON):** `{ "rideId": "guid", "message": "string" }`
 
                 * `RideStarted`: Triggered when the rider boards the car and the trip officially begins. The app should transition to the "In Transit" state.
-                    * **Payload (Object):** `{ "rideId": "guid", "message": "string" }`
+                    * **Payload (JSON):** `{ "rideId": "guid", "message": "string" }`
 
                 * `RideCompleted`: Triggered when the driver successfully ends the trip. The app should close the map and display the receipt and rating screen.
-                    * **Payload (Object):** `{ "rideId": "guid", "message": "string" }`
+                    * **Payload (JSON):** `{ "rideId": "guid", "message": "string" }`
 
                 * `RideCancelled`: Triggered if the driver or the system cancels the active trip. The app should return to the home screen and display the reason.
                     * **Payload (String):** `message`
 
 
-                ### 🚀 4. Client Invoking Events (Send)
-                Once connected, clients can send data to the server directly via SignalR:
-                * `UpdateLocation(double latitude, double longitude, string currnetRideId)`: **(Drivers Only)** Broadcasts the Driver's current GPS coordinates. Should be called periodically (every 3-10 seconds) while online or in an active ride ,Send rideId only when the driver have an active ride.
+                ### 🚀 5. Connection Lifecycle & Driver Approval
+                - **On connect:** For Drivers, the server checks `ApprovalStatus`. If not **Approved**, the connection is aborted immediately.
+                - **On disconnect:** The driver's location is automatically removed from the Redis GEO index, making them invisible for new ride requests.
+                - **Rider connections:** No special validation on connect; riders need only a valid JWT.
 
-                ### 🗺️ 5. Radar Simulator (Testing Tool)
-                We provide a built-in web simulator to test live tracking without a mobile app.
-                - **Simulator Link:** `https://apiservice.ddns.net/wasl/driver_radar_simulation.html`
-                - **Usage:** Login as a Driver. The simulator will automatically connect to SignalR and start broadcasting mock GPS movements on the map, and can receive ride requests.
+                ### 🗺️ 6. Ride Dispatch Mechanism
+                When a ride is requested, the system finds nearby drivers via a background job:
+
+                - **Radius expansion:** Starts at **2km**, increases by **+2km every 60 seconds** (up to 10km max).
+                - **Excluded drivers:** Already-notified drivers are tracked in Redis (`ride:{rideId}:excluded`, TTL: 10 min) to avoid duplicate notifications.
+                - **Auto-cancel:** If no driver accepts within **5 minutes**, the ride status changes to `Cancelled` automatically.
+                - **Rider cancellation (Pending):** Sends `HideRideRequest` to all notified drivers so they can remove the popup.
+                - **Race condition protection:** Ride acceptance uses a **distributed Redis lock** (`RideLock:{rideId}`) with 5-minute TTL to prevent two drivers accepting the same ride.
+
+                ### 🗺️ 7. WebSocket CORS Requirement
+                The API CORS policy includes `.AllowCredentials()` which is **required** for SignalR WebSocket connections. Ensure your frontend's requests include credentials (e.g. `withCredentials` in fetch or `accessTokenFactory` in SignalR).
+
+                ### 🔌 8. Summary of All Events & Payloads
+
+                | # | Event Name | Sent To | Payload |
+                |---|-----------|---------|---------|
+                | 1 | `ReceiveRideRequest` | Drivers (nearby) | `{ "rideId", "lat", "lng", "dropLat", "dropLng", "calculatedPrice", "message" }` |
+                | 2 | `HideRideRequest` | Drivers (notified) | `string (rideId)` |
+                | 3 | `RideCancelled` | Rider or Driver | `string (message)` |
+                | 4 | `ProfileReviewed` | Driver | `{ "isApproved": bool, "message": string }` |
+                | 5 | `ReceiveDriverLocation` | Ride Group | Positional args: `latitude, longitude` |
+                | 6 | `RideAccepted` | Rider | `{ "rideId", "driverId", "message" }` |
+                | 7 | `DriverArrived` | Rider | `{ "rideId", "message" }` |
+                | 8 | `RideStarted` | Rider | `{ "rideId", "message" }` |
+                | 9 | `RideCompleted` | Rider | `{ "rideId", "message" }` |
 
                 ---
 

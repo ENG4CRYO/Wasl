@@ -420,4 +420,22 @@
   <data name="Rides.ReviewSubmittedSuccessfully" xml:space="preserve">
     <value>تم إرسال التقييم بنجاح.</value>
   </data>
+  <data name="Rides.HistoryRetrievedSuccessfully" xml:space="preserve">
+    <value>تم استرجاع سجل الرحلات بنجاح.</value>
+  </data>
+  <data name="Rides.Completed" xml:space="preserve">
+    <value>مكتملة</value>
+  </data>
+  <data name="Rides.Cancelled" xml:space="preserve">
+    <value>ملغية</value>
+  </data>
+  <data name="Validation.Common.PageNumberGreaterThanZero" xml:space="preserve">
+    <value>رقم الصفحة يجب أن يكون أكبر من صفر.</value>
+  </data>
+  <data name="Validation.Common.PageSizeGreaterThanZero" xml:space="preserve">
+    <value>حجم الصفحة يجب أن يكون أكبر من صفر.</value>
+  </data>
+  <data name="Validation.Common.PageSizeMax100" xml:space="preserve">
+    <value>حجم الصفحة لا يمكن أن يتجاوز 100.</value>
+  </data>
 </root>

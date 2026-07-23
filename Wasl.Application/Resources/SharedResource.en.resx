@@ -420,4 +420,22 @@
   <data name="Rides.ReviewSubmittedSuccessfully" xml:space="preserve">
     <value>Review submitted successfully.</value>
   </data>
+  <data name="Rides.HistoryRetrievedSuccessfully" xml:space="preserve">
+    <value>Ride history retrieved successfully.</value>
+  </data>
+  <data name="Rides.Completed" xml:space="preserve">
+    <value>Completed</value>
+  </data>
+  <data name="Rides.Cancelled" xml:space="preserve">
+    <value>Cancelled</value>
+  </data>
+  <data name="Validation.Common.PageNumberGreaterThanZero" xml:space="preserve">
+    <value>Page number must be greater than zero.</value>
+  </data>
+  <data name="Validation.Common.PageSizeGreaterThanZero" xml:space="preserve">
+    <value>Page size must be greater than zero.</value>
+  </data>
+  <data name="Validation.Common.PageSizeMax100" xml:space="preserve">
+    <value>Page size cannot exceed 100.</value>
+  </data>
 </root>

@@ -17,6 +17,7 @@ using Wasl.Application.Features.Rides.Commands.RequestRide;
 using Wasl.Application.Features.Rides.Commands.ReviewRide;
 using Wasl.Application.Features.Rides.Commands.StartRide;
 using Wasl.Application.Features.Rides.Queries.EstimateFare;
+using Wasl.Application.Features.Rides.Queries.GetRideHistory;
 using Wasl.Core.Constants;
 
 namespace Wasl.API.Controllers.V1
@@ -294,6 +295,29 @@ namespace Wasl.API.Controllers.V1
             return Ok(result);
         }
 
+
+        /// <summary>
+        /// Gets the ride history for the current user (Rider or Driver).
+        /// </summary>
+        /// <remarks>
+        /// **Roles Required:** Rider, Driver
+        /// 
+        /// Returns a paginated list of past rides (Completed / Cancelled only).
+        /// Riders see rides where they are the rider; Drivers see rides where they are the driver.
+        /// </remarks>
+        /// <param name="query">Pagination parameters (PageNumber, PageSize).</param>
+        /// <returns>A paginated list of ride history entries.</returns>
+        [Authorize(Roles = "Rider,Driver")]
+        [HttpGet("history")]
+        [Tags("Rides")]
+        [ProducesResponseType(typeof(ApiResponse<PagedList<RideHistoryDto>>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        public async Task<IActionResult> GetRideHistory([FromQuery] GetRideHistoryQuery query)
+        {
+            var result = await _mediator.Send(query);
+            return result.Succeeded ? Ok(result) : BadRequest(result);
+        }
 
         /// <summary>
         /// Submits a review and rating for a completed ride.

@@ -283,7 +283,7 @@ namespace Wasl.UnitTests.TestHelpers
         }
     }
 
-    internal class AsyncQueryable<T> : IQueryable<T>, IAsyncEnumerable<T>
+    internal class AsyncQueryable<T> : IOrderedQueryable<T>, IAsyncEnumerable<T>
     {
         private readonly Expression _expression;
         private readonly TestAsyncQueryProvider _provider;
