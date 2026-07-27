@@ -1,7 +1,9 @@
 using FluentAssertions;
 using Microsoft.Extensions.Localization;
+using Microsoft.Extensions.Options;
 using Moq;
 using Wasl.Application.Common;
+using Wasl.Application.Common.Models;
 using Wasl.Application.Features.Rides.Commands.CompleteRide;
 using Wasl.Application.Interfaces.Common;
 using Wasl.Application.Interfaces.Infrastructure;
@@ -19,6 +21,8 @@ public class CompleteRideCommandHandlerTests
     private readonly Mock<IStringLocalizer<SharedResource>> _localizerMock;
     private readonly Mock<ICurrentUserService> _currentUserServiceMock;
     private readonly Mock<IDriverNotificationService> _driverNotificationMock;
+    private readonly Mock<IWalletService> _walletServiceMock;
+    private readonly IOptions<RidePricingSettings> _pricingSettings;
     private readonly CompleteRideCommandHandler _handler;
     private readonly List<Ride> _rides;
     private readonly List<DriverProfile> _driverProfiles;
@@ -49,6 +53,8 @@ public class CompleteRideCommandHandlerTests
         });
         _currentUserServiceMock = TestDataFactory.MockCurrentUserService(_driverId);
         _driverNotificationMock = new Mock<IDriverNotificationService>();
+        _walletServiceMock = new Mock<IWalletService>();
+        _pricingSettings = TestDataFactory.CreateRidePricingSettings();
 
         var ridesDbSetMock = TestDataFactory.MockDbSet(_rides);
         _dbContextMock.Setup(x => x.Rides).Returns(ridesDbSetMock.Object);
@@ -56,14 +62,35 @@ public class CompleteRideCommandHandlerTests
         var driverProfilesDbSetMock = TestDataFactory.MockDbSet(_driverProfiles);
         _dbContextMock.Setup(x => x.DriverProfiles).Returns(driverProfilesDbSetMock.Object);
 
+        var transactionMock = new Mock<Microsoft.EntityFrameworkCore.Storage.IDbContextTransaction>();
+        _dbContextMock.Setup(x => x.BeginTransactionAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(transactionMock.Object);
+
         _dbContextMock.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(1);
+
+        _walletServiceMock
+            .Setup(x => x.TransferFundsAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<decimal>(),
+                It.IsAny<TransactionType>(), It.IsAny<Guid?>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new WalletOperationResult(true, 100));
+
+        _walletServiceMock
+            .Setup(x => x.DeductFundsAsync(It.IsAny<string>(), It.IsAny<decimal>(),
+                It.IsAny<TransactionType>(), It.IsAny<Guid?>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new WalletOperationResult(true, 100));
+
+        _walletServiceMock
+            .Setup(x => x.AddFundsAsync(It.IsAny<string>(), It.IsAny<decimal>(),
+                It.IsAny<TransactionType>(), It.IsAny<Guid?>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new WalletOperationResult(true, 100));
 
         _handler = new CompleteRideCommandHandler(
             _dbContextMock.Object,
             _localizerMock.Object,
             _currentUserServiceMock.Object,
-            _driverNotificationMock.Object);
+            _driverNotificationMock.Object,
+            _walletServiceMock.Object,
+            _pricingSettings);
     }
 
     [Fact]

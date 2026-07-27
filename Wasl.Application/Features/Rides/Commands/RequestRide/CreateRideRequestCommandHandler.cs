@@ -25,6 +25,7 @@ public class CreateRideRequestCommandHandler : IRequestHandler<CreateRideRequest
     private readonly IStringLocalizer<SharedResource> _localizer;
     private readonly ICurrentUserService _currentUserService;
     private readonly IRideFareCalculator _priceCalculator;
+    private readonly IWalletService _walletService;
 
     public CreateRideRequestCommandHandler(
         IBackgroundJobClient backgroundJobClient,
@@ -32,7 +33,8 @@ public class CreateRideRequestCommandHandler : IRequestHandler<CreateRideRequest
         IApplicationDbContext dbContext,
         IStringLocalizer<SharedResource> localizer,
         ICurrentUserService currentUserService,
-        IRideFareCalculator priceCalculator)
+        IRideFareCalculator priceCalculator,
+        IWalletService walletService)
     {
         _backgroundJobClient = backgroundJobClient;
         _dispatchService = dispatchService;
@@ -40,6 +42,7 @@ public class CreateRideRequestCommandHandler : IRequestHandler<CreateRideRequest
         _localizer = localizer;
         _currentUserService = currentUserService;
         _priceCalculator = priceCalculator;
+        _walletService = walletService;
     }
 
     public async Task<ApiResponse<Guid>> Handle(CreateRideRequestCommand request, CancellationToken cancellationToken)
@@ -54,6 +57,16 @@ public class CreateRideRequestCommandHandler : IRequestHandler<CreateRideRequest
         var (fare, distance) = _priceCalculator.CalculateFare(
         request.pickupLat, request.pickupLng,
         request.dropoffLat, request.dropoffLng);
+        if (request.PaymentMethod == PaymentMethod.Wallet)
+        {
+            var rider = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == riderId, cancellationToken);
+            if (rider is null)
+                return ApiResponse<Guid>.Failure(_localizer["Auth.Unauthenticated"]);
+
+            if (rider.Balance < fare)
+                return ApiResponse<Guid>.Failure(_localizer["Rides.InsufficientWalletBalance"]);
+        }
+
         var ride = new Ride
         {
             Id = newRideId,
@@ -65,6 +78,7 @@ public class CreateRideRequestCommandHandler : IRequestHandler<CreateRideRequest
             CreatedAt = DateTime.UtcNow,
             RequestedAt = DateTime.UtcNow,
             CalculatedPrice = fare,
+            PaymentMethod = request.PaymentMethod,
             RiderId = riderId
         };
 

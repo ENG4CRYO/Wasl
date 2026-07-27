@@ -6,7 +6,8 @@ namespace Wasl.Core.Enums
 {
     public enum PaymentMethod
     {
-        Cash =1,
-        Visa=2
+        Cash = 1,
+        Card=2,
+        Wallet = 3
     }
 }

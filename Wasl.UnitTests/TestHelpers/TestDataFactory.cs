@@ -103,7 +103,8 @@ namespace Wasl.UnitTests.TestHelpers
                 PerKmRate = 2.5m,
                 PerMinuteRate = 0.5m,
                 MinimumFare = 10.0m,
-                AverageCitySpeedKmh = 30.0
+                AverageCitySpeedKmh = 30.0,
+                CompanyCommissionRate = 0.20m
             });
         }
 

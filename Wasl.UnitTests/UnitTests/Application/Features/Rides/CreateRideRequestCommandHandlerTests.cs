@@ -23,12 +23,18 @@ public class CreateRideRequestCommandHandlerTests
     private readonly Mock<IStringLocalizer<SharedResource>> _localizerMock;
     private readonly Mock<ICurrentUserService> _currentUserServiceMock;
     private readonly Mock<IRideFareCalculator> _priceCalculatorMock;
+    private readonly Mock<IWalletService> _walletServiceMock;
     private readonly CreateRideRequestCommandHandler _handler;
     private readonly List<Ride> _rides;
+    private readonly List<ApplicationUser> _users;
 
     public CreateRideRequestCommandHandlerTests()
     {
         _rides = new List<Ride>();
+        _users = new List<ApplicationUser>
+        {
+            TestDataFactory.CreateTestUser("rider@test.com", "test-user-id")
+        };
 
         _backgroundJobClientMock = new Mock<IBackgroundJobClient>();
         _dispatchServiceMock = new Mock<IRideDispatchService>();
@@ -36,13 +42,18 @@ public class CreateRideRequestCommandHandlerTests
         _localizerMock = TestDataFactory.MockLocalizer<SharedResource>(new Dictionary<string, string>
         {
             ["Auth.Unauthenticated"] = "User is not authenticated.",
-            ["Rides.RequestRideReceivedSuccessfully"] = "Ride request received."
+            ["Rides.RequestRideReceivedSuccessfully"] = "Ride request received.",
+            ["Rides.InsufficientWalletBalance"] = "Insufficient wallet balance."
         });
         _currentUserServiceMock = TestDataFactory.MockCurrentUserService();
         _priceCalculatorMock = new Mock<IRideFareCalculator>();
+        _walletServiceMock = new Mock<IWalletService>();
 
         var ridesDbSetMock = TestDataFactory.MockDbSet(_rides);
         _dbContextMock.Setup(x => x.Rides).Returns(ridesDbSetMock.Object);
+
+        var usersDbSetMock = TestDataFactory.MockDbSet(_users);
+        _dbContextMock.Setup(x => x.Users).Returns(usersDbSetMock.Object);
 
         _dbContextMock.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(1);
@@ -57,7 +68,8 @@ public class CreateRideRequestCommandHandlerTests
             _dbContextMock.Object,
             _localizerMock.Object,
             _currentUserServiceMock.Object,
-            _priceCalculatorMock.Object);
+            _priceCalculatorMock.Object,
+            _walletServiceMock.Object);
     }
 
     [Fact]

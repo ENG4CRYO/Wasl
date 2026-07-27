@@ -1,10 +1,12 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
+using Microsoft.Extensions.Options;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Wasl.Application.Common;
+using Wasl.Application.Common.Models;
 using Wasl.Application.Interfaces.Common;
 using Wasl.Application.Interfaces.Infrastructure;
 using Wasl.Application.Resources;
@@ -17,18 +19,24 @@ namespace Wasl.Application.Features.Rides.Commands.CompleteRide
         private readonly IApplicationDbContext _dbContext;
         private readonly IStringLocalizer<SharedResource> _localizer;
         private readonly ICurrentUserService _currentUserService;
-        private readonly IDriverNotificationService _driverNotification;    
+        private readonly IDriverNotificationService _driverNotification;
+        private readonly IWalletService _walletService;
+        private readonly RidePricingSettings _pricingSettings;
 
         public CompleteRideCommandHandler(
             IApplicationDbContext dbContext,
             IStringLocalizer<SharedResource> localizer,
             ICurrentUserService currentUserService,
-            IDriverNotificationService driverNotification)
+            IDriverNotificationService driverNotification,
+            IWalletService walletService,
+            IOptions<RidePricingSettings> pricingSettings)
         {
             _dbContext = dbContext;
             _localizer = localizer;
             _currentUserService = currentUserService;
             _driverNotification = driverNotification;
+            _walletService = walletService;
+            _pricingSettings = pricingSettings.Value;
         }
 
         public async Task<ApiResponse<bool>> Handle(CompleteRideCommand request, CancellationToken cancellationToken)
@@ -77,13 +85,55 @@ namespace Wasl.Application.Features.Rides.Commands.CompleteRide
                 return ApiResponse<bool>.Failure(_localizer["Rides.StatusAlreadyCompleted"]);
             }
 
-            ride.Status = RideStatus.Completed;
-            ride.CompletedAt = DateTime.UtcNow; 
+            using var transaction = await _dbContext.BeginTransactionAsync(cancellationToken);
+            try
+            {
+                ride.Status = RideStatus.Completed;
+                ride.CompletedAt = DateTime.UtcNow;
+                ride.TotalFare = ride.CalculatedPrice;
+                ride.CompanyCommission = Math.Round(ride.TotalFare * _pricingSettings.CompanyCommissionRate, 2);
+                ride.DriverNetEarnings = ride.TotalFare - ride.CompanyCommission;
 
-            await _dbContext.SaveChangesAsync(cancellationToken);
-            await _driverNotification.NotifyRiderRideCompletedAsync(ride.RiderId, ride.Id);
+                if (ride.PaymentMethod == PaymentMethod.Wallet)
+                {
+                    var transfer = await _walletService.TransferFundsAsync(
+                        ride.RiderId, ride.DriverId, ride.TotalFare,
+                        TransactionType.RidePayment, ride.Id, cancellationToken);
 
-            return ApiResponse<bool>.Success(true, _localizer["Rides.RideCompletedSuccessfully"]);
+                    if (!transfer.IsSuccess)
+                        return ApiResponse<bool>.Failure(transfer.ErrorMessage!);
+
+                    await _walletService.DeductFundsAsync(
+                        ride.DriverId, ride.CompanyCommission,
+                        TransactionType.CompanyCommission, ride.Id,
+                        allowNegativeBalance: true, cancellationToken);
+                }
+                else if (ride.PaymentMethod == PaymentMethod.Cash)
+                {
+                    await _walletService.DeductFundsAsync(
+                        ride.DriverId, ride.CompanyCommission,
+                        TransactionType.CompanyCommission, ride.Id,
+                        allowNegativeBalance: true, cancellationToken);
+                }
+                else if (ride.PaymentMethod == PaymentMethod.Card)
+                {
+                    await _walletService.AddFundsAsync(
+                        ride.DriverId, ride.DriverNetEarnings,
+                        TransactionType.RidePayment, ride.Id, cancellationToken);
+                }
+
+                await _dbContext.SaveChangesAsync(cancellationToken);
+                await transaction.CommitAsync(cancellationToken);
+
+                await _driverNotification.NotifyRiderRideCompletedAsync(ride.RiderId, ride.Id);
+
+                return ApiResponse<bool>.Success(true, _localizer["Rides.RideCompletedSuccessfully"]);
+            }
+            catch
+            {
+                await transaction.RollbackAsync(cancellationToken);
+                throw;
+            }
         }
     }
 }

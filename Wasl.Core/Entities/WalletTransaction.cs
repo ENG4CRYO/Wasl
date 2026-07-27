@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Wasl.Core.Entities.BaseEntity;
+﻿using Wasl.Core.Entities.BaseEntity;
 using Wasl.Core.Enums;
 
 namespace Wasl.Core.Entities
 {
-    public class WalletTransaction : BaseAuditableEntity<int>  
+    public class WalletTransaction : BaseAuditableEntity<Guid>
     {
         public string UserId { get; set; } = string.Empty;
         public ApplicationUser User { get; set; } = default!;

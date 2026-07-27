@@ -1,14 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Wasl.Core.Enums
+﻿namespace Wasl.Core.Enums
 {
     public enum TransactionType
     {
-        RideEarnings =1,
-        Tip =2,
-        Penality =3,
-        Promotion =4
+        RidePayment = 1,
+        CompanyCommission = 2,
+        WalletTopUp = 3,
+        CashOut = 4,
+        Refund = 5
     }
 }

@@ -45,8 +45,18 @@ namespace Wasl.API.Controllers.V1
         /// 
         /// This endpoint takes the pickup and drop-off coordinates, creates a ride with 'Pending' status, 
         /// and triggers the dispatch system to notify nearby active drivers via SignalR.
+        /// 
+        /// **PaymentMethod Enum Values:**
+        /// 
+        /// | Value | Description |
+        /// |-------|-------------|
+        /// | `Cash` (1) | Pay with cash upon completion. |
+        /// | `Card` (2) | Pay via card (processed externally). |
+        /// | `Wallet` (3) | Pay using the rider's wallet balance. Requires sufficient balance at request time. |
+        /// 
+        /// **Note:** When `PaymentMethod` is `Wallet`, the system checks the rider's balance before creating the ride. If insufficient, the request is rejected.
         /// </remarks>
-        /// <param name="command">Contains pickup/drop-off locations and optional ride details.</param>
+        /// <param name="command">Contains pickup/drop-off locations, payment method, and optional ride details.</param>
         /// <returns>A confirmation message along with the newly created Ride ID.</returns>
         [Authorize(Roles = AspRoles.Rider)]
         [HttpPost("request")]
@@ -147,6 +157,16 @@ namespace Wasl.API.Controllers.V1
         /// 
         /// Validates that the ride is not already completed or cancelled, and belongs to the requesting driver, 
         /// then transitions it to 'Completed' to free up the driver for new requests.
+        /// 
+        /// **Financial Settlement by PaymentMethod:**
+        /// 
+        /// | PaymentMethod | Rider | Driver |
+        /// |---------------|-------|--------|
+        /// | `Cash` | Pays cash to driver directly | Company commission deducted from wallet (may go negative) |
+        /// | `Card` | Card processed externally | Net earnings (fare − commission) added to wallet |
+        /// | `Wallet` | Fare deducted from wallet balance | Fare credited to wallet, then commission deducted (may go negative) |
+        /// 
+        /// A `WalletTransaction` ledger entry is created for every balance change.
         /// </remarks>
         /// <param name="id">The unique identifier of the Ride.</param>
         /// <returns>A success message indicating the ride has been completed.</returns>

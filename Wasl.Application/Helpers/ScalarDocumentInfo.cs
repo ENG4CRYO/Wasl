@@ -135,6 +135,42 @@
 
                 ---
 
+                ## 💰 Wallet & Payment System
+
+                The platform supports multiple payment methods for ride settlement.
+
+                ### PaymentMethod Enum
+
+                | Value | Description |
+                |-------|-------------|
+                | `Cash` (1) | Rider pays cash to the driver upon drop-off. |
+                | `Card` (2) | Payment is processed via an external card gateway. |
+                | `Wallet` (3) | Payment is deducted from the rider's wallet balance. |
+
+                ### Financial Settlement on Ride Completion
+
+                When a driver completes a ride, the system performs financial routing based on `PaymentMethod`:
+
+                - **Cash:** Rider pays cash directly. The company commission is deducted from the driver's wallet. Drivers may carry a **negative balance** (debt) for cash rides.
+                - **Card:** The card is processed externally. The driver's net earnings (total fare − commission) are credited to their wallet.
+                - **Wallet:** Total fare is transferred from rider → driver wallet. Commission is then deducted from the driver.
+
+                ### WalletTransaction Ledger
+
+                Every balance change creates an immutable `WalletTransaction` record with:
+
+                | Field | Description |
+                |-------|-------------|
+                | `Id` | Unique GUID |
+                | `UserId` | The affected user |
+                | `Amount` | Positive (credit) or negative (debit) |
+                | `Type` | `RidePayment`, `CompanyCommission`, `WalletTopUp`, `CashOut`, `Refund` |
+                | `RideId` | Optional link to the ride |
+
+                **Note:** Riders cannot have negative balances. If a wallet payment is requested with insufficient funds, the ride request is rejected.
+
+                ---
+
                 ## 📋 Request Headers
                 | Header Name | Value | Description | Required? |
                 | :--- | :--- | :----- | :--- |

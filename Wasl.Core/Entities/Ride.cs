@@ -21,6 +21,9 @@ namespace Wasl.Core.Entities
         public double DropoffLongitude { get; set; }
 
         public decimal CalculatedPrice { get; set; }
+        public decimal TotalFare { get; set; }
+        public decimal CompanyCommission { get; set; }
+        public decimal DriverNetEarnings { get; set; }
         public PaymentMethod PaymentMethod { get; set; }
         [ConcurrencyCheck]
         public RideStatus Status { get; set; } = RideStatus.Pending;

@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using Wasl.Application.Resources;
+using Wasl.Core.Enums;
 
 namespace Wasl.Application.Features.Rides.Commands.RequestRide
 {

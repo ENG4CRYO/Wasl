@@ -44,9 +44,10 @@ namespace Wasl.Application.Extensions
 
             services.AddScoped<IRideFareCalculator, RideFareCalculator>();
 
+            services.AddScoped<IWalletService, WalletService>();
 
-          
 
+           
         }
     }
 }
