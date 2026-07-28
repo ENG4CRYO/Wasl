@@ -438,4 +438,19 @@
   <data name="Validation.Common.PageSizeMax100" xml:space="preserve">
     <value>حجم الصفحة لا يمكن أن يتجاوز 100.</value>
   </data>
+  <data name="Validation.Admin.UserIdRequired" xml:space="preserve">
+    <value>معرف المستخدم مطلوب.</value>
+  </data>
+  <data name="Validation.Admin.AmountGreaterThanZero" xml:space="preserve">
+    <value>يجب أن يكون المبلغ أكبر من صفر.</value>
+  </data>
+  <data name="Admin.TopUpSuccess" xml:space="preserve">
+    <value>تم شحن المحفظة بنجاح. الرصيد الجديد: {0}</value>
+  </data>
+  <data name="Admin.TopUpFailed" xml:space="preserve">
+    <value>فشل شحن المحفظة.</value>
+  </data>
+  <data name="Admin.ClientsRetrievedSuccessfully" xml:space="preserve">
+    <value>تم جلب بيانات العملاء بنجاح.</value>
+  </data>
 </root>

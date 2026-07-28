@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using System;
 using System.Collections.Generic;
@@ -11,6 +12,8 @@ namespace Wasl.Application.Interfaces.Common
     public interface IApplicationDbContext
     {
         DbSet<ApplicationUser> Users { get; }
+        DbSet<IdentityRole> Roles { get; }
+        DbSet<IdentityUserRole<string>> UserRoles { get; }
         DbSet<RefreshToken> RefreshTokens { get; set; }
         DbSet<DriverProfile> DriverProfiles { get; set; }
         DbSet<Ride> Rides { get; set; }

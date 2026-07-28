@@ -7,6 +7,7 @@ namespace Wasl.Application.Dtos.Admin
         public string DriverId { get; set; } = string.Empty;
         public string FullName { get; set; } = string.Empty;
         public string PhoneNumber { get; set; } = string.Empty;
+        public decimal Balance { get; set; }
         public DriverApprovalStatus Status { get; set; }
         public DateTime SubmittedAt { get; set; }
     }

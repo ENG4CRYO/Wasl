@@ -41,8 +41,9 @@ namespace Wasl.Application.Features.Admin.Queries.GetAllDrivers
             var mappedQuery = query.Select(dp => new DriverListDto
             {
                 DriverId = dp.UserId,
-                FullName = dp.User.FirstName + " " +  dp.User.LastName,
+                FullName = dp.User.FirstName + " " + dp.User.LastName,
                 PhoneNumber = dp.User.PhoneNumber!,
+                Balance = dp.User.Balance,
                 Status = dp.ApprovalStatus,
                 SubmittedAt = dp.CreatedAt
             });

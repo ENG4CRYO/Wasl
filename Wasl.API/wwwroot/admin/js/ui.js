@@ -8,7 +8,8 @@ export const DOM = {
     },
     views: {
         'view-pending': document.getElementById('view-pending'),
-        'view-all-drivers': document.getElementById('view-all-drivers')
+        'view-all-drivers': document.getElementById('view-all-drivers'),
+        'view-clients': document.getElementById('view-clients')
     },
     sidebar: {
         navItems: document.querySelectorAll('.sidebar-nav .nav-item')
@@ -34,6 +35,23 @@ export const DOM = {
         pageInfo: document.getElementById('all-page-info'),
         searchInput: document.getElementById('search-driver'),
         statusFilter: document.getElementById('filter-status')
+    },
+    clients: {
+        tableBody: document.getElementById('clients-tbody'),
+        prevBtn: document.getElementById('clients-prev-btn'),
+        nextBtn: document.getElementById('clients-next-btn'),
+        pageInfo: document.getElementById('clients-page-info'),
+        searchInput: document.getElementById('search-client')
+    },
+    wallet: {
+        overlay: document.getElementById('wallet-modal'),
+        backdrop: document.getElementById('wallet-modal-backdrop'),
+        closeBtn: document.getElementById('close-wallet-modal-btn'),
+        userName: document.getElementById('wallet-user-name'),
+        currentBalance: document.getElementById('wallet-current-balance'),
+        amount: document.getElementById('wallet-amount'),
+        confirmBtn: document.getElementById('btn-confirm-topup'),
+        cancelBtn: document.getElementById('btn-cancel-topup')
     },
     modal: {
         overlay: document.getElementById('review-modal'),

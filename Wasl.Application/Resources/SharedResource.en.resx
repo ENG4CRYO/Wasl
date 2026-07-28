@@ -438,4 +438,19 @@
   <data name="Validation.Common.PageSizeMax100" xml:space="preserve">
     <value>Page size cannot exceed 100.</value>
   </data>
+  <data name="Validation.Admin.UserIdRequired" xml:space="preserve">
+    <value>User ID is required.</value>
+  </data>
+  <data name="Validation.Admin.AmountGreaterThanZero" xml:space="preserve">
+    <value>Amount must be greater than zero.</value>
+  </data>
+  <data name="Admin.TopUpSuccess" xml:space="preserve">
+    <value>Wallet topped up successfully. New balance: {0}</value>
+  </data>
+  <data name="Admin.TopUpFailed" xml:space="preserve">
+    <value>Failed to top up wallet.</value>
+  </data>
+  <data name="Admin.ClientsRetrievedSuccessfully" xml:space="preserve">
+    <value>Clients retrieved successfully.</value>
+  </data>
 </root>

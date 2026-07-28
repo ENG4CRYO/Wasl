@@ -1,6 +1,7 @@
 ﻿import { CONFIG } from './config.js';
 import { DOM, UI } from './ui.js';
 import { API } from './api.js';
+import { WalletModal } from './walletModal.js';
 
 export const AllDriversManager = {
     state: {
@@ -23,7 +24,7 @@ export const AllDriversManager = {
             this.renderTable(result.data.items);
             this.updatePagination(result.data);
         } else {
-            DOM.allDrivers.tableBody.innerHTML = `<tr><td colspan="4" class="text-center">فشل تحميل البيانات.</td></tr>`;
+            DOM.allDrivers.tableBody.innerHTML = `<tr><td colspan="5" class="text-center">فشل تحميل البيانات.</td></tr>`;
         }
     },
 
@@ -32,6 +33,7 @@ export const AllDriversManager = {
             <tr class="skeleton-row">
                 <td><div class="skeleton" style="width: 80%; height: 20px; border-radius: 4px;"></div></td>
                 <td><div class="skeleton" style="width: 60%; height: 20px; border-radius: 4px;"></div></td>
+                <td><div class="skeleton" style="width: 60px; height: 20px; border-radius: 4px;"></div></td>
                 <td><div class="skeleton" style="width: 100px; height: 24px; border-radius: 12px;"></div></td>
                 <td><div class="skeleton" style="width: 120px; height: 30px; border-radius: 4px;"></div></td>
             </tr>`;
@@ -50,7 +52,7 @@ export const AllDriversManager = {
 
     renderTable(drivers) {
         if (!drivers || drivers.length === 0) {
-            DOM.allDrivers.tableBody.innerHTML = `<tr><td colspan="4" style="text-align: center; padding: 2rem;">لا يوجد سائقين مطابقين للبحث 🔍</td></tr>`;
+            DOM.allDrivers.tableBody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 2rem;">لا يوجد سائقين مطابقين للبحث 🔍</td></tr>`;
             return;
         }
 
@@ -58,8 +60,9 @@ export const AllDriversManager = {
             <tr>
                 <td><strong>${d.fullName}</strong></td>
                 <td dir="ltr" style="text-align: right;">${d.phoneNumber}</td>
+                <td style="color: var(--success); font-weight: 700;">${d.balance != null ? d.balance.toLocaleString() : '-'}</td>
                 <td>${this.getStatusBadge(d.status)}</td>
-                <td>
+                <td style="display: flex; gap: 6px; align-items: center;">
                     ${(d.status === 1 || d.status === 2)
                 ? `<span style="font-size: 11px; color: #94a3b8;">لا يمكن تغييره من هنا</span>`
             : `<select class="status-changer form-input" data-id="${d.driverId}" style="width: auto; padding: 4px 24px 4px 8px; font-size: 13px;">
@@ -68,6 +71,7 @@ export const AllDriversManager = {
                             <option value="4" ${d.status === 4 ? 'selected' : ''}>مرفوض/موقوف</option>
                            </select>`
             }
+                    <button class="btn btn-success btn-sm top-up-btn" data-id="${d.driverId}" data-name="${d.fullName}" data-balance="${d.balance || 0}">شحن</button>
                 </td>
             </tr>
         `).join('');
@@ -87,7 +91,6 @@ export const AllDriversManager = {
 
         if (result && result.succeeded) {
             UI.showToast(result.message, 'success');
-
         } else {
             this.loadDrivers();
         }

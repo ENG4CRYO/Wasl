@@ -8,6 +8,8 @@ using Wasl.Application.Common;
 using Wasl.Application.Dtos.Admin;
 using Wasl.Application.Features.Admin.Commands.ChangeDriverStatus;
 using Wasl.Application.Features.Admin.Commands.ReviewDriverProfile;
+using Wasl.Application.Features.Admin.Commands.TopUpWallet;
+using Wasl.Application.Features.Admin.Queries.GetAllClients;
 using Wasl.Application.Features.Admin.Queries.GetAllDrivers;
 using Wasl.Application.Features.Admin.Queries.GetPendingDriverDetails;
 using Wasl.Application.Features.Admin.Queries.GetPendingDrivers;
@@ -81,6 +83,30 @@ namespace Wasl.API.Controllers.V1
             };
             var response = await _mediator.Send(query);
             return response.Succeeded ? Ok(response) : BadRequest(response);
+        }
+
+        /// <summary>
+        /// Get a paginated list of all clients (Riders).
+        /// </summary>
+        [HttpGet("clients")]
+        public async Task<ActionResult<ApiResponse<PagedList<ClientListDto>>>> GetAllClients(
+            [FromQuery] int pageNumber = 1,
+            [FromQuery] int pageSize = 10,
+            [FromQuery] string? searchTerm = null)
+        {
+            var query = new GetAllClientsQuery { PageNumber = pageNumber, PageSize = pageSize, SearchTerm = searchTerm };
+            var result = await _mediator.Send(query);
+            return result.Succeeded ? Ok(result) : BadRequest(result);
+        }
+
+        /// <summary>
+        /// Top up a user's wallet (Driver or Rider).
+        /// </summary>
+        [HttpPost("top-up-wallet")]
+        public async Task<ActionResult<ApiResponse<decimal>>> TopUpWallet([FromBody] TopUpWalletCommand command)
+        {
+            var result = await _mediator.Send(command);
+            return result.Succeeded ? Ok(result) : BadRequest(result);
         }
 
         /// <summary>
