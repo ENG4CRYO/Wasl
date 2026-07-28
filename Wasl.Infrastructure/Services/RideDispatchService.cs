@@ -67,7 +67,8 @@ public class RideDispatchService : IRideDispatchService
                 ride.PickupLongitude,
                 ride.DropoffLatitude,
                 ride.DropoffLongitude,
-                ride.CalculatedPrice
+                ride.CalculatedPrice,
+                ride.PaymentMethod.ToString()
             );
 
             await _redisCache.AddExcludedDriversToRideAsync(rideId, driversToNotify);

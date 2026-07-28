@@ -21,6 +21,7 @@ namespace Wasl.Application.Features.Rides.Commands.CompleteRide
         private readonly ICurrentUserService _currentUserService;
         private readonly IDriverNotificationService _driverNotification;
         private readonly IWalletService _walletService;
+        private readonly IPaymentGatewayService _paymentGateway;
         private readonly RidePricingSettings _pricingSettings;
 
         public CompleteRideCommandHandler(
@@ -29,6 +30,7 @@ namespace Wasl.Application.Features.Rides.Commands.CompleteRide
             ICurrentUserService currentUserService,
             IDriverNotificationService driverNotification,
             IWalletService walletService,
+            IPaymentGatewayService paymentGateway,
             IOptions<RidePricingSettings> pricingSettings)
         {
             _dbContext = dbContext;
@@ -36,6 +38,7 @@ namespace Wasl.Application.Features.Rides.Commands.CompleteRide
             _currentUserService = currentUserService;
             _driverNotification = driverNotification;
             _walletService = walletService;
+            _paymentGateway = paymentGateway;
             _pricingSettings = pricingSettings.Value;
         }
 
@@ -83,6 +86,22 @@ namespace Wasl.Application.Features.Rides.Commands.CompleteRide
             if (ride.Status == RideStatus.Completed || ride.Status == RideStatus.Cancelled)
             {
                 return ApiResponse<bool>.Failure(_localizer["Rides.StatusAlreadyCompleted"]);
+            }
+
+            if (ride.PaymentMethod == PaymentMethod.Card)
+            {
+                if (string.IsNullOrWhiteSpace(ride.PaymentToken))
+                {
+                    return ApiResponse<bool>.Failure(_localizer["Rides.PaymentTokenRequired"]);
+                }
+
+                var paymentResult = await _paymentGateway.ProcessPaymentAsync(
+                    ride.PaymentToken, ride.CalculatedPrice, ride.RiderId, cancellationToken);
+
+                if (!paymentResult.IsSuccess)
+                {
+                    return ApiResponse<bool>.Failure(_localizer["Rides.CardPaymentFailed"]);
+                }
             }
 
             using var transaction = await _dbContext.BeginTransactionAsync(cancellationToken);

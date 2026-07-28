@@ -818,3 +818,15 @@ html[dir="ltr"] .lang-toggle-btn {
     left: auto;
     right: 20px;
 }
+
+.payment-badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: var(--text-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+}
+.payment-badge.cash { background-color: #f59e0b; color: #1e293b; }
+.payment-badge.card { background-color: #3b82f6; color: #fff; }
+.payment-badge.wallet { background-color: #10b981; color: #fff; }

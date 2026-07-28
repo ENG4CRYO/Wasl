@@ -453,4 +453,22 @@
   <data name="Admin.ClientsRetrievedSuccessfully" xml:space="preserve">
     <value>Clients retrieved successfully.</value>
   </data>
+  <data name="Rides.CardPaymentFailed" xml:space="preserve">
+    <value>Payment failed. Please ask the rider to pay in cash and switch the payment method.</value>
+  </data>
+  <data name="Rides.PaymentTokenRequired" xml:space="preserve">
+    <value>Payment token is required for card payments.</value>
+  </data>
+  <data name="Rides.PaymentMethodChanged" xml:space="preserve">
+    <value>Payment method changed successfully.</value>
+  </data>
+  <data name="Payments.InvalidCard" xml:space="preserve">
+    <value>Invalid card details. Please check and try again.</value>
+  </data>
+  <data name="Payments.TokenizeSuccess" xml:space="preserve">
+    <value>Card tokenized successfully.</value>
+  </data>
+  <data name="Payments.InvalidToken" xml:space="preserve">
+    <value>Invalid or expired payment token.</value>
+  </data>
 </root>

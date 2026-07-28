@@ -453,4 +453,22 @@
   <data name="Admin.ClientsRetrievedSuccessfully" xml:space="preserve">
     <value>تم جلب بيانات العملاء بنجاح.</value>
   </data>
+  <data name="Rides.CardPaymentFailed" xml:space="preserve">
+    <value>فشلت عملية الدفع. يرجى طلب الدفع نقداً من الراكب وتغيير طريقة الدفع.</value>
+  </data>
+  <data name="Rides.PaymentTokenRequired" xml:space="preserve">
+    <value>رمز الدفع مطلوب للمدفوعات بالبطاقة.</value>
+  </data>
+  <data name="Rides.PaymentMethodChanged" xml:space="preserve">
+    <value>تم تغيير طريقة الدفع بنجاح.</value>
+  </data>
+  <data name="Payments.InvalidCard" xml:space="preserve">
+    <value>بيانات البطاقة غير صالحة. يرجى التحقق والمحاولة مرة أخرى.</value>
+  </data>
+  <data name="Payments.TokenizeSuccess" xml:space="preserve">
+    <value>تم تحويل البطاقة إلى رمز بنجاح.</value>
+  </data>
+  <data name="Payments.InvalidToken" xml:space="preserve">
+    <value>رمز الدفع غير صالح أو منتهي الصلاحية.</value>
+  </data>
 </root>

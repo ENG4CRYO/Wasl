@@ -48,7 +48,7 @@
                 ### 🚕 3. For DRIVERS: Listening Events (On)
                 Drivers must listen to these events to receive and manage ride requests:
                 * `ReceiveRideRequest`: Triggered when a new ride is requested nearby.
-                    * **Payload (JSON):** `{ "rideId": "guid", "lat": double, "lng": double, "dropLat": double, "dropLng": double, "calculatedPrice": decimal, "message": string }`
+                    * **Payload (JSON):** `{ "rideId": "guid", "lat": double, "lng": double, "dropLat": double, "dropLng": double, "calculatedPrice": decimal, "paymentMethod": "Cash" | "Card" | "Wallet", "message": string }`
                 * `HideRideRequest`: Triggered when a Rider cancels a *Pending* ride. The frontend MUST close the request popup if the ID matches.
                     * **Payload (String):** `rideId`
                 * `RideCancelled`: Triggered when a Rider cancels a ride *after* the driver has accepted it, or when the ride auto-cancels after 5 minutes.
@@ -100,7 +100,7 @@
 
                 | # | Event Name | Sent To | Payload |
                 |---|-----------|---------|---------|
-                | 1 | `ReceiveRideRequest` | Drivers (nearby) | `{ "rideId", "lat", "lng", "dropLat", "dropLng", "calculatedPrice", "message" }` |
+                | 1 | `ReceiveRideRequest` | Drivers (nearby) | `{ "rideId", "lat", "lng", "dropLat", "dropLng", "calculatedPrice", "paymentMethod", "message" }` |
                 | 2 | `HideRideRequest` | Drivers (notified) | `string (rideId)` |
                 | 3 | `RideCancelled` | Rider or Driver | `string (message)` |
                 | 4 | `ProfileReviewed` | Driver | `{ "isApproved": bool, "message": string }` |
@@ -168,6 +168,29 @@
                 | `RideId` | Optional link to the ride |
 
                 **Note:** Riders cannot have negative balances. If a wallet payment is requested with insufficient funds, the ride request is rejected.
+
+                ### Invisible Payments Flow (Card)
+
+                For card payments, the platform uses the industry-standard tokenization pattern (similar to Stripe/Uber):
+
+                1. **Tokenize:** Rider calls `POST /api/v1/Payments/tokenize` with card details → receives a one-time-use GUID token.
+                2. **Request ride:** Rider calls `POST /api/v1/Rides/request` with `paymentMethod: 2` and `paymentToken: "guid"` → token stored on the ride.
+                3. **Complete ride:** Driver calls `POST /api/v1/Rides/{id}/complete` (no body needed) → system reads the stored token and processes payment.
+
+                The driver **never** sees the rider's card details. The payment token is consumed on first use.
+
+                ### Test Cards (MockGateway)
+
+                The development environment uses a mock payment gateway. Use these test card numbers:
+
+                | Card Prefix | Tokenization | Payment Result | Use Case |
+                |-------------|-------------|----------------|----------|
+                | `4242` | ✅ Accepted | ✅ **Success** | Happy path — payment goes through |
+                | `5555` | ✅ Accepted | ❌ **Declined — Insufficient funds** | Test failed payment → driver changes to Cash |
+                | `1111` | ✅ Accepted | ❌ **Declined — Expired card** | Test expired card scenario |
+                | Any other | ❌ Rejected | N/A — error returned | Test invalid card validation |
+
+                **Important:** Tokens are single-use via `TryRemove`. A second attempt with the same token returns "Invalid or expired payment token."
 
                 ---
 

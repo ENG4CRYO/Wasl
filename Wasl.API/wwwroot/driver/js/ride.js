@@ -68,6 +68,8 @@ export const RideManager = {
                 if (btnStart) btnStart.style.display = 'none';
                 document.getElementById('btnCompleteRide').style.display = 'inline-block';
                 document.getElementById('btnCancelRide').style.display = 'none';
+                const btnChange = document.getElementById('btnChangePayment');
+                if (btnChange) btnChange.style.display = 'inline-block';
             } else {
                 UI.showToast(AuthManager.getErrorMessage(result, t('networkError')), 'error');
                 if (btnStart) { btnStart.disabled = false; btnStart.innerText = t('btnStart'); }
@@ -99,6 +101,35 @@ export const RideManager = {
         } catch {
             UI.showToast(t('networkError'), 'error');
             if (btnComplete) { btnComplete.disabled = false; btnComplete.innerText = t('btnComplete'); }
+        }
+    },
+
+    async changePaymentMethod(btn) {
+        if (!State.activeRide) return;
+        if (btn) { btn.disabled = true; btn.innerText = t('btnSending'); }
+
+        try {
+            const response = await API.fetch(`/api/v1/Rides/${State.activeRide.rideId}/change-payment`, {
+                method: 'POST',
+                body: JSON.stringify({ newPaymentMethod: 1 })
+            });
+            if (!response) return;
+            const result = await response.json().catch(() => ({}));
+
+            if (response.ok && result.succeeded) {
+                UI.showToast(result.message, 'success');
+                State.activeRide.paymentMethod = 'Cash';
+                const badge = document.querySelector('.payment-badge');
+                if (badge) badge.outerHTML = UI.getPaymentBadgeHtml('Cash');
+                const changeBtn = document.getElementById('btnChangePayment');
+                if (changeBtn) changeBtn.remove();
+            } else {
+                UI.showToast(AuthManager.getErrorMessage(result, t('networkError')), 'error');
+                if (btn) { btn.disabled = false; btn.innerText = t('btnChangePayment'); }
+            }
+        } catch {
+            UI.showToast(t('networkError'), 'error');
+            if (btn) { btn.disabled = false; btn.innerText = t('btnChangePayment'); }
         }
     },
 

@@ -79,6 +79,7 @@ public class CreateRideRequestCommandHandler : IRequestHandler<CreateRideRequest
             RequestedAt = DateTime.UtcNow,
             CalculatedPrice = fare,
             PaymentMethod = request.PaymentMethod,
+            PaymentToken = request.PaymentMethod == PaymentMethod.Card ? request.PaymentToken : null,
             RiderId = riderId
         };
 

@@ -24,6 +24,8 @@ export const UI = {
         DOM.modalPickup = document.getElementById('modalPickup');
         DOM.modalDrop = document.getElementById('modalDrop');
         DOM.modalRideId = document.getElementById('modalRideId');
+        DOM.modalPrice = document.getElementById('modalPrice');
+        DOM.modalPaymentMethod = document.getElementById('modalPaymentMethod');
         DOM.modalMap = document.getElementById('modalMap');
         DOM.modalAcceptBtn = document.getElementById('modalAcceptBtn');
         DOM.modalDismissBtn = document.getElementById('modalDismissBtn');
@@ -125,13 +127,15 @@ export const UI = {
             const dropLat = data.dropLat || data.DropLat || 'غير محدد';
             const dropLng = data.dropLng || data.DropLng || 'غير محدد';
             const price = data.calculatedPrice || data.CalculatedPrice || data.price || data.Price || 0;
+            const paymentMethod = data.paymentMethod || data.PaymentMethod || 'Cash';
 
-            State.activeRide = { rideId, lat, lng, dropLat, dropLng, price };
+            State.activeRide = { rideId, lat, lng, dropLat, dropLng, price, paymentMethod };
 
             if (DOM.modalPickup) DOM.modalPickup.textContent = `${lat}, ${lng}`;
             if (DOM.modalDrop) DOM.modalDrop.textContent = `${dropLat}, ${dropLng}`;
             if (DOM.modalRideId) DOM.modalRideId.textContent = rideId;
             if (DOM.modalPrice) DOM.modalPrice.textContent = `${price} ${t('currency')}`;
+            if (DOM.modalPaymentMethod) DOM.modalPaymentMethod.textContent = t(`paymentMethod_${paymentMethod}`);
             if (DOM.modalMap) DOM.modalMap.src = `https://maps.google.com/maps?q=${lat},${lng}&z=15&output=embed`;
 
             this.openModal();
@@ -140,11 +144,18 @@ export const UI = {
         }
     },
 
+    getPaymentBadgeHtml(paymentMethod) {
+        const label = t(`paymentMethod_${paymentMethod}`);
+        const cls = paymentMethod ? paymentMethod.toLowerCase() : 'cash';
+        return `<span class="payment-badge ${cls}">${label}</span>`;
+    },
+
     renderActiveRideDashboard(data) {
         DOM.emptyState.hidden = true;
         DOM.notificationsArea.innerHTML = '';
 
         const mapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${data.lat},${data.lng}&destination=${data.dropLat},${data.dropLng}&travelmode=driving`;
+        const paymentMethod = data.paymentMethod || 'Cash';
 
         const card = document.createElement('div');
         card.className = 'ride-card';
@@ -154,6 +165,7 @@ export const UI = {
                 <p><b>${t('pickupPoint')}:</b> <span>${data.lat}, ${data.lng}</span></p>
                 <p><b>${t('dropoffPoint')}:</b> <span>${data.dropLat}, ${data.dropLng}</span></p>
                 <p><b>${t('priceLabel')}</b> <span style="color: #28a745; font-weight: bold; font-size: 1.1em;">${data.price} ${t('currency')}</span></p>
+                <p><b>${t('paymentMethodLabel')}:</b> ${this.getPaymentBadgeHtml(paymentMethod)}</p>
                 <p class="ride-card-id">ID: <code>${data.rideId}</code></p>
             </div>
             <div class="controls-group" style="margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap;">
@@ -161,6 +173,7 @@ export const UI = {
                 <button id="btnStartRide" class="btn btn-primary" style="display: none;">${t('btnStart')}</button>
                 <button id="btnCompleteRide" class="btn btn-danger" style="display: none;">${t('btnComplete')}</button>
                 <button id="btnCancelRide" class="btn btn-ghost" style="color: #dc3545; border: 1px solid #dc3545;">${t('btnCancel')}</button>
+                ${paymentMethod === 'Card' || paymentMethod === 'Wallet' ? `<button id="btnChangePayment" class="btn btn-secondary" style="display: none;">${t('btnChangePayment')}</button>` : ''}
             </div>
             <a class="btn-map" href="${mapsUrl}" target="_blank" rel="noopener noreferrer" style="margin-top: 15px; display: inline-block;">
                 ${t('voiceGuide')}

@@ -22,6 +22,7 @@ public class CompleteRideCommandHandlerTests
     private readonly Mock<ICurrentUserService> _currentUserServiceMock;
     private readonly Mock<IDriverNotificationService> _driverNotificationMock;
     private readonly Mock<IWalletService> _walletServiceMock;
+    private readonly Mock<IPaymentGatewayService> _paymentGatewayMock;
     private readonly IOptions<RidePricingSettings> _pricingSettings;
     private readonly CompleteRideCommandHandler _handler;
     private readonly List<Ride> _rides;
@@ -49,11 +50,14 @@ public class CompleteRideCommandHandlerTests
             ["Rides.RideNotYours"] = "This ride does not belong to you.",
             ["Rides.StatusNotInProgress"] = "Ride status is not InProgress.",
             ["Rides.StatusAlreadyCompleted"] = "Ride already completed.",
-            ["Rides.RideCompletedSuccessfully"] = "Ride completed."
+            ["Rides.RideCompletedSuccessfully"] = "Ride completed.",
+            ["Rides.CardPaymentFailed"] = "Payment failed.",
+            ["Rides.PaymentTokenRequired"] = "Payment token required."
         });
         _currentUserServiceMock = TestDataFactory.MockCurrentUserService(_driverId);
         _driverNotificationMock = new Mock<IDriverNotificationService>();
         _walletServiceMock = new Mock<IWalletService>();
+        _paymentGatewayMock = new Mock<IPaymentGatewayService>();
         _pricingSettings = TestDataFactory.CreateRidePricingSettings();
 
         var ridesDbSetMock = TestDataFactory.MockDbSet(_rides);
@@ -90,6 +94,7 @@ public class CompleteRideCommandHandlerTests
             _currentUserServiceMock.Object,
             _driverNotificationMock.Object,
             _walletServiceMock.Object,
+            _paymentGatewayMock.Object,
             _pricingSettings);
     }
 

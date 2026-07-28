@@ -13,5 +13,5 @@ namespace Wasl.Application.Features.Rides.Commands.RequestRide;
         public double dropoffLat { get; set; }
         public double dropoffLng { get; set; }
         public PaymentMethod PaymentMethod { get; set; }
-
+        public string? PaymentToken { get; set; }
     }

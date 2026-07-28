@@ -122,6 +122,7 @@ namespace Wasl.Infrastructure.Extensions
             services.AddHangfireServer();
 
             services.AddScoped<IRideDispatchService, RideDispatchService>();
+            services.AddScoped<IPaymentGatewayService, MockPaymentGatewayService>();
 
             return services;
         }

@@ -11,6 +11,8 @@ using Wasl.Application.Features.Rides.Commands;
 using Wasl.Application.Features.Rides.Commands.AcceptRide;
 using Wasl.Application.Features.Rides.Commands.CancelRideByDriver;
 using Wasl.Application.Features.Rides.Commands.CancelRideByRider;
+using Wasl.Application.Features.Rides.Commands.ChangePaymentMethod;
+using Wasl.Core.Enums;
 using Wasl.Application.Features.Rides.Commands.CompleteRide;
 using Wasl.Application.Features.Rides.Commands.DriverArrived;
 using Wasl.Application.Features.Rides.Commands.RequestRide;
@@ -50,13 +52,22 @@ namespace Wasl.API.Controllers.V1
         /// 
         /// | Value | Description |
         /// |-------|-------------|
-        /// | `Cash` (1) | Pay with cash upon completion. |
-        /// | `Card` (2) | Pay via card (processed externally). |
-        /// | `Wallet` (3) | Pay using the rider's wallet balance. Requires sufficient balance at request time. |
+        /// | `Cash` (1) | Pay with cash upon completion. Company commission deducted from driver wallet. |
+        /// | `Card` (2) | Invisible payments flow. Rider must call <c>POST /payments/tokenize</c> first to get a <c>paymentToken</c>, then include it here. The driver never sees card details. |
+        /// | `Wallet` (3) | Pay using the rider's wallet balance. System checks balance before creating the ride; insufficient balance is rejected. |
         /// 
-        /// **Note:** When `PaymentMethod` is `Wallet`, the system checks the rider's balance before creating the ride. If insufficient, the request is rejected.
+        /// **Invisible Payments Flow (Card):**
+        /// 
+        /// ```text
+        /// 1. Rider calls POST /payments/tokenize → receives a GUID token
+        /// 2. Rider calls POST /rides/request with paymentMethod=2 and paymentToken="guid"
+        /// 3. Driver completes ride → system processes payment using the stored token
+        /// ```
+        /// 
+        /// **Note:** The <c>paymentToken</c> is only persisted when <c>PaymentMethod</c> is <c>Card</c>.
+        /// For <c>Cash</c> or <c>Wallet</c>, it is ignored even if provided.
         /// </remarks>
-        /// <param name="command">Contains pickup/drop-off locations, payment method, and optional ride details.</param>
+        /// <param name="command">Contains pickup/drop-off locations, payment method, and optional payment token for card payments.</param>
         /// <returns>A confirmation message along with the newly created Ride ID.</returns>
         [Authorize(Roles = AspRoles.Rider)]
         [HttpPost("request")]
@@ -158,15 +169,18 @@ namespace Wasl.API.Controllers.V1
         /// Validates that the ride is not already completed or cancelled, and belongs to the requesting driver, 
         /// then transitions it to 'Completed' to free up the driver for new requests.
         /// 
+        /// **No request body required.** The <c>PaymentToken</c> was already stored on the ride
+        /// at request time (invisible payments flow), so the driver only sends the ride ID.
+        /// 
         /// **Financial Settlement by PaymentMethod:**
         /// 
         /// | PaymentMethod | Rider | Driver |
         /// |---------------|-------|--------|
         /// | `Cash` | Pays cash to driver directly | Company commission deducted from wallet (may go negative) |
-        /// | `Card` | Card processed externally | Net earnings (fare − commission) added to wallet |
+        /// | `Card` | Card processed via stored token (4242=success, 5555=insufficient funds, 1111=expired) | Net earnings (fare − commission) added to wallet |
         /// | `Wallet` | Fare deducted from wallet balance | Fare credited to wallet, then commission deducted (may go negative) |
         /// 
-        /// A `WalletTransaction` ledger entry is created for every balance change.
+        /// A <c>WalletTransaction</c> ledger entry is created for every balance change.
         /// </remarks>
         /// <param name="id">The unique identifier of the Ride.</param>
         /// <returns>A success message indicating the ride has been completed.</returns>
@@ -179,11 +193,7 @@ namespace Wasl.API.Controllers.V1
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         public async Task<IActionResult> CompleteRide(string id)
         {
-
-            var command = new CompleteRideCommand
-            {
-                RideId = id,
-            };
+            var command = new CompleteRideCommand { RideId = id };
 
             var result = await _mediator.Send(command);
 
@@ -193,6 +203,54 @@ namespace Wasl.API.Controllers.V1
             }
 
             return Ok(result);
+        }
+
+        /// <summary>
+        /// Changes the payment method of an in-progress ride (fallback when card is declined).
+        /// </summary>
+        /// <remarks>
+        /// **Role Required:** Driver
+        /// 
+        /// **Fallback for failed card/wallet payments.** When the rider's card is declined or wallet balance 
+        /// is insufficient at completion time, the driver can switch to Cash so the ride can still be completed.
+        /// 
+        /// **How it works:**
+        /// 
+        /// ```text
+        /// 1. Driver attempts POST /rides/{id}/complete
+        /// 2. Card/Wallet payment fails → error returned
+        /// 3. Driver calls POST /rides/{id}/change-payment { "newPaymentMethod": 1 }
+        /// 4. ride.PaymentMethod is set to Cash
+        /// 5. Driver calls POST /rides/{id}/complete again
+        /// 6. Cash branch runs: company commission deducted from driver wallet only
+        /// ```
+        /// 
+        /// **Request body:** Only <c>newPaymentMethod</c> is required (e.g. <c>1</c> for Cash).
+        /// The <c>RideId</c> is taken from the URL route, not the body.
+        /// 
+        /// **Note:** Switching from Card/Wallet to Cash only changes the settlement method.
+        /// The stored <c>PaymentToken</c> (if Card) is not cleared but is safely ignored
+        /// since the completion handler checks <c>ride.PaymentMethod</c> at runtime.
+        /// </remarks>
+        /// <param name="id">The unique identifier of the Ride.</param>
+        /// <param name="request">Contains the new payment method (typically 1 = Cash).</param>
+        /// <returns>A success message indicating the payment method was updated.</returns>
+        [Authorize(Roles = AspRoles.Driver)]
+        [HttpPost("{id}/change-payment")]
+        [Tags("Rides")]
+        [ProducesResponseType(typeof(ApiResponse<bool>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<bool>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        public async Task<IActionResult> ChangePaymentMethod(Guid id, [FromBody] ChangePaymentMethodRequest request)
+        {
+            var command = new ChangeRidePaymentMethodCommand
+            {
+                RideId = id,
+                NewPaymentMethod = request.NewPaymentMethod
+            };
+            var result = await _mediator.Send(command);
+            return result.Succeeded ? Ok(result) : BadRequest(result);
         }
 
         /// <summary>

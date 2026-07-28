@@ -45,6 +45,7 @@ const App = {
             else if (id === 'btnStartRide') RideManager.startRide(e.target);
             else if (id === 'btnCompleteRide') RideManager.completeRide(e.target);
             else if (id === 'btnCancelRide') RideManager.cancelRide(e.target);
+            else if (id === 'btnChangePayment') RideManager.changePaymentMethod(e.target);
         });
 
         window.addEventListener('session-expired', () => {
