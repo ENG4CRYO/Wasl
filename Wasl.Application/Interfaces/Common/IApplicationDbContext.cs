@@ -19,6 +19,7 @@ namespace Wasl.Application.Interfaces.Common
         DbSet<Ride> Rides { get; set; }
         DbSet<RideReview> RideReviews { get; set; }
         DbSet<WalletTransaction> WalletTransactions { get; set; }
+        DbSet<DriverOnlineLog> DriverOnlineLogs { get; set; }
         Task<int> SaveChangesAsync(CancellationToken cancellationToken);
         Task<IDbContextTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default);
     }

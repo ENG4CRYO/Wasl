@@ -96,6 +96,10 @@ namespace Wasl.UnitTests.Architecture
                 .DoNotHaveNameEndingWith("Validator")
                 .And()
                 .DoNotHaveNameEndingWith("Handler")
+                .And()
+                .DoNotHaveNameEndingWith("Dto")
+                .And()
+                .DoNotHaveNameEndingWith("Request")
                 .Should()
                 .HaveNameEndingWith("Command")
                 .GetResult();
@@ -116,6 +120,10 @@ namespace Wasl.UnitTests.Architecture
                 .DoNotHaveNameEndingWith("Validator")
                 .And()
                 .DoNotHaveNameEndingWith("Handler")
+                .And()
+                .DoNotHaveNameEndingWith("Dto")
+                .And()
+                .DoNotHaveNameEndingWith("Request")
                 .Should()
                 .HaveNameEndingWith("Query")
                 .GetResult();

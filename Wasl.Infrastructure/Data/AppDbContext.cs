@@ -25,6 +25,7 @@ namespace Wasl.Infrastructure.Data
         public DbSet<Ride> Rides { get; set; }
         public DbSet<RideReview> RideReviews { get; set; }
         public DbSet<WalletTransaction> WalletTransactions { get; set; }
+        public DbSet<DriverOnlineLog> DriverOnlineLogs { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

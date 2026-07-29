@@ -15,13 +15,16 @@ namespace Wasl.API.Hubs
     {
         private readonly IRedisCacheService _redisCache;
         private readonly ICacheService _cacheService;
+        private readonly IDriverSessionCacheService _sessionCache;
 
 
         public TrackingHub(IRedisCacheService redisCache,
-            ICacheService cacheService)
+            ICacheService cacheService,
+            IDriverSessionCacheService sessionCache)
         {
             _redisCache = redisCache;
             _cacheService = cacheService;
+            _sessionCache = sessionCache;
         }
 
         public async Task UpdateLocation(double latitude, double longitude, string? rideId = null)
@@ -107,6 +110,7 @@ namespace Wasl.API.Hubs
                 return;
             }
 
+            await _sessionCache.HandleConnectionAsync(driverId);
             await base.OnConnectedAsync();
         }
 
@@ -120,6 +124,7 @@ namespace Wasl.API.Hubs
                 if (!string.IsNullOrEmpty(driverId))
                 {
                     await _redisCache.RemoveDriverLocationAsync(driverId);
+                    await _sessionCache.HandleDisconnectionAsync(driverId);
                 }
             }
 

@@ -110,6 +110,8 @@ namespace Wasl.Infrastructure.Extensions
             services.AddSingleton<RedisCacheService>();
             services.AddSingleton<ICacheService>(provider => provider.GetRequiredService<RedisCacheService>());
             services.AddSingleton<IRedisCacheService>(provider => provider.GetRequiredService<RedisCacheService>());
+            services.AddSingleton<IDriverSessionCacheService, DriverSessionCacheService>();
+            services.AddHostedService<DriverSessionSyncHostedService>();
  
 
             services.AddHangfire(config => config

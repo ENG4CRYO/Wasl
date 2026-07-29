@@ -82,6 +82,11 @@ namespace Wasl.API.Extensions
                             ["name"] = "Payments 💳",
                             ["tags"] = new JsonArray { "Payments" }
                         },
+                        new JsonObject
+                        {
+                            ["name"] = "Driver Earnings 💰",
+                            ["tags"] = new JsonArray { "Driver Earnings" }
+                        }
 
 
                     };
