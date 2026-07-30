@@ -366,6 +366,7 @@ web.config
 appsettings.Development.json
 appsettings.Production.json
 drivers
+riders
 .gemini
 graphify-out
 GEMINI.md

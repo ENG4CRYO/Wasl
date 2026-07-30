@@ -42,6 +42,7 @@ namespace Wasl.Application.Features.DriverProfiles.Commands.SubmitProfile
             }
 
             var driverProfile = await _context.DriverProfiles
+                .Include(dp => dp.User)
                 .FirstOrDefaultAsync(dp => dp.UserId == userId, cancellationToken);
 
             if (driverProfile == null)
@@ -83,6 +84,7 @@ namespace Wasl.Application.Features.DriverProfiles.Commands.SubmitProfile
             driverProfile.LicenseFrontUrl = licenseFrontUrl;
             driverProfile.LicenseBackUrl = licenseBackUrl;
             driverProfile.SelfieUrl = selfieUrl;
+            driverProfile.User.ProfilePictureUrls = selfieUrl;
 
             driverProfile.ApprovalStatus = DriverApprovalStatus.UnderReview;
             await _cacheService.RemoveAsync($"DriverStatus:{userId}", cancellationToken);
