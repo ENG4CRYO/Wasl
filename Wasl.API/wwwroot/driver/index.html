@@ -87,6 +87,26 @@
             </button>
         </section>
 
+        <section class="card" aria-labelledby="simHeading">
+            <h3 class="card-title" id="simHeading">
+                <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2" /><path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M6 12h.01M18 12h.01M6 16h.01M18 16h.01M8 12h8" /></svg>
+                <span data-i18n="joystickTitle">🎮 محاكاة حركة السائق</span>
+            </h3>
+            <div class="sim-controls">
+                <div id="joystickBase" class="joystick-base" role="slider" aria-label="Joystick" tabindex="0">
+                    <div id="joystickKnob" class="joystick-knob"></div>
+                </div>
+                <div class="sim-side">
+                    <div class="input-group speed-group">
+                        <label for="speedSlider" data-i18n="speedLabel">سرعة الحركة (درجة/ثانية)</label>
+                        <input type="range" id="speedSlider" class="speed-slider" min="0.00005" max="0.0005" step="0.00001" value="0.0002">
+                        <span id="speedValue" class="speed-value">0.00020</span>
+                    </div>
+                    <p class="input-hint" data-i18n="joystickHint">اسحب العصا للتحرك، وأفلتها للتوقف. يتم تحديث الموقع تلقائياً كل ثانية.</p>
+                </div>
+            </div>
+        </section>
+
         <section class="card" aria-labelledby="opsHeading" aria-live="polite">
             <h3 class="card-title" id="opsHeading">
                 <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" /></svg>

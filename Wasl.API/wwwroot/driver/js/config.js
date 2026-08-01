@@ -28,7 +28,9 @@ export const TRANSLATIONS = {
         invalidCoords: "قيم الإحداثيات غير صحيحة", radarNotConnected: "أنت غير متصل بالرادار", btnSending: "جاري الإرسال...",
         btnFinishing: "جاري الإنهاء...", btnArrived: "📍 لقد وصلت (Arrived)", btnStart: "🚀 بدء الرحلة", btnStarting: "جاري البدء...",
         btnComplete: "🏁 إنهاء الرحلة", btnCancel: "❌ إلغاء الرحلة", btnCancelling: "جاري الإلغاء...",
-        activeRideTitle: "✅ أنت الآن في رحلة نشطة", voiceGuide: "🗺️ بدء التوجيه الصوتي", priceLabel: "السعر التقديري:", currency: "د.ع"
+        activeRideTitle: "✅ أنت الآن في رحلة نشطة", voiceGuide: "🗺️ بدء التوجيه الصوتي", priceLabel: "السعر التقديري:", currency: "د.ع",
+        joystickTitle: "🎮 محاكاة حركة السائق", speedLabel: "سرعة الحركة (درجة/ثانية)",
+        joystickHint: "اسحب العصا للتحرك، وأفلتها للتوقف. يتم تحديث الموقع تلقائياً كل ثانية."
     },
     en: {
         langToggleBtn: "العربية", subtitle: "Developer Driver Portal", emailLabel: "Email Address", passwordLabel: "Password",
@@ -43,7 +45,9 @@ export const TRANSLATIONS = {
         invalidCoords: "Invalid coordinate values", radarNotConnected: "You are not connected to the radar", btnSending: "Sending...",
         btnFinishing: "Completing...", btnArrived: "📍 Arrived", btnStart: "🚀 Start Ride", btnStarting: "Starting...",
         btnComplete: "🏁 Complete Ride", btnCancel: "❌ Cancel Ride", btnCancelling: "Cancelling...",
-        activeRideTitle: "✅ You are in an active ride", voiceGuide: "🗺️ Start Voice Guidance", priceLabel: "Estimated Fare:", currency: "IQD"
+        activeRideTitle: "✅ You are in an active ride", voiceGuide: "🗺️ Start Voice Guidance", priceLabel: "Estimated Fare:", currency: "IQD",
+        joystickTitle: "🎮 Driver Movement Simulation", speedLabel: "Movement Speed (deg/sec)",
+        joystickHint: "Drag the stick to move, release to stop. Location updates automatically every second."
     }
 };
 

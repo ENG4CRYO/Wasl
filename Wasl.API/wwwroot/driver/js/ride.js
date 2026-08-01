@@ -163,9 +163,9 @@ export const SignalRHandler = {
         return State.connection?.state === signalR.HubConnectionState.Connected;
     },
 
-    async sendLocation() {
+    async sendLocation(silent = false) {
         if (!this.isConnected()) {
-            UI.showToast(t('radarNotConnected'), 'warning');
+            if (!silent) UI.showToast(t('radarNotConnected'), 'warning');
             return;
         }
 
@@ -173,20 +173,20 @@ export const SignalRHandler = {
         const lng = parseFloat(DOM.lng.value);
 
         if (isNaN(lat) || isNaN(lng)) {
-            UI.showToast(t('invalidCoords'), 'warning');
+            if (!silent) UI.showToast(t('invalidCoords'), 'warning');
             return;
         }
 
-        UI.setButtonLoading(DOM.sendBtn, true);
+        if (!silent) UI.setButtonLoading(DOM.sendBtn, true);
 
         try {
             const currentRideId = State.activeRide ? State.activeRide.rideId : null;
             await State.connection.invoke('UpdateLocation', lat, lng,currentRideId);
-            UI.showToast(t('connected'), 'success');
+            if (!silent) UI.showToast(t('connected'), 'success');
         } catch {
-            UI.showToast(t('networkError'), 'error');
+            if (!silent) UI.showToast(t('networkError'), 'error');
         } finally {
-            UI.setButtonLoading(DOM.sendBtn, false);
+            if (!silent) UI.setButtonLoading(DOM.sendBtn, false);
         }
     },
 

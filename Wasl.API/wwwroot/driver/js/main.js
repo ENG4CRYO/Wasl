@@ -2,6 +2,8 @@
 import { DOM, UI } from './ui.js';
 import { AuthManager, TokenManager } from './auth.js';
 import { RideManager, SignalRHandler } from './ride.js';
+import { Joystick } from './joystick.js';
+import { Tracking } from './tracking.js';
 
 const App = {
     toggleLanguage() {
@@ -59,6 +61,16 @@ const App = {
         UI.applyLanguage();
         this.bindEvents();
 
+        Tracking.init({
+            joystick: Joystick,
+            baseEl: DOM.joystickBase,
+            knobEl: DOM.joystickKnob,
+            latInput: DOM.lat,
+            lngInput: DOM.lng,
+            speedSlider: DOM.speedSlider,
+            speedValueEl: DOM.speedValue,
+            handler: SignalRHandler
+        });
 
         if (TokenManager.getToken()) {
             UI.showDashboard();
