@@ -159,28 +159,41 @@
         </section>
     </main>
 
-    <div id="wallet-modal" class="modal-overlay d-none" role="dialog" aria-modal="true">
+    <div id="wallet-modal" class="modal-overlay d-none" role="dialog" aria-modal="true" aria-labelledby="wallet-title">
         <div class="modal-backdrop" id="wallet-modal-backdrop"></div>
         <div class="modal-content modal-wallet">
-            <div class="modal-header">
-                <h3>شحن المحفظة</h3>
+            <div class="modal-header wallet-modal-header">
+                <div class="wallet-modal-title">
+                    <div class="wallet-modal-icon">💳</div>
+                    <div>
+                        <h3 id="wallet-title">شحن المحفظة</h3>
+                        <p>أضف رصيداً لحساب المستخدم</p>
+                    </div>
+                </div>
                 <button class="close-btn" id="close-wallet-modal-btn" aria-label="إغلاق">&times;</button>
             </div>
-            <div class="modal-body">
-                <div class="wallet-user-info">
+
+            <div class="modal-body wallet-modal-body">
+                <div class="wallet-user-card">
                     <div class="wallet-avatar" id="wallet-avatar">👤</div>
-                    <p class="wallet-name" id="wallet-user-name"></p>
-                    <p class="wallet-balance-label">الرصيد الحالي</p>
-                    <p class="wallet-balance-value"><span id="wallet-current-balance">0</span> <span class="wallet-currency">د.ع</span></p>
+                    <div class="wallet-user-meta">
+                        <p class="wallet-name" id="wallet-user-name"></p>
+                        <div class="wallet-balance-row">
+                            <span class="wallet-balance-label">الرصيد الحالي</span>
+                            <span class="wallet-balance-value"><span id="wallet-current-balance">0</span> <span class="wallet-currency">د.ع</span></span>
+                        </div>
+                    </div>
                 </div>
+
                 <div class="wallet-amount-wrap">
-                    <label class="wallet-amount-label">المبلغ المراد شحنه</label>
+                    <label class="wallet-amount-label" for="wallet-amount">المبلغ المطلوب شحنه</label>
                     <div class="wallet-amount-input-group">
                         <span class="wallet-amount-prefix">+</span>
-                        <input type="number" id="wallet-amount" placeholder="0" min="1" step="0.001">
+                        <input type="text" id="wallet-amount" placeholder="0" inputmode="numeric" autocomplete="off">
                         <span class="wallet-amount-suffix">د.ع</span>
                     </div>
                 </div>
+
                 <div class="wallet-quick-amounts">
                     <button class="quick-amount-btn" data-amount="5000">5,000</button>
                     <button class="quick-amount-btn" data-amount="10000">10,000</button>
@@ -188,13 +201,19 @@
                     <button class="quick-amount-btn" data-amount="50000">50,000</button>
                     <button class="quick-amount-btn" data-amount="100000">100,000</button>
                 </div>
+
+                <div class="wallet-preview" id="wallet-preview">
+                    <span class="wallet-preview-label">الرصيد بعد الشحن</span>
+                    <span class="wallet-preview-value"><span id="wallet-new-balance">0</span> <span class="wallet-currency">د.ع</span></span>
+                </div>
             </div>
+
             <div class="modal-footer">
+                <button class="btn btn-secondary" id="btn-cancel-topup">إلغاء</button>
                 <button class="btn btn-success btn-lg" id="btn-confirm-topup">
                     <span class="btn-text">تأكيد الشحن</span>
                     <span class="spinner d-none"></span>
                 </button>
-                <button class="btn btn-secondary" id="btn-cancel-topup">إلغاء</button>
             </div>
         </div>
     </div>

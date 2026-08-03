@@ -50,6 +50,8 @@ export const DOM = {
         userName: document.getElementById('wallet-user-name'),
         currentBalance: document.getElementById('wallet-current-balance'),
         amount: document.getElementById('wallet-amount'),
+        newBalance: document.getElementById('wallet-new-balance'),
+        avatar: document.getElementById('wallet-avatar'),
         confirmBtn: document.getElementById('btn-confirm-topup'),
         cancelBtn: document.getElementById('btn-cancel-topup')
     },

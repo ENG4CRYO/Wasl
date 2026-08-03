@@ -32,6 +32,7 @@ const App = {
 
 
         DOM.logoutBtn.addEventListener('click', () => AuthManager.logout(State.connection));
+        DOM.reconnectBtn.addEventListener('click', () => SignalRHandler.reconnect());
         DOM.sendBtn.addEventListener('click', () => SignalRHandler.sendLocation());
 
         DOM.modalAcceptBtn.addEventListener('click', () => RideManager.acceptRide());

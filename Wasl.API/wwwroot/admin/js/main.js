@@ -10,8 +10,15 @@ import { WalletModal } from './walletModal.js';
 const App = {
     initDashboard() {
         UI.switchScreen('dashboard');
-        UI.switchView('view-pending'); 
-        DashboardManager.loadDrivers(1);
+        const targetView = localStorage.getItem('adminActiveView') || 'view-pending';
+        UI.switchView(targetView);
+        this.loadViewData(targetView);
+    },
+
+    loadViewData(targetView) {
+        if (targetView === 'view-all-drivers') AllDriversManager.loadDrivers();
+        else if (targetView === 'view-clients') ClientsManager.loadClients();
+        else DashboardManager.loadDrivers(1);
     },
 
     bindEvents() {
@@ -28,6 +35,7 @@ const App = {
             btn.addEventListener('click', (e) => {
                 const targetView = e.target.dataset.target;
                 UI.switchView(targetView);
+                localStorage.setItem('adminActiveView', targetView);
 
                 if (targetView === 'view-pending') {
                     DashboardManager.loadDrivers(1);
@@ -116,6 +124,7 @@ const App = {
         DOM.wallet.backdrop.addEventListener('click', () => WalletModal.close());
         DOM.wallet.cancelBtn.addEventListener('click', () => WalletModal.close());
         DOM.wallet.confirmBtn.addEventListener('click', () => WalletModal.confirmTopUp());
+        DOM.wallet.amount.addEventListener('input', () => WalletModal.handleInput());
 
 
         document.addEventListener('click', (e) => {
@@ -143,12 +152,24 @@ const App = {
         });
     },
 
-    init() {
+    async init() {
         UI.setupImageErrorHandlers();
         this.bindEvents();
 
-        if (State.token) this.initDashboard();
-        else UI.switchScreen('login');
+        if (State.token) {
+            this.initDashboard();
+            return;
+        }
+
+        if (State.refreshToken) {
+            const restored = await AuthManager.refreshSession();
+            if (restored) {
+                this.initDashboard();
+                return;
+            }
+        }
+
+        UI.switchScreen('login');
     }
 };
 

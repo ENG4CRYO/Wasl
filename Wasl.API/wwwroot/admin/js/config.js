@@ -8,6 +8,7 @@
 
 export const State = {
     token: localStorage.getItem('adminToken') || null,
+    refreshToken: localStorage.getItem('adminRefreshToken') || null,
     currentPage: 1,
     activeDriverId: null
 };

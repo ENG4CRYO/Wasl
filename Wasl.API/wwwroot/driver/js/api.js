@@ -6,10 +6,9 @@ export const API = {
         if (State.isRefreshing) return null;
         State.isRefreshing = true;
 
-        const expiredToken = TokenManager.getToken();
         const refreshToken = TokenManager.getRefreshToken();
 
-        if (!expiredToken || !refreshToken) {
+        if (!refreshToken) {
             State.isRefreshing = false;
             return null;
         }
@@ -18,7 +17,7 @@ export const API = {
             const response = await fetch(`${CONFIG.API_BASE_URL}/api/v1/Auth/refresh-token`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Accept-Language': State.lang },
-                body: JSON.stringify({ token: expiredToken, refreshToken }),
+                body: JSON.stringify({ token: refreshToken }),
             });
 
             const result = await response.json();

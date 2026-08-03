@@ -30,7 +30,9 @@ export const AuthManager = {
             }
 
             State.token = result.data.token;
+            State.refreshToken = result.data.refreshToken;
             localStorage.setItem('adminToken', State.token);
+            localStorage.setItem('adminRefreshToken', State.refreshToken);
 
             DOM.login.form.reset();
             if (onSuccessCallback) onSuccessCallback(); 
@@ -39,8 +41,29 @@ export const AuthManager = {
 
     logout() {
         localStorage.removeItem('adminToken');
+        localStorage.removeItem('adminRefreshToken');
         State.token = null;
+        State.refreshToken = null;
         UI.switchScreen('login');
+    },
+
+    async refreshSession() {
+        const refreshToken = State.refreshToken;
+        if (!refreshToken) return false;
+
+        const result = await API.fetch('/Auth/refresh-token', {
+            method: 'POST',
+            body: JSON.stringify({ token: refreshToken })
+        });
+
+        if (result && result.succeeded) {
+            State.token = result.data.token;
+            State.refreshToken = result.data.refreshToken;
+            localStorage.setItem('adminToken', State.token);
+            localStorage.setItem('adminRefreshToken', State.refreshToken);
+            return true;
+        }
+        return false;
     },
 
     togglePassword() {

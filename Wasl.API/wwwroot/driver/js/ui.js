@@ -14,6 +14,7 @@ export const UI = {
         DOM.passwordToggle = document.getElementById('passwordToggle');
         DOM.statusBadge = document.getElementById('statusBadge');
         DOM.statusText = document.getElementById('statusText');
+        DOM.reconnectBtn = document.getElementById('reconnectBtn');
         DOM.lat = document.getElementById('lat');
         DOM.lng = document.getElementById('lng');
         DOM.sendBtn = document.getElementById('sendBtn');

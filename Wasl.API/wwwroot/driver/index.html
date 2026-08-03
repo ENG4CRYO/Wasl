@@ -53,10 +53,16 @@
         <header class="dashboard-header">
             <div class="header-brand">
                 <h2 class="header-title" data-i18n="radarTitle">🚕 رادار Wasl</h2>
-                <span class="status-badge" id="statusBadge" role="status">
-                    <span class="status-dot" aria-hidden="true"></span>
-                    <span id="statusText" data-i18n="connecting">جاري الاتصال…</span>
-                </span>
+                <div class="header-status-row">
+                    <span class="status-badge" id="statusBadge" role="status">
+                        <span class="status-dot" aria-hidden="true"></span>
+                        <span id="statusText" data-i18n="connecting">جاري الاتصال…</span>
+                    </span>
+                    <button class="btn btn-ghost btn-sm reconnect-btn" id="reconnectBtn" type="button" aria-label="إعادة الاتصال">
+                        <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6" /><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" /></svg>
+                        <span class="btn-text" data-i18n="reconnectBtn">إعادة الاتصال</span>
+                    </button>
+                </div>
             </div>
             <button class="btn btn-danger btn-sm" id="logoutBtn" type="button" aria-label="تسجيل الخروج">
                 <span data-i18n="logoutBtn">خروج</span>

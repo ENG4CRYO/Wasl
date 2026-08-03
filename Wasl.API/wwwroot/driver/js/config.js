@@ -18,7 +18,7 @@ export const TRANSLATIONS = {
     ar: {
         langToggleBtn: "English", subtitle: "بوابة السائق للمطورين", emailLabel: "البريد الإلكتروني", passwordLabel: "كلمة المرور",
         loginBtn: "تسجيل الدخول", radarTitle: "🚕 رادار Wasl", connecting: "جاري الاتصال…", connected: "متصل بالرادار ✓",
-        connFailed: "فشل الاتصال بالرادار", logoutBtn: "خروج", yourLocation: "موقعك الحالي", locationHint: "القيم الحالية تمثل موقع بغداد، العراق",
+        connFailed: "فشل الاتصال بالرادار", reconnectBtn: "إعادة الاتصال", logoutBtn: "خروج", yourLocation: "موقعك الحالي", locationHint: "القيم الحالية تمثل موقع بغداد، العراق",
         updateLocationBtn: "تحديث الموقع", operationsPanel: "لوحة العمليات", waitingRides: "متصل. في انتظار طلبات العملاء…",
         newRideReq: "طلب رحلة جديد", pickupPoint: "نقطة الانطلاق", dropoffPoint: "الوجهة النهائية", rideIdStr: "رقم الرحلة: ",
         acceptRideBtn: "قبول الرحلة", ignoreBtn: "تجاهل", reqEmailPass: "يرجى إدخال البريد الإلكتروني وكلمة المرور",
@@ -35,7 +35,7 @@ export const TRANSLATIONS = {
     en: {
         langToggleBtn: "العربية", subtitle: "Developer Driver Portal", emailLabel: "Email Address", passwordLabel: "Password",
         loginBtn: "Login", radarTitle: "🚕 Wasl Radar", connecting: "Connecting…", connected: "Connected to Radar ✓",
-        connFailed: "Radar Connection Failed", logoutBtn: "Logout", yourLocation: "Your Current Location", locationHint: "Current values represent Baghdad, Iraq",
+        connFailed: "Radar Connection Failed", reconnectBtn: "Reconnect", logoutBtn: "Logout", yourLocation: "Your Current Location", locationHint: "Current values represent Baghdad, Iraq",
         updateLocationBtn: "Update Location", operationsPanel: "Operations Panel", waitingRides: "Connected. Waiting for ride requests…",
         newRideReq: "New Ride Request", pickupPoint: "Pickup Point", dropoffPoint: "Dropoff Destination", rideIdStr: "Ride ID: ",
         acceptRideBtn: "Accept Ride", ignoreBtn: "Dismiss", reqEmailPass: "Please enter email and password",

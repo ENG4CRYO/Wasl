@@ -163,6 +163,27 @@ export const SignalRHandler = {
         return State.connection?.state === signalR.HubConnectionState.Connected;
     },
 
+    async getFreshToken() {
+        const token = TokenManager.getToken();
+        if (!token) return '';
+
+        const exp = this.getTokenExpiry(token);
+        if (exp && exp > Date.now()) return token;
+
+        const newTokens = await API.refreshMyToken();
+        return newTokens ? newTokens.token : token;
+    },
+
+    getTokenExpiry(token) {
+        try {
+            const payload = token.split('.')[1];
+            const decoded = JSON.parse(atob(payload.replace(/-/g, '+').replace(/_/g, '/')));
+            return decoded.exp ? decoded.exp * 1000 : null;
+        } catch {
+            return null;
+        }
+    },
+
     async sendLocation(silent = false) {
         if (!this.isConnected()) {
             if (!silent) UI.showToast(t('radarNotConnected'), 'warning');
@@ -199,10 +220,12 @@ export const SignalRHandler = {
         UI.setStatus('connecting');
 
         try {
-            State.connection = new signalR.HubConnectionBuilder()
-                .withUrl(`${CONFIG.API_BASE_URL}${CONFIG.SIGNALR_HUB}`, { accessTokenFactory: TokenManager.getToken })
+            this.connection = new signalR.HubConnectionBuilder()
+                .withUrl(`${CONFIG.API_BASE_URL}${CONFIG.SIGNALR_HUB}`, { accessTokenFactory: () => this.getFreshToken() })
                 .withAutomaticReconnect()
                 .build();
+
+            State.connection = this.connection;
 
             State.connection.on('ReceiveRideRequest', (data) => UI.renderRideRequest(data));
 
@@ -245,5 +268,14 @@ export const SignalRHandler = {
             UI.setStatus('error');
             if (err?.statusCode === 401) AuthManager.logout(State.connection);
         }
+    },
+
+    async reconnect() {
+        const current = State.connection;
+        if (current && this.isConnected()) {
+            try { await current.stop(); } catch { }
+        }
+        State.connection = null;
+        await this.start();
     }
 };
