@@ -108,6 +108,11 @@ public class CompleteRideCommandHandlerTests
         result.Succeeded.Should().BeTrue();
         _testRide.Status.Should().Be(RideStatus.Completed);
         _testRide.CompletedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1));
+        _testRide.TotalFare.Should().Be(_testRide.CalculatedPrice);
+        _testRide.CompanyCommission.Should().Be(Math.Round(_testRide.TotalFare * 0.2m, 0));
+        _testRide.DriverNetEarnings.Should().Be(_testRide.TotalFare - _testRide.CompanyCommission);
+        _testRide.CompanyCommission.Should().Be(Math.Round(_testRide.CompanyCommission, 0));
+        _testRide.DriverNetEarnings.Should().Be(Math.Round(_testRide.DriverNetEarnings, 0));
         _dbContextMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
         _driverNotificationMock.Verify(x => x.NotifyRiderRideCompletedAsync(_testRide.RiderId, _testRide.Id), Times.Once);
     }

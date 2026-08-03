@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Options;
 using System;
+using Wasl.Application.Common;
 using Wasl.Application.Common.Models;
 using Wasl.Application.Interfaces.Services;
 
@@ -30,7 +31,7 @@ namespace Wasl.Application.Services
             decimal finalFare = totalFare < _settings.MinimumFare ? _settings.MinimumFare : totalFare;
 
 
-            return (Math.Round(finalFare, 0), Math.Round(distanceKm, 2));
+            return (MoneyHelper.Round(finalFare), Math.Round(distanceKm, 2));
         }
 
         private double CalculateHaversineDistance(double lat1, double lon1, double lat2, double lon2)

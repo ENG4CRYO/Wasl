@@ -110,7 +110,7 @@ namespace Wasl.Application.Features.Rides.Commands.CompleteRide
                 ride.Status = RideStatus.Completed;
                 ride.CompletedAt = DateTime.UtcNow;
                 ride.TotalFare = ride.CalculatedPrice;
-                ride.CompanyCommission = Math.Round(ride.TotalFare * _pricingSettings.CompanyCommissionRate, 2);
+                ride.CompanyCommission = MoneyHelper.Round(ride.TotalFare * _pricingSettings.CompanyCommissionRate);
                 ride.DriverNetEarnings = ride.TotalFare - ride.CompanyCommission;
 
                 if (ride.PaymentMethod == PaymentMethod.Wallet)

@@ -26,6 +26,7 @@ public class RideFareCalculatorTests
 
         distance.Should().BeGreaterThan(0);
         fare.Should().BeGreaterThan(0);
+        fare.Should().Be(Math.Round(fare, 0));
         distance.Should().BeApproximately(3.9, 0.5);
     }
 
@@ -60,6 +61,7 @@ public class RideFareCalculatorTests
 
         distance.Should().BeGreaterThan(130);
         fare.Should().BeGreaterThan(300);
+        fare.Should().Be(Math.Round(fare, 0));
     }
 
     [Theory]
