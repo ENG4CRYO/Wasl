@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Wasl.API.Hubs;
 using Wasl.API.Resources;
+using Wasl.Application.Features.Rides.Commands.AcceptRide;
 using Wasl.Application.Interfaces;
 using Wasl.Application.Interfaces.Infrastructure;
 
@@ -63,14 +64,19 @@ public class DriverNotificationService : IDriverNotificationService
         });
     }
 
-    public async Task NotifyRiderRideAcceptedAsync(string riderId, Guid rideId, string driverId)
+    public async Task NotifyRiderRideAcceptedAsync(string riderId, DriverRideAcceptedInfoDto info)
     {
         if (string.IsNullOrEmpty(riderId)) return;
         await _hubContext.Clients.User(riderId).SendAsync("RideAccepted", new
         {
-            RideId = rideId,
-            DriverId = driverId,
-            Message = _localizer["Rides.RideAcceptedByDriver"]
+            info.RideId,
+            info.DriverId,
+            info.DriverName,
+            info.DriverProfilePictureUrl,
+            info.VehicleModel,
+            info.VehicleYear,
+            info.VinNumber,
+            Message = info.Message
         });
     }
 

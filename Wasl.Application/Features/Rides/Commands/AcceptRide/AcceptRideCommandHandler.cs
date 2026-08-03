@@ -9,6 +9,7 @@ using Wasl.Application.Common;
 using Wasl.Application.Interfaces.Common;
 using Wasl.Application.Interfaces.Infrastructure;
 using Wasl.Application.Resources;
+using Wasl.Core.Entities;
 using Wasl.Core.Enums;
 
 namespace Wasl.Application.Features.Rides.Commands.AcceptRide;
@@ -88,7 +89,9 @@ public class AcceptRideCommandHandler : IRequestHandler<AcceptRideCommand, ApiRe
             ride.AcceptedAt = DateTime.UtcNow;
 
             await _dbContext.SaveChangesAsync(cancellationToken);
-            await _driverNotification.NotifyRiderRideAcceptedAsync(ride.RiderId, ride.Id, driverId);
+
+            var info = await BuildDriverRideAcceptedInfoAsync(ride, cancellationToken);
+            await _driverNotification.NotifyRiderRideAcceptedAsync(ride.RiderId, info);
 
             return ApiResponse<bool>.Success(true, _localizer["Rides.RideAcceptanceSucceeded"]);
         }
@@ -100,5 +103,34 @@ public class AcceptRideCommandHandler : IRequestHandler<AcceptRideCommand, ApiRe
         {
             await _redisCache.ReleaseRideLockAsync(rideId);
         }
+    }
+
+    private async Task<DriverRideAcceptedInfoDto> BuildDriverRideAcceptedInfoAsync(Ride ride, CancellationToken cancellationToken)
+    {
+        var driver = await _dbContext.Users
+            .AsNoTracking()
+            .Where(u => u.Id == ride.DriverId)
+            .Select(u => new
+            {
+                u.FirstName,
+                u.LastName,
+                u.ProfilePictureUrls,
+                VehicleModel = u.DriverProfile != null ? u.DriverProfile.VehicleModel : string.Empty,
+                VehicleYear = u.DriverProfile != null ? u.DriverProfile.VehicleYear : 0,
+                VinNumber = u.DriverProfile != null ? u.DriverProfile.VinNumber : string.Empty
+            })
+            .FirstOrDefaultAsync(cancellationToken);
+
+        return new DriverRideAcceptedInfoDto
+        {
+            RideId = ride.Id,
+            DriverId = ride.DriverId!,
+            DriverName = driver != null ? $"{driver.FirstName} {driver.LastName}".Trim() : string.Empty,
+            DriverProfilePictureUrl = driver?.ProfilePictureUrls ?? string.Empty,
+            VehicleModel = driver?.VehicleModel ?? string.Empty,
+            VehicleYear = driver?.VehicleYear ?? 0,
+            VinNumber = driver?.VinNumber ?? string.Empty,
+            Message = _localizer["Rides.RideAcceptedByDriver"]
+        };
     }
 }

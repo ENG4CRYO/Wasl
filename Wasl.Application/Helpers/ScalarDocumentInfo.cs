@@ -64,7 +64,7 @@
                     * **Payload (two positional arguments):** `latitude` (double), `longitude` (double)
 
                 * `RideAccepted`: Triggered immediately when a driver accepts the requested trip. The app should transition from the "finding driver" state to showing driver details.
-                    * **Payload (JSON):** `{ "rideId": "guid", "driverId": "string", "message": "string" }`
+                    * **Payload (JSON):** `{ "rideId": "guid", "driverId": "string", "driverName": "string", "driverProfilePictureUrl": "string", "vehicleModel": "string", "vehicleYear": int, "vinNumber": "string", "message": "string" }`
 
                 * `DriverArrived`: Triggered when the driver taps the "Arrived" button. The app should display a notification for the rider to head out.
                     * **Payload (JSON):** `{ "rideId": "guid", "message": "string" }`
@@ -105,7 +105,7 @@
                 | 3 | `RideCancelled` | Rider or Driver | `string (message)` |
                 | 4 | `ProfileReviewed` | Driver | `{ "isApproved": bool, "message": string }` |
                 | 5 | `ReceiveDriverLocation` | Ride Group | Positional args: `latitude, longitude` |
-                | 6 | `RideAccepted` | Rider | `{ "rideId", "driverId", "message" }` |
+                | 6 | `RideAccepted` | Rider | `{ "rideId", "driverId", "driverName", "driverProfilePictureUrl", "vehicleModel", "vehicleYear", "vinNumber", "message" }` |
                 | 7 | `DriverArrived` | Rider | `{ "rideId", "message" }` |
                 | 8 | `RideStarted` | Rider | `{ "rideId", "message" }` |
                 | 9 | `RideCompleted` | Rider | `{ "rideId", "message" }` |

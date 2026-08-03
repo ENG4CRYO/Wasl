@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Wasl.Application.Features.Rides.Commands.AcceptRide;
 
 namespace Wasl.Application.Interfaces.Infrastructure
 {
@@ -17,7 +18,7 @@ namespace Wasl.Application.Interfaces.Infrastructure
         Task SendProfileReviewedNotificationAsync(string driverId, bool isApproved, string message);
 
 
-        Task NotifyRiderRideAcceptedAsync(string riderId, Guid rideId, string driverId);
+        Task NotifyRiderRideAcceptedAsync(string riderId, DriverRideAcceptedInfoDto info);
         Task NotifyRiderDriverArrivedAsync(string riderId, Guid rideId);
         Task NotifyRiderRideStartedAsync(string riderId, Guid rideId);
         Task NotifyRiderRideCompletedAsync(string riderId, Guid rideId);

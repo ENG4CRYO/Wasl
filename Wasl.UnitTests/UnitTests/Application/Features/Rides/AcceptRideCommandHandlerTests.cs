@@ -25,6 +25,7 @@ public class AcceptRideCommandHandlerTests
     private readonly AcceptRideCommandHandler _handler;
     private readonly List<Ride> _rides;
     private readonly List<DriverProfile> _driverProfiles;
+    private readonly List<ApplicationUser> _users;
     private readonly string _driverId;
 
     public AcceptRideCommandHandlerTests()
@@ -34,6 +35,17 @@ public class AcceptRideCommandHandlerTests
         _driverProfiles = new List<DriverProfile>
         {
             TestDataFactory.CreateTestDriverProfile(_driverId, DriverApprovalStatus.Approved)
+        };
+        _users = new List<ApplicationUser>
+        {
+            new ApplicationUser
+            {
+                Id = _driverId,
+                FirstName = "Test",
+                LastName = "Driver",
+                ProfilePictureUrls = "https://example.com/photo.jpg",
+                DriverProfile = TestDataFactory.CreateTestDriverProfile(_driverId, DriverApprovalStatus.Approved)
+            }
         };
 
         _redisCacheMock = new Mock<IRedisCacheService>();
@@ -61,6 +73,9 @@ public class AcceptRideCommandHandlerTests
 
         var driverProfilesDbSetMock = TestDataFactory.MockDbSet(_driverProfiles);
         _dbContextMock.Setup(x => x.DriverProfiles).Returns(driverProfilesDbSetMock.Object);
+
+        var usersDbSetMock = TestDataFactory.MockDbSet(_users);
+        _dbContextMock.Setup(x => x.Users).Returns(usersDbSetMock.Object);
 
         _dbContextMock.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(1);
@@ -91,7 +106,13 @@ public class AcceptRideCommandHandlerTests
         ride.DriverId.Should().Be(_driverId);
 
         _dbContextMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
-        _driverNotificationMock.Verify(x => x.NotifyRiderRideAcceptedAsync(ride.RiderId, ride.Id, _driverId), Times.Once);
+        _driverNotificationMock.Verify(x => x.NotifyRiderRideAcceptedAsync(ride.RiderId, It.Is<DriverRideAcceptedInfoDto>(info =>
+            info.DriverId == _driverId &&
+            info.DriverName == "Test Driver" &&
+            info.DriverProfilePictureUrl == "https://example.com/photo.jpg" &&
+            info.VehicleModel == "Toyota Camry" &&
+            info.VehicleYear == 2020 &&
+            info.VinNumber == "1HGCM82633A004352")), Times.Once);
         _redisCacheMock.Verify(x => x.ReleaseRideLockAsync(ride.Id), Times.Once);
     }
 
