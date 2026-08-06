@@ -471,4 +471,7 @@
   <data name="Payments.InvalidToken" xml:space="preserve">
     <value>رمز الدفع غير صالح أو منتهي الصلاحية.</value>
   </data>
+  <data name="Wallet.BalanceRetrievedSuccessfully" xml:space="preserve">
+    <value>تم جلب رصيد المحفظة بنجاح.</value>
+  </data>
 </root>

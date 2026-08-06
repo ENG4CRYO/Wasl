@@ -91,8 +91,13 @@ namespace Wasl.API.Extensions
                         {
                             ["name"] = "User Profile",
                             ["tags"] = new JsonArray { "Profile" }
+                        },
+                        new JsonObject
+                        {
+                            ["name"] = "Wallet",
+                            ["tags"] = new JsonArray { "Wallet" }
+ 
                         }
-
 
                     };
 

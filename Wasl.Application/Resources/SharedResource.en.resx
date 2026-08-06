@@ -471,4 +471,7 @@
   <data name="Payments.InvalidToken" xml:space="preserve">
     <value>Invalid or expired payment token.</value>
   </data>
+  <data name="Wallet.BalanceRetrievedSuccessfully" xml:space="preserve">
+    <value>Wallet balance retrieved successfully.</value>
+  </data>
 </root>

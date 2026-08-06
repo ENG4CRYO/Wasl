@@ -53,7 +53,7 @@ namespace Wasl.API.Hubs
                     await _redisCache.UpdateDriverLocationAsync(driverId, longitude, latitude);
                     await _cacheService.SetAsync($"DriverStatus:{driverId}", status, TimeSpan.FromHours(24), CancellationToken.None);
 
-                    if (!string.IsNullOrEmpty(rideId))
+                    if (!string.IsNullOrWhiteSpace(rideId))
                     {
                         await Clients.Group($"Ride_{rideId}").SendAsync("ReceiveDriverLocation", latitude, longitude);
                     }
