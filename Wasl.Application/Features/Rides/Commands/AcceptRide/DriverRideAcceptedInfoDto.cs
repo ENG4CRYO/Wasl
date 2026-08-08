@@ -10,4 +10,5 @@ public class DriverRideAcceptedInfoDto
     public int VehicleYear { get; set; }
     public string VinNumber { get; set; } = string.Empty;
     public string Message { get; set; } = default!;
+    public string PhoneNumber { get; set; } = default!;
 }

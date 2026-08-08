@@ -33,7 +33,7 @@ public class DriverNotificationService : IDriverNotificationService
     public async Task NotifyDriversWithRideRequestAsync(List<string> driverIds,
         Guid rideId, double latitude, double longitude,
         double dropLat, double dropLng, decimal price,
-        string paymentMethod)
+        string paymentMethod, string riderName, string riderPhone)
     {
         await _hubContext.Clients.Users(driverIds)
             .SendAsync("ReceiveRideRequest", new
@@ -45,6 +45,8 @@ public class DriverNotificationService : IDriverNotificationService
                 DropLng = dropLng,
                 calculatedPrice = price,
                 PaymentMethod = paymentMethod,
+                RiderName = riderName,
+                RiderPhone = riderPhone,
                 Message = _localizer["SignalRReceiveRideRequest"]
             });
     }
@@ -76,6 +78,7 @@ public class DriverNotificationService : IDriverNotificationService
             info.VehicleModel,
             info.VehicleYear,
             info.VinNumber,
+            info.PhoneNumber,
             Message = info.Message
         });
     }

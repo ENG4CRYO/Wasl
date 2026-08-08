@@ -115,6 +115,7 @@ public class AcceptRideCommandHandler : IRequestHandler<AcceptRideCommand, ApiRe
                 u.FirstName,
                 u.LastName,
                 u.ProfilePictureUrls,
+                u.PhoneNumber,
                 VehicleModel = u.DriverProfile != null ? u.DriverProfile.VehicleModel : string.Empty,
                 VehicleYear = u.DriverProfile != null ? u.DriverProfile.VehicleYear : 0,
                 VinNumber = u.DriverProfile != null ? u.DriverProfile.VinNumber : string.Empty
@@ -130,6 +131,7 @@ public class AcceptRideCommandHandler : IRequestHandler<AcceptRideCommand, ApiRe
             VehicleModel = driver?.VehicleModel ?? string.Empty,
             VehicleYear = driver?.VehicleYear ?? 0,
             VinNumber = driver?.VinNumber ?? string.Empty,
+            PhoneNumber = driver?.PhoneNumber ?? string.Empty,
             Message = _localizer["Rides.RideAcceptedByDriver"]
         };
     }

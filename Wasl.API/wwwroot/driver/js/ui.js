@@ -29,6 +29,8 @@ export const UI = {
         DOM.modalPickup = document.getElementById('modalPickup');
         DOM.modalDrop = document.getElementById('modalDrop');
         DOM.modalRideId = document.getElementById('modalRideId');
+        DOM.modalRiderName = document.getElementById('modalRiderName');
+        DOM.modalRiderPhone = document.getElementById('modalRiderPhone');
         DOM.modalPrice = document.getElementById('modalPrice');
         DOM.modalPaymentMethod = document.getElementById('modalPaymentMethod');
         DOM.modalMap = document.getElementById('modalMap');
@@ -133,12 +135,16 @@ export const UI = {
             const dropLng = data.dropLng || data.DropLng || 'غير محدد';
             const price = data.calculatedPrice || data.CalculatedPrice || data.price || data.Price || 0;
             const paymentMethod = data.paymentMethod || data.PaymentMethod || 'Cash';
+            const riderName = data.riderName || data.RiderName || '';
+            const riderPhone = data.riderPhone || data.RiderPhone || '';
 
-            State.activeRide = { rideId, lat, lng, dropLat, dropLng, price, paymentMethod };
+            State.activeRide = { rideId, lat, lng, dropLat, dropLng, price, paymentMethod, riderName, riderPhone };
 
             if (DOM.modalPickup) DOM.modalPickup.textContent = `${lat}, ${lng}`;
             if (DOM.modalDrop) DOM.modalDrop.textContent = `${dropLat}, ${dropLng}`;
             if (DOM.modalRideId) DOM.modalRideId.textContent = rideId;
+            if (DOM.modalRiderName) DOM.modalRiderName.textContent = riderName || '—';
+            if (DOM.modalRiderPhone) DOM.modalRiderPhone.textContent = riderPhone || '—';
             if (DOM.modalPrice) DOM.modalPrice.textContent = `${price} ${t('currency')}`;
             if (DOM.modalPaymentMethod) DOM.modalPaymentMethod.textContent = t(`paymentMethod_${paymentMethod}`);
             if (DOM.modalMap) DOM.modalMap.src = `https://maps.google.com/maps?q=${lat},${lng}&z=15&output=embed`;

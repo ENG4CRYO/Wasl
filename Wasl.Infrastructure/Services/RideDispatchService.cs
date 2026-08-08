@@ -60,6 +60,20 @@ public class RideDispatchService : IRideDispatchService
 
         if (driversToNotify.Any())
         {
+            var rider = await _dbContext.Users
+                .AsNoTracking()
+                .Where(u => u.Id == ride.RiderId)
+                .Select(u => new
+                {
+                    u.FirstName,
+                    u.LastName,
+                    u.PhoneNumber
+                })
+                .FirstOrDefaultAsync(cancellationToken);
+
+            var riderName = rider != null ? $"{rider.FirstName} {rider.LastName}".Trim() : string.Empty;
+            var riderPhone = rider?.PhoneNumber ?? string.Empty;
+
             await _notificationService.NotifyDriversWithRideRequestAsync(
                 driversToNotify,
                 rideId,
@@ -68,7 +82,9 @@ public class RideDispatchService : IRideDispatchService
                 ride.DropoffLatitude,
                 ride.DropoffLongitude,
                 ride.CalculatedPrice,
-                ride.PaymentMethod.ToString()
+                ride.PaymentMethod.ToString(),
+                riderName,
+                riderPhone
             );
 
             await _redisCache.AddExcludedDriversToRideAsync(rideId, driversToNotify);
