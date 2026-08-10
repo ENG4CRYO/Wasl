@@ -79,6 +79,8 @@ public class DriverNotificationService : IDriverNotificationService
             info.VehicleYear,
             info.VinNumber,
             info.PhoneNumber,
+            info.DriverLatitude,
+            info.DriverLongitude,
             Message = info.Message
         });
     }

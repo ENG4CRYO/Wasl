@@ -122,6 +122,8 @@ public class AcceptRideCommandHandler : IRequestHandler<AcceptRideCommand, ApiRe
             })
             .FirstOrDefaultAsync(cancellationToken);
 
+        var driverLocation = await _redisCache.GetDriverLocationAsync(ride.DriverId!);
+
         return new DriverRideAcceptedInfoDto
         {
             RideId = ride.Id,
@@ -132,6 +134,8 @@ public class AcceptRideCommandHandler : IRequestHandler<AcceptRideCommand, ApiRe
             VehicleYear = driver?.VehicleYear ?? 0,
             VinNumber = driver?.VinNumber ?? string.Empty,
             PhoneNumber = driver?.PhoneNumber ?? string.Empty,
+            DriverLatitude = driverLocation?.Latitude,
+            DriverLongitude = driverLocation?.Longitude,
             Message = _localizer["Rides.RideAcceptedByDriver"]
         };
     }

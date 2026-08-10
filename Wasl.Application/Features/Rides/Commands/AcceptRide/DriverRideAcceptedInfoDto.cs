@@ -11,4 +11,6 @@ public class DriverRideAcceptedInfoDto
     public string VinNumber { get; set; } = string.Empty;
     public string Message { get; set; } = default!;
     public string PhoneNumber { get; set; } = default!;
+    public double? DriverLatitude { get; set; }
+    public double? DriverLongitude { get; set; }
 }

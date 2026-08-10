@@ -8,6 +8,7 @@ namespace Wasl.Application.Interfaces.Infrastructure
     {
         Task UpdateDriverLocationAsync(string driverId, double longitude, double latitude);
         Task RemoveDriverLocationAsync(string driverId);
+        Task<(double Longitude, double Latitude)?> GetDriverLocationAsync(string driverId);
         Task<IEnumerable<string>> GetNearbyDriversAsync(double longitude, double latitude, double radiusInKm);
         Task<bool> AcquireRideLockAsync(Guid rideId, string driverId);
         Task ReleaseRideLockAsync(Guid rideId);

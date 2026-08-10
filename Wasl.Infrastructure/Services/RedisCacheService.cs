@@ -45,6 +45,18 @@ namespace Wasl.Infrastructure.Services
             await _db.GeoAddAsync(ActiveDriversGeoKey, longitude, latitude, driverId);
         }
 
+        public async Task<(double Longitude, double Latitude)?> GetDriverLocationAsync(string driverId)
+        {
+            var position = await _db.GeoPositionAsync(ActiveDriversGeoKey, driverId);
+
+            if (!position.HasValue)
+            {
+                return null;
+            }
+
+            return (position.Value.Longitude, position.Value.Latitude);
+        }
+
         public async Task<bool> AcquireRideLockAsync(Guid rideId, string driverId)
         {
             var lockKey = $"RideLock:{rideId}";

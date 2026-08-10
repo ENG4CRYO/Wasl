@@ -48,7 +48,7 @@
                 ### 🚕 3. For DRIVERS: Listening Events (On)
                 Drivers must listen to these events to receive and manage ride requests:
                 * `ReceiveRideRequest`: Triggered when a new ride is requested nearby.
-                    * **Payload (JSON):** `{ "rideId": "guid", "lat": double, "lng": double, "dropLat": double, "dropLng": double, "calculatedPrice": decimal, "paymentMethod": "Cash" | "Card" | "Wallet", "message": string }`
+                    * **Payload (JSON):** `{ "rideId": "guid", "lat": double, "lng": double, "dropLat": double, "dropLng": double, "calculatedPrice": decimal, "paymentMethod": "Cash" | "Card" | "Wallet", "riderName": string, "riderPhone": string, "message": string }`
                 * `HideRideRequest`: Triggered when a Rider cancels a *Pending* ride. The frontend MUST close the request popup if the ID matches.
                     * **Payload (String):** `rideId`
                 * `RideCancelled`: Triggered when a Rider cancels a ride *after* the driver has accepted it, or when the ride auto-cancels after 5 minutes.
@@ -64,7 +64,7 @@
                     * **Payload (two positional arguments):** `latitude` (double), `longitude` (double)
 
                 * `RideAccepted`: Triggered immediately when a driver accepts the requested trip. The app should transition from the "finding driver" state to showing driver details.
-                    * **Payload (JSON):** `{ "rideId": "guid", "driverId": "string", "driverName": "string", "driverProfilePictureUrl": "string", "vehicleModel": "string", "vehicleYear": int, "vinNumber": "string", "message": "string" }`
+                    * **Payload (JSON):** `{ "rideId": "guid", "driverId": "string", "driverName": "string", "driverProfilePictureUrl": "string", "vehicleModel": "string", "vehicleYear": int, "vinNumber": "string", "phoneNumber": "string", "driverLatitude": double, "driverLongitude": double, "message": "string" }`
 
                 * `DriverArrived`: Triggered when the driver taps the "Arrived" button. The app should display a notification for the rider to head out.
                     * **Payload (JSON):** `{ "rideId": "guid", "message": "string" }`
@@ -100,12 +100,12 @@
 
                 | # | Event Name | Sent To | Payload |
                 |---|-----------|---------|---------|
-                | 1 | `ReceiveRideRequest` | Drivers (nearby) | `{ "rideId", "lat", "lng", "dropLat", "dropLng", "calculatedPrice", "paymentMethod", "message" }` |
+                | 1 | `ReceiveRideRequest` | Drivers (nearby) | `{ "rideId", "lat", "lng", "dropLat", "dropLng", "calculatedPrice", "paymentMethod", "riderName", "riderPhone", "message" }` |
                 | 2 | `HideRideRequest` | Drivers (notified) | `string (rideId)` |
                 | 3 | `RideCancelled` | Rider or Driver | `string (message)` |
                 | 4 | `ProfileReviewed` | Driver | `{ "isApproved": bool, "message": string }` |
                 | 5 | `ReceiveDriverLocation` | Ride Group | Positional args: `latitude, longitude` |
-                | 6 | `RideAccepted` | Rider | `{ "rideId", "driverId", "driverName", "driverProfilePictureUrl", "vehicleModel", "vehicleYear", "vinNumber", "message" }` |
+                | 6 | `RideAccepted` | Rider | `{ "rideId", "driverId", "driverName", "driverProfilePictureUrl", "vehicleModel", "vehicleYear", "vinNumber", "phoneNumber", "driverLatitude", "driverLongitude", "message" }` |
                 | 7 | `DriverArrived` | Rider | `{ "rideId", "message" }` |
                 | 8 | `RideStarted` | Rider | `{ "rideId", "message" }` |
                 | 9 | `RideCompleted` | Rider | `{ "rideId", "message" }` |
