@@ -20,8 +20,9 @@
                 - **Caching:** The user data and OTP are temporarily stored in-memory (encrypted) for 10 minutes, linked to your Token.
 
                 ### ✅ 2. Verification & Completion
-                - Call `verify-registration` or `reset-password` by sending the `Token` + `OTP`.
-                - Upon success, the system creates the actual database record and returns your **JWT Access Token** and **Refresh Token**.
+                - For registration, call `verify-otp` (Rider/Driver) by sending the `RegisterToken` + `OTP`. For password reset, call `verify-reset-otp` by sending the `ResetToken` + `OTP`.
+                - Upon success, the system returns a validated token.
+                - Finally, call `complete-registration` (with profile + password) or `reset-password` (with new password only) using the validated token to finish the flow.
 
                 ---
 

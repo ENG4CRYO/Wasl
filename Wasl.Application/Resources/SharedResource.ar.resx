@@ -165,6 +165,9 @@
   <data name="Auth.PasswordResetSuccessfully" xml:space="preserve">
     <value>تم اعادة تعيين كلمة المرور بنجاح</value>
   </data>
+  <data name="Auth.PasswordResetSessionExpiredOrInvalid" xml:space="preserve">
+    <value>انتهت جلسة إعادة تعيين كلمة المرور أو أنها غير صالحة</value>
+  </data>
   <data name="Auth.TokenRevokedSuccessfully" xml:space="preserve">
     <value>تم تعطيل التوكن بنجاح</value>
   </data>

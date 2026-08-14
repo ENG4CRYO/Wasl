@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Localization;
 using Moq;
 using Wasl.Application.Features.Auth.Commands.ResetPassword;
-using Wasl.Application.Interfaces.Services;
+using Wasl.Application.Interfaces.Infrastructure;
 using Wasl.Application.Resources;
 using Wasl.Core.Entities;
 using Wasl.UnitTests.TestHelpers;
@@ -14,20 +14,25 @@ namespace Wasl.UnitTests.UnitTests.Application.Features.Auth;
 public class ResetPasswordCommandHandlerTests
 {
     private readonly Mock<UserManager<ApplicationUser>> _userManagerMock;
-    private readonly Mock<IOtpService> _otpServiceMock;
+    private readonly Mock<ICacheService> _cacheServiceMock;
     private readonly Mock<IStringLocalizer<SharedResource>> _localizerMock;
     private readonly ResetPasswordCommandHandler _handler;
 
     public ResetPasswordCommandHandlerTests()
     {
         _userManagerMock = TestDataFactory.MockUserManager<ApplicationUser>();
-        _otpServiceMock = TestDataFactory.MockOtpService();
+        _cacheServiceMock = TestDataFactory.MockCacheService();
         _localizerMock = TestDataFactory.MockLocalizer<SharedResource>(new Dictionary<string, string>
         {
+            ["Auth.PasswordResetSessionExpiredOrInvalid"] = "Password reset session expired or invalid.",
             ["Auth.UserNotFound"] = "User not found.",
             ["Auth.NewPasswordSameAsOld"] = "New password cannot be same as old.",
-            ["Auth.PasswordResetSuccessfully"] = "Password reset successfully."
+            ["Auth.PasswordResetSuccessfully"] = "Password reset successfully.",
+            ["Auth.ResetPasswordFailed"] = "Failed to reset password."
         });
+
+        _cacheServiceMock.Setup(x => x.GetAsync<string>($"ValidatedResetSession:valid-token", It.IsAny<CancellationToken>()))
+            .ReturnsAsync("test@wasl.com");
 
         var user = TestDataFactory.CreateTestUser();
         _userManagerMock.Setup(x => x.FindByEmailAsync("test@wasl.com"))
@@ -41,17 +46,16 @@ public class ResetPasswordCommandHandlerTests
 
         _handler = new ResetPasswordCommandHandler(
             _userManagerMock.Object,
-            _otpServiceMock.Object,
+            _cacheServiceMock.Object,
             _localizerMock.Object);
     }
 
     [Fact]
-    public async Task Handle_ValidReset_ReturnsSuccess()
+    public async Task Handle_ValidToken_ReturnsSuccess()
     {
         var command = new ResetPasswordCommand
         {
-            ResetToken = "valid-reset-token",
-            OtpCode = "123456",
+            Token = "valid-token",
             NewPassword = "NewPass@123"
         };
 
@@ -60,24 +64,25 @@ public class ResetPasswordCommandHandlerTests
         result.Succeeded.Should().BeTrue();
         result.Data.Should().BeTrue();
         result.Message.Should().Be("Password reset successfully.");
+        _cacheServiceMock.Verify(x => x.RemoveAsync("ValidatedResetSession:valid-token", It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
-    public async Task Handle_InvalidOtp_ReturnsFailure()
+    public async Task Handle_InvalidSession_ReturnsFailure()
     {
-        _otpServiceMock.Setup(x => x.VerifyOtpAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync((false, "Auth.InvalidOTP", null));
+        _cacheServiceMock.Setup(x => x.GetAsync<string>(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((string?)null);
 
         var command = new ResetPasswordCommand
         {
-            ResetToken = "invalid-otp",
-            OtpCode = "000000",
+            Token = "expired-token",
             NewPassword = "NewPass@123"
         };
 
         var result = await _handler.Handle(command, CancellationToken.None);
 
         result.Succeeded.Should().BeFalse();
+        result.Message.Should().Be("Password reset session expired or invalid.");
     }
 
     [Fact]
@@ -88,8 +93,7 @@ public class ResetPasswordCommandHandlerTests
 
         var command = new ResetPasswordCommand
         {
-            ResetToken = "valid-token",
-            OtpCode = "123456",
+            Token = "valid-token",
             NewPassword = "SamePass@123"
         };
 

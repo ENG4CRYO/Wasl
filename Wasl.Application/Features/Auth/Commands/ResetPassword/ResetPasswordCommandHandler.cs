@@ -5,7 +5,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Wasl.Application.Common;
-using Wasl.Application.Interfaces.Services;
+using Wasl.Application.Interfaces.Infrastructure;
 using Wasl.Application.Resources;
 using Wasl.Core.Entities;
 
@@ -14,31 +14,27 @@ namespace Wasl.Application.Features.Auth.Commands.ResetPassword
     public class ResetPasswordCommandHandler : IRequestHandler<ResetPasswordCommand, ApiResponse<bool>>
     {
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly IOtpService _otpService; 
+        private readonly ICacheService _cacheService;
         private readonly IStringLocalizer<SharedResource> _localizer;
 
         public ResetPasswordCommandHandler(
             UserManager<ApplicationUser> userManager,
-            IOtpService otpService, 
+            ICacheService cacheService,
             IStringLocalizer<SharedResource> localizer)
         {
             _userManager = userManager;
-            _otpService = otpService;
+            _cacheService = cacheService;
             _localizer = localizer;
         }
 
         public async Task<ApiResponse<bool>> Handle(ResetPasswordCommand request, CancellationToken cancellationToken)
         {
+            var userEmail = await _cacheService.GetAsync<string>($"ValidatedResetSession:{request.Token}", cancellationToken);
 
-            var verificationResult = await _otpService.VerifyOtpAsync(request.ResetToken, request.OtpCode, cancellationToken);
-
-            if (!verificationResult.IsValid)
+            if (string.IsNullOrEmpty(userEmail))
             {
-
-                return ApiResponse<bool>.Failure(_localizer[verificationResult.ErrorMessage!]);
+                return ApiResponse<bool>.Failure(_localizer["Auth.PasswordResetSessionExpiredOrInvalid"]);
             }
-
-            string userEmail = verificationResult.Data!.Email;
 
             var user = await _userManager.FindByEmailAsync(userEmail);
             if (user == null)
@@ -58,9 +54,12 @@ namespace Wasl.Application.Features.Auth.Commands.ResetPassword
             if (!resetResult.Succeeded)
             {
                 var errors = string.Join(" | ", resetResult.Errors.Select(e => e.Description));
-            
-                return ApiResponse<bool>.Failure(_localizer["Aut.FailedResetPassword"]);
+
+                return ApiResponse<bool>.Failure(_localizer["Auth.ResetPasswordFailed"]);
             }
+
+            await _cacheService.RemoveAsync($"ValidatedResetSession:{request.Token}", cancellationToken);
+
             return ApiResponse<bool>.Success(true, _localizer["Auth.PasswordResetSuccessfully"]);
         }
     }

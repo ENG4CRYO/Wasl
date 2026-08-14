@@ -168,6 +168,9 @@
   <data name="Auth.PasswordResetSuccessfully" xml:space="preserve">
     <value>Password has been reset successfully</value>
   </data>
+  <data name="Auth.PasswordResetSessionExpiredOrInvalid" xml:space="preserve">
+    <value>Password reset session expired or invalid</value>
+  </data>
   <data name="Auth.TokenRevokedSuccessfully" xml:space="preserve">
     <value>Token revoked successfully</value>
   </data>

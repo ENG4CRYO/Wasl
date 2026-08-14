@@ -233,12 +233,35 @@ namespace Wasl.API.Controllers.V1
         }
 
         /// <summary>
-        /// Step 2: Verify OTP and Reset Password.
+        /// Step 2: Verify OTP.
         /// </summary>
         /// <remarks>
-        /// Takes the ResetToken, the 6-digit OTP, and the new password. If validation passes, updates the user's password securely.
+        /// Receives the ResetToken and the 6-digit OTP. On success returns a validated ResetToken
+        /// which is required for Step 3 to set the new password.
         /// </remarks>
-        /// <param name="request">Contains ResetToken, OTP, and the New Password.</param>
+        /// <param name="request">Contains ResetToken and OTP.</param>
+        /// <returns>A validated ResetToken for the next step.</returns>
+        [HttpPost("verify-reset-otp")]
+        [Tags("Common Authentication")]
+        [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> VerifyResetOtp([FromBody] VerifyResetOtpCommand request)
+        {
+            var result = await _mediator.Send(request);
+
+            if (!result.Succeeded)
+                return BadRequest(result);
+
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Step 3: Reset Password.
+        /// </summary>
+        /// <remarks>
+        /// Takes the validated ResetToken from Step 2 and the new password. If validation passes, updates the user's password securely.
+        /// </remarks>
+        /// <param name="request">Contains the validated ResetToken and the New Password.</param>
         /// <returns>Success status.</returns>
         [HttpPost("reset-password")]
         [Tags("Common Authentication")]
