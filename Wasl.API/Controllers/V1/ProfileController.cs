@@ -5,7 +5,9 @@ using Microsoft.AspNetCore.Mvc;
 using Wasl.API.Extensions;
 using Wasl.Application.Common;
 using Wasl.Application.Dtos.Profile;
+using Wasl.Application.Features.Profile.Commands.UpdateDriverProfile;
 using Wasl.Application.Features.Profile.Commands.UpdateRiderPhoto;
+using Wasl.Application.Features.Profile.Commands.UpdateRiderProfile;
 using Wasl.Application.Features.Profile.Queries.GetDriverProfile;
 using Wasl.Application.Features.Profile.Queries.GetRiderProfile;
 using Wasl.Core.Constants;
@@ -54,6 +56,24 @@ namespace Wasl.API.Controllers.V1
                 Photo = photo.ToUploadedFile()!
             };
 
+            var result = await _mediator.Send(command);
+            return result.Succeeded ? Ok(result) : BadRequest(result);
+        }
+
+        [Authorize(Roles = AspRoles.Rider)]
+        [Tags("Profile")]
+        [HttpPut("rider")]
+        public async Task<ActionResult<ApiResponse<RiderProfileDto>>> UpdateRiderProfile([FromBody] UpdateRiderProfileCommand command)
+        {
+            var result = await _mediator.Send(command);
+            return result.Succeeded ? Ok(result) : BadRequest(result);
+        }
+
+        [Authorize(Roles = AspRoles.Driver)]
+        [Tags("Profile")]
+        [HttpPut("driver")]
+        public async Task<ActionResult<ApiResponse<DriverProfileDto>>> UpdateDriverProfile([FromBody] UpdateDriverProfileCommand command)
+        {
             var result = await _mediator.Send(command);
             return result.Succeeded ? Ok(result) : BadRequest(result);
         }

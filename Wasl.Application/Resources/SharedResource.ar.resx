@@ -477,4 +477,10 @@
   <data name="Wallet.BalanceRetrievedSuccessfully" xml:space="preserve">
     <value>تم جلب رصيد المحفظة بنجاح.</value>
   </data>
+  <data name="Profile.UpdatedSuccessfully" xml:space="preserve">
+    <value>تم تحديث الملف الشخصي بنجاح</value>
+  </data>
+  <data name="Profile.PhoneNumberAlreadyTaken" xml:space="preserve">
+    <value>رقم الهاتف مستخدم بالفعل</value>
+  </data>
 </root>

@@ -477,4 +477,10 @@
   <data name="Wallet.BalanceRetrievedSuccessfully" xml:space="preserve">
     <value>Wallet balance retrieved successfully.</value>
   </data>
+  <data name="Profile.UpdatedSuccessfully" xml:space="preserve">
+    <value>Profile updated successfully</value>
+  </data>
+  <data name="Profile.PhoneNumberAlreadyTaken" xml:space="preserve">
+    <value>Phone number is already in use</value>
+  </data>
 </root>
