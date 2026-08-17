@@ -46,8 +46,6 @@ namespace Wasl.Application.Features.Profile.Commands.UpdateDriverProfile
             if (phoneTaken)
                 return ApiResponse<DriverProfileDto>.Failure(_localizer["Profile.PhoneNumberAlreadyTaken"]);
 
-            user.FirstName = request.FirstName;
-            user.LastName = request.LastName;
             user.PhoneNumber = request.PhoneNumber;
 
             await _context.SaveChangesAsync(cancellationToken);

@@ -57,8 +57,6 @@ public class UpdateDriverProfileCommandHandlerTests
 
         var command = new UpdateDriverProfileCommand
         {
-            FirstName = "Ali",
-            LastName = "Hassan",
             PhoneNumber = "07709876543"
         };
 
@@ -126,8 +124,6 @@ public class UpdateDriverProfileCommandHandlerTests
 
         var command = new UpdateDriverProfileCommand
         {
-            FirstName = "Ali",
-            LastName = "Hassan",
             PhoneNumber = "07709876543"
         };
 
