@@ -278,7 +278,58 @@ select {
 .layout-dashboard:not(.d-none) {
     display: flex;
     height: 100vh;
+    height: 100dvh;
     overflow: hidden;
+}
+
+.filters-bar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+}
+
+    .filters-bar .form-input {
+        max-width: 300px;
+    }
+
+    .filters-bar select.form-input {
+        max-width: 200px;
+    }
+
+.sidebar-toggle {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text-main);
+    cursor: pointer;
+    transition: var(--transition);
+    flex-shrink: 0;
+}
+
+    .sidebar-toggle:hover {
+        background-color: rgba(255, 255, 255, 0.05);
+        border-color: var(--border-focus);
+    }
+
+.sidebar-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 999;
+    background-color: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(2px);
+}
+
+.table-actions {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    flex-wrap: wrap;
 }
 
 .sidebar {
@@ -881,4 +932,204 @@ select {
 .btn-lg {
     padding: 0.75rem 1.5rem;
     font-size: 1rem;
+}
+
+/* ==================== 📱 التجاوب مع الشاشات (Responsive) ==================== */
+
+/* 📱 الأجهزة اللوحية والجوال (≤768px) */
+@media (max-width: 768px) {
+
+    /* القائمة الجانبية تصبح درجاً منزلقاً من اليمين */
+    .sidebar {
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        right: 0;
+        width: 260px;
+        max-width: 85vw;
+        transform: translateX(100%);
+        transition: transform 0.3s ease;
+        z-index: 1000;
+        box-shadow: var(--shadow-lg);
+    }
+
+    .sidebar.open {
+        transform: translateX(0);
+    }
+
+    .sidebar-toggle {
+        display: inline-flex;
+    }
+
+    .main-content {
+        width: 100%;
+    }
+
+    .topbar {
+        padding: 0.75rem 1rem;
+        gap: 0.75rem;
+    }
+
+    .content-body {
+        padding: 1rem;
+    }
+
+    .filters-bar {
+        flex-direction: column;
+    }
+
+    .filters-bar .form-input,
+    .filters-bar select.form-input {
+        max-width: 100%;
+        width: 100%;
+    }
+
+    /* الجداول تتحول إلى بطاقات (مع بقاء التمرير الأفقي كحل احتياطي) */
+    .table-responsive {
+        overflow-x: auto;
+    }
+
+    .data-table,
+    .data-table tbody,
+    .data-table tr,
+    .data-table td {
+        display: block;
+        width: 100%;
+    }
+
+    .data-table thead {
+        display: none;
+    }
+
+    .data-table tr {
+        padding: 0.75rem;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .data-table td {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        padding: 0.5rem 0.25rem;
+        border-bottom: 1px dashed var(--border);
+        text-align: right;
+    }
+
+    .data-table td:last-child {
+        border-bottom: none;
+    }
+
+    .data-table td::before {
+        content: attr(data-label);
+        color: var(--text-muted);
+        font-size: 0.75rem;
+        font-weight: 600;
+        flex-shrink: 0;
+    }
+
+    .data-table td:not([data-label])::before {
+        content: none;
+    }
+
+    .pagination {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.75rem;
+    }
+
+    /* النوافذ المنبثقة تصبح قريبة من ملء الشاشة */
+    .modal-overlay {
+        align-items: flex-end;
+    }
+
+    .modal-content,
+    .modal-lg,
+    .modal-wallet {
+        width: 100%;
+        max-width: 100%;
+        max-height: 100vh;
+        max-height: 100dvh;
+        border-radius: 16px 16px 0 0;
+    }
+
+    .driver-details-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .modal-footer {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .modal-footer .btn {
+        width: 100%;
+        padding: 0.75rem;
+    }
+
+    .modal-header,
+    .modal-body,
+    .modal-footer {
+        padding-right: 1rem;
+        padding-left: 1rem;
+    }
+
+    .auth-card {
+        padding: 1.5rem 1.25rem;
+        margin: 0 1rem;
+    }
+
+    .toast-container {
+        top: 0.75rem;
+        right: 0.75rem;
+        left: 0.75rem;
+    }
+
+    .toast {
+        min-width: 0;
+        width: 100%;
+    }
+
+    .managed-image {
+        height: 120px;
+    }
+}
+
+/* 📱 الشاشات الصغيرة (≤480px) */
+@media (max-width: 480px) {
+
+    .content-body {
+        padding: 0.75rem;
+    }
+
+    .data-table tr {
+        padding: 0.5rem;
+    }
+
+    .data-table td {
+        padding: 0.5rem 0.125rem;
+    }
+
+    .user-profile > span {
+        display: none;
+    }
+
+    .wallet-quick-amounts .quick-amount-btn {
+        flex: 1 1 auto;
+    }
+
+    .wallet-balance-value {
+        font-size: 1.2rem;
+    }
+
+    .wallet-amount-input-group input {
+        font-size: 1.5rem;
+    }
+
+    .wallet-modal-header,
+    .wallet-modal-body {
+        padding-right: 1rem;
+        padding-left: 1rem;
+    }
 }

@@ -58,11 +58,11 @@ export const AllDriversManager = {
 
         DOM.allDrivers.tableBody.innerHTML = drivers.map(d => `
             <tr>
-                <td><strong>${d.fullName}</strong></td>
-                <td dir="ltr" style="text-align: right;">${d.phoneNumber}</td>
-                <td style="color: var(--success); font-weight: 700;">${d.balance != null ? d.balance.toLocaleString() : '-'}</td>
-                <td>${this.getStatusBadge(d.status)}</td>
-                <td style="display: flex; gap: 6px; align-items: center;">
+                <td data-label="الاسم الكامل"><strong>${d.fullName}</strong></td>
+                <td data-label="الهاتف" dir="ltr" style="text-align: right;">${d.phoneNumber}</td>
+                <td data-label="الرصيد" style="color: var(--success); font-weight: 700;">${d.balance != null ? d.balance.toLocaleString() : '-'}</td>
+                <td data-label="الحالة">${this.getStatusBadge(d.status)}</td>
+                <td data-label="الإجراءات" class="table-actions">
                     ${(d.status === 1 || d.status === 2)
                 ? `<span style="font-size: 11px; color: #94a3b8;">لا يمكن تغييره من هنا</span>`
             : `<select class="status-changer form-input" data-id="${d.driverId}" style="width: auto; padding: 4px 24px 4px 8px; font-size: 13px;">

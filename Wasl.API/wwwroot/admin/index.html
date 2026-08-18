@@ -41,8 +41,10 @@
         </div>
     </main>
 
+    <div id="sidebar-overlay" class="sidebar-overlay d-none"></div>
+
     <main id="dashboard-screen" class="screen layout-dashboard d-none">
-        <aside class="sidebar">
+        <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <h2>Wasl Admin</h2>
             </div>
@@ -58,6 +60,9 @@
 
         <section class="main-content">
             <header class="topbar">
+                <button id="sidebar-toggle" class="sidebar-toggle" aria-label="فتح القائمة" aria-expanded="false">
+                    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+                </button>
                 <h3>لوحة التحكم</h3>
                 <div class="user-profile">
                     <span>مدير النظام</span>
@@ -93,9 +98,9 @@
                 </div>
 
                 <div id="view-all-drivers" class="view-section d-none">
-                    <div class="filters-bar" style="display: flex; gap: 10px; margin-bottom: 15px;">
-                        <input type="text" id="search-driver" placeholder="بحث بالاسم أو الهاتف..." class="form-input" style="max-width: 300px;">
-                        <select id="filter-status" class="form-input" style="max-width: 200px;">
+                    <div class="filters-bar">
+                        <input type="text" id="search-driver" placeholder="بحث بالاسم أو الهاتف..." class="form-input">
+                        <select id="filter-status" class="form-input">
                             <option value="">جميع الحالات</option>
                             <option value="1">لم يرفع ملفه (Pending)</option>
                             <option value="2">قيد المراجعة</option>
@@ -128,8 +133,8 @@
                 </div>
 
                 <div id="view-clients" class="view-section d-none">
-                    <div class="filters-bar" style="display: flex; gap: 10px; margin-bottom: 15px;">
-                        <input type="text" id="search-client" placeholder="بحث بالاسم أو الهاتف أو البريد..." class="form-input" style="max-width: 300px;">
+                    <div class="filters-bar">
+                        <input type="text" id="search-client" placeholder="بحث بالاسم أو الهاتف أو البريد..." class="form-input">
                     </div>
 
                     <div class="card table-card">

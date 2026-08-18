@@ -35,6 +35,7 @@ const App = {
             btn.addEventListener('click', (e) => {
                 const targetView = e.target.dataset.target;
                 UI.switchView(targetView);
+                UI.closeSidebar();
                 localStorage.setItem('adminActiveView', targetView);
 
                 if (targetView === 'view-pending') {
@@ -46,6 +47,9 @@ const App = {
                 }
             });
         });
+
+        DOM.sidebar.toggleBtn.addEventListener('click', () => UI.toggleSidebar());
+        DOM.sidebar.overlay.addEventListener('click', () => UI.closeSidebar());
 
 
         DOM.dashboard.prevBtn.addEventListener('click', () => DashboardManager.loadDrivers(State.currentPage - 1));
@@ -146,6 +150,7 @@ const App = {
 
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
+                UI.closeSidebar();
                 if (!DOM.modal.overlay.classList.contains('d-none')) ModalManager.close();
                 if (!DOM.wallet.overlay.classList.contains('d-none')) WalletModal.close();
             }

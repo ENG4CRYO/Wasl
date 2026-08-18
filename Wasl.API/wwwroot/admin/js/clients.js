@@ -46,11 +46,11 @@ export const ClientsManager = {
 
         DOM.clients.tableBody.innerHTML = clients.map(c => `
             <tr>
-                <td><strong>${c.fullName}</strong></td>
-                <td dir="ltr" style="text-align: right;">${c.email}</td>
-                <td dir="ltr" style="text-align: right;">${c.phoneNumber}</td>
-                <td style="color: var(--success); font-weight: 700;">${c.balance != null ? c.balance.toLocaleString() : '0'}</td>
-                <td>
+                <td data-label="الاسم الكامل"><strong>${c.fullName}</strong></td>
+                <td data-label="البريد الإلكتروني" dir="ltr" style="text-align: right;">${c.email}</td>
+                <td data-label="رقم الهاتف" dir="ltr" style="text-align: right;">${c.phoneNumber}</td>
+                <td data-label="الرصيد" style="color: var(--success); font-weight: 700;">${c.balance != null ? c.balance.toLocaleString() : '0'}</td>
+                <td data-label="الإجراء">
                     <button class="btn btn-success btn-sm top-up-btn" data-id="${c.clientId}" data-name="${c.fullName}" data-balance="${c.balance || 0}">شحن المحفظة</button>
                 </td>
             </tr>

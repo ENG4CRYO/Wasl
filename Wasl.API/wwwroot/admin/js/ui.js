@@ -12,7 +12,10 @@ export const DOM = {
         'view-clients': document.getElementById('view-clients')
     },
     sidebar: {
-        navItems: document.querySelectorAll('.sidebar-nav .nav-item')
+        navItems: document.querySelectorAll('.sidebar-nav .nav-item'),
+        sidebar: document.getElementById('sidebar'),
+        toggleBtn: document.getElementById('sidebar-toggle'),
+        overlay: document.getElementById('sidebar-overlay')
     },
     login: {
         form: document.getElementById('login-form'),
@@ -86,6 +89,21 @@ export const UI = {
             if (btn.dataset.target === targetViewId) btn.classList.add('active');
             else btn.classList.remove('active');
         });
+    },
+
+    toggleSidebar() {
+        const isOpen = DOM.sidebar.sidebar.classList.toggle('open');
+        DOM.sidebar.overlay.classList.toggle('d-none', !isOpen);
+        DOM.sidebar.toggleBtn.setAttribute('aria-expanded', String(isOpen));
+        DOM.sidebar.toggleBtn.setAttribute('aria-label', isOpen ? 'إغلاق القائمة' : 'فتح القائمة');
+    },
+
+    closeSidebar() {
+        if (!DOM.sidebar.sidebar.classList.contains('open')) return;
+        DOM.sidebar.sidebar.classList.remove('open');
+        DOM.sidebar.overlay.classList.add('d-none');
+        DOM.sidebar.toggleBtn.setAttribute('aria-expanded', 'false');
+        DOM.sidebar.toggleBtn.setAttribute('aria-label', 'فتح القائمة');
     },
 
     showToast(message, type = 'error') {

@@ -37,11 +37,11 @@ export const DashboardManager = {
 
         DOM.dashboard.tableBody.innerHTML = drivers.map(d => `
             <tr>
-                <td><strong>${d.fullName}</strong></td>
-                <td dir="ltr" style="text-align: right;">${d.email}</td>
-                <td dir="ltr" style="text-align: right;">${d.phoneNumber}</td>
-                <td>${new Date(d.submittedAt).toLocaleDateString('ar-IQ')}</td>
-                <td>
+                <td data-label="الاسم الكامل"><strong>${d.fullName}</strong></td>
+                <td data-label="البريد الإلكتروني" dir="ltr" style="text-align: right;">${d.email}</td>
+                <td data-label="رقم الهاتف" dir="ltr" style="text-align: right;">${d.phoneNumber}</td>
+                <td data-label="تاريخ التقديم">${new Date(d.submittedAt).toLocaleDateString('ar-IQ')}</td>
+                <td data-label="الإجراء">
                     <button class="btn btn-primary btn-sm view-btn" data-id="${d.driverId}">مراجعة الطلب</button>
                 </td>
             </tr>
