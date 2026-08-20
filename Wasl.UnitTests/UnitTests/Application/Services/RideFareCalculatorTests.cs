@@ -38,7 +38,7 @@ public class RideFareCalculatorTests
             30.0450, 31.2360);
 
         distance.Should().BeLessThan(0.5);
-        fare.Should().Be(10.0m);
+        fare.Should().Be(2000.0m);
     }
 
     [Fact]
@@ -49,7 +49,7 @@ public class RideFareCalculatorTests
             30.0444, 31.2357);
 
         distance.Should().Be(0);
-        fare.Should().Be(10.0m);
+        fare.Should().Be(2000.0m);
     }
 
     [Fact]
@@ -85,7 +85,8 @@ public class RideFareCalculatorTests
             PerKmRate = 5.0m,
             PerMinuteRate = 1.0m,
             MinimumFare = 25.0m,
-            AverageCitySpeedKmh = 20.0
+            AverageCitySpeedKmh = 20.0,
+            PriceRoundingIncrement = 10.0m
         });
 
         var calculator = new RideFareCalculator(highSettings);

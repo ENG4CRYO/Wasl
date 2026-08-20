@@ -64,8 +64,8 @@ public class UpdateDriverProfileCommandHandlerTests
 
         result.Succeeded.Should().BeTrue();
         result.Data.Should().NotBeNull();
-        result.Data!.FirstName.Should().Be("Ali");
-        result.Data.LastName.Should().Be("Hassan");
+        result.Data!.FirstName.Should().Be("Test");
+        result.Data.LastName.Should().Be("User");
         result.Data.PhoneNumber.Should().Be("07709876543");
         result.Data.Email.Should().Be("driver@wasl.com");
         result.Data.City.Should().Be("Baghdad");
@@ -73,8 +73,8 @@ public class UpdateDriverProfileCommandHandlerTests
         result.Data.AverageRating.Should().Be(4.5m);
         result.Data.TotalReviews.Should().Be(10);
         result.Data.Balance.Should().Be(1000m);
-        user.FirstName.Should().Be("Ali");
-        user.LastName.Should().Be("Hassan");
+        user.FirstName.Should().Be("Test");
+        user.LastName.Should().Be("User");
         user.PhoneNumber.Should().Be("07709876543");
     }
 

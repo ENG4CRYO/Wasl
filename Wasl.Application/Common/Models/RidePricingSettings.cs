@@ -12,5 +12,6 @@ namespace Wasl.Application.Common.Models
         public decimal MinimumFare { get; set; }
         public double AverageCitySpeedKmh { get; set; }
         public decimal CompanyCommissionRate { get; set; }
+        public decimal PriceRoundingIncrement { get; set; } = 250m;
     }
 }

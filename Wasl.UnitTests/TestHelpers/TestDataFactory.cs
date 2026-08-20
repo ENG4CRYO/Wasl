@@ -99,12 +99,13 @@ namespace Wasl.UnitTests.TestHelpers
         {
             return Options.Create(new RidePricingSettings
             {
-                BaseFare = 5.0m,
-                PerKmRate = 2.5m,
-                PerMinuteRate = 0.5m,
-                MinimumFare = 10.0m,
-                AverageCitySpeedKmh = 30.0,
-                CompanyCommissionRate = 0.20m
+                BaseFare = 1000.0m,
+                PerKmRate = 250.0m,
+                PerMinuteRate = 50.0m,
+                MinimumFare = 2000.0m,
+                AverageCitySpeedKmh = 40.0,
+                CompanyCommissionRate = 0.20m,
+                PriceRoundingIncrement = 250.0m
             });
         }
 
