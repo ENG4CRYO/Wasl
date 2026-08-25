@@ -36,15 +36,83 @@
                 - **User Identity:** SignalR maps users via the `uid` claim in the JWT. This is used by `Clients.User(userId)` to send targeted events.
                 - **Reconnection:** The client should use `.withAutomaticReconnect()` (built-in retry: 0s, 2s, 10s, 30s then exponential backoff). Listen for:
                   - `onreconnecting` → Show "Reconnecting..." UI state
-                  - `onreconnected` → Restore connected state
-                  - `onclose` → Show "Disconnected" UI state; if 401, redirect to login
+                  - `onreconnected` → Call `ReconnectToRide(rideId)` if a ride is active → restore state from `RideStatusSync`
+                  - `onclose` → Show "Disconnected" UI state; retry with backoff while authenticated. If 401, redirect to login
+                - **Server keep-alive:** The server pings every 15s and declares the connection dead after 30s of silence.
+
+                ### 🛟 1.1 State Recovery — READ THIS FIRST
+                **The backend is the single source of truth. Never treat local storage or in-memory UI state as authoritative.**
+                A client must be able to fully rebuild its ride UI at any moment from these two mechanisms:
+
+                1. **REST (cold start / app restart / long outage):**
+                   - `GET /api/v1/Rides/active` → your current active ride snapshot (`data` is `null` if you have none)
+                   - `GET /api/v1/Rides/{id}` → snapshot of one specific ride (participant-only)
+                2. **SignalR (mid-session reconnect):**
+                   - Invoke `ReconnectToRide(rideId)` → rejoins the ride group + immediately receives a `RideStatusSync` snapshot
+                   - Additionally, the server pushes `RideStatusSync` automatically on every successful hub connect when you have an active ride
+
+                **Required client behavior:**
+
+                | Scenario | What to do |
+                |----------|-----------|
+                | App opened / restarted | Call `GET /rides/active`. If data exists → render ride UI from it; connect to hub; invoke `ReconnectToRide(rideId)` |
+                | `onreconnecting` fires | Show "Reconnecting..." overlay. Do NOT cancel the ride or reset state |
+                | `onreconnected` fires | Invoke `ReconnectToRide(rideId)`, apply `RideStatusSync`; on invocation error fall back to `GET /rides/active` |
+                | `onclose` fires | Retry connecting with backoff (e.g. 2s→5s→10s→30s→60s, never give up while authenticated). On 401 → login |
+                | `DriverDisconnected` received | Keep ride alive; show "Driver connection lost. Waiting for reconnection...". Do NOT change ride status locally |
+                | `RideStatusSync` shows Completed/Cancelled/null | Clear local ride state and follow normal end-of-ride flow |
+
+                **Important:** A transport disconnect NEVER changes the ride business status. Rides remain `Accepted`, `Arrived`, or `InProgress` until real business actions occur. When the disconnected party returns, `RideStatusSync` restores the exact current state.
 
                 ### 📍 2. Client-Callable Hub Methods (Invoke)
 
                 | Method | Parameters | Who | Description |
                 |--------|-----------|-----|-------------|
                 | `UpdateLocation` | `(double latitude, double longitude, string? rideId)` | **Driver** | Updates GPS in Redis GEO index. Call every 3–10s while online. Pass `rideId` only during an active ride to broadcast location to rider. If driver is not Approved, connection is aborted. |
-                | `TrackRide` | `(string rideId)` | **Rider** | Joins the `Ride_{rideId}` group to start receiving live driver location updates. Must be called once after ride is accepted. |
+                | `TrackRide` | `(string rideId)` | **Rider** | Joins the `Ride_{rideId}` group to start receiving live driver location updates. Must be called once after ride is accepted. *(Legacy: no participant validation — prefer `ReconnectToRide`)* |
+                | `ReconnectToRide` | `(string rideId)` | **Rider / Driver** | Reconnection entry point. Validates the caller participates in the ride (otherwise invocation fails with a HubException), re-adds them to the `Ride_{rideId}` group, and immediately sends a `RideStatusSync` snapshot to the caller. Call after `onreconnected` and after cold-start connect. |
+
+                ### 🔄 2.1 REST State-Recovery Endpoints
+
+                | Endpoint | Roles | Description |
+                |----------|-------|-------------|
+                | `GET /api/v1/Rides/active` | Rider, Driver | Returns the caller's current active ride (`Pending`/`Accepted`/`Arrived`/`InProgress`) with full snapshot, or `null` data if none. **Primary recovery source on app open/restart.** |
+                | `GET /api/v1/Rides/{id}` | Rider, Driver | Full snapshot of a specific ride. Participant-only; non-participants get `400`. |
+
+                Both return `ActiveRideDto`, identical to the `RideStatusSync` payload:
+
+                ```json
+                {
+                  "rideId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                  "status": 2,
+                  "statusName": "Accepted",
+                  "pickupLatitude": 33.3152,
+                  "pickupLongitude": 44.3661,
+                  "dropoffLatitude": 33.2989,
+                  "dropoffLongitude": 44.4009,
+                  "calculatedPrice": 7500,
+                  "paymentMethod": "Cash",
+                  "requestedAt": "2026-08-26T10:00:00Z",
+                  "acceptedAt": "2026-08-26T10:01:12Z",
+                  "startedAt": null,
+                  "riderId": "user-1",
+                  "riderName": "Ali Hassan",
+                  "riderPhone": "+9647701234567",
+                  "driverId": "user-2",
+                  "driverName": "Kareem Ahmed",
+                  "driverPhone": "+9647709876543",
+                  "vehicleModel": "Kia Cerato",
+                  "vehicleYear": 2021,
+                  "vinNumber": "...",
+                  "driverLatitude": 33.3201,
+                  "driverLongitude": 44.3710
+                }
+                ```
+
+                - `statusName`: `Pending` \| `Accepted` \| `Arrived` \| `InProgress` \| `Completed` \| `Cancelled`
+                - `paymentMethod`: `Cash` \| `Card` \| `Wallet`
+                - `driverLatitude`/`driverLongitude` are the driver's **live** Redis position; `null` when the driver is offline.
+                - Riders receive rider fields populated + driver fields populated once accepted; Drivers see both sides as well.
 
                 ### 🚕 3. For DRIVERS: Listening Events (On)
                 Drivers must listen to these events to receive and manage ride requests:
@@ -79,10 +147,17 @@
                 * `RideCancelled`: Triggered if the driver or the system cancels the active trip. The app should return to the home screen and display the reason.
                     * **Payload (String):** `message`
 
+                * `DriverDisconnected`: Triggered when the assigned driver loses SignalR connectivity mid-ride. **The ride status does NOT change** — keep the current UI state and show a "Driver connection lost. Waiting for reconnection..." indicator until `RideStatusSync` / `ReceiveDriverLocation` resume.
+                    * **Payload (JSON):** `{ "rideId": "guid", "message": "string" }`
+
+                * `RideStatusSync`: Authoritative full-ride snapshot pushed to a rider or driver when: they call `ReconnectToRide`, they (re)connect to the hub while having an active ride. Apply it to rebuild the entire ride UI; if `statusName` is `Completed`/`Cancelled` (or payload is null) clear any local ride state.
+                    * **Payload (JSON):** Same schema as `ActiveRideDto` above (see §2.1).
+
 
                 ### 🚀 5. Connection Lifecycle & Driver Approval
                 - **On connect:** For Drivers, the server checks `ApprovalStatus`. If not **Approved**, the connection is aborted immediately.
-                - **On disconnect:** The driver's location is automatically removed from the Redis GEO index, making them invisible for new ride requests.
+                - **On connect (Rider or approved Driver) with an active ride:** the server automatically pushes `RideStatusSync` with the authoritative snapshot — cold-start recovery requires no extra calls beyond connecting.
+                - **On disconnect:** The driver's location is automatically removed from the Redis GEO index, making them invisible for new ride requests. If the driver had a ride in progress (`Accepted`/`Arrived`/`InProgress`), a `DriverDisconnected` event is broadcast to the ride group; **the ride status itself never changes on disconnect**. The driver's session enters a 3-minute grace period before being logged as offline.
                 - **Rider connections:** No special validation on connect; riders need only a valid JWT.
 
                 ### 🗺️ 6. Ride Dispatch Mechanism
@@ -110,6 +185,8 @@
                 | 7 | `DriverArrived` | Rider | `{ "rideId", "message" }` |
                 | 8 | `RideStarted` | Rider | `{ "rideId", "message" }` |
                 | 9 | `RideCompleted` | Rider | `{ "rideId", "message" }` |
+                | 10 | `DriverDisconnected` | Ride Group (Rider) | `{ "rideId": guid, "message": string }` — ride state unchanged; show reconnecting indicator |
+                | 11 | `RideStatusSync` | Rider or Driver (on connect / `ReconnectToRide`) | Full `ActiveRideDto` snapshot (§2.1) — authoritative state, rebuild UI from it |
 
                 ---
 

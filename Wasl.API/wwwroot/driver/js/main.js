@@ -24,6 +24,7 @@ const App = {
 
         DOM.loginBtn.addEventListener('click', () => AuthManager.login(() => {
             UI.showDashboard();
+            SignalRHandler.recoverActiveRideFromApi();
             SignalRHandler.start();
         }));
         DOM.email.addEventListener('keydown', e => { if (e.key === 'Enter') DOM.password.focus(); });
@@ -75,6 +76,9 @@ const App = {
 
         if (TokenManager.getToken()) {
             UI.showDashboard();
+            // Cold-start recovery: restore the authoritative ride state from the backend
+            // (the server also pushes RideStatusSync automatically once the hub connects).
+            SignalRHandler.recoverActiveRideFromApi();
             SignalRHandler.start();
         } else {
             DOM.loginScreen.hidden = false;

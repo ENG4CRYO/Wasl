@@ -19,6 +19,8 @@ using Wasl.Application.Features.Rides.Commands.RequestRide;
 using Wasl.Application.Features.Rides.Commands.ReviewRide;
 using Wasl.Application.Features.Rides.Commands.StartRide;
 using Wasl.Application.Features.Rides.Queries.EstimateFare;
+using Wasl.Application.Features.Rides.Queries.GetMyActiveRide;
+using Wasl.Application.Features.Rides.Queries.GetRideById;
 using Wasl.Application.Features.Rides.Queries.GetRideHistory;
 using Wasl.Core.Constants;
 
@@ -394,6 +396,56 @@ namespace Wasl.API.Controllers.V1
         public async Task<IActionResult> GetRideHistory([FromQuery] GetRideHistoryQuery query)
         {
             var result = await _mediator.Send(query);
+            return result.Succeeded ? Ok(result) : BadRequest(result);
+        }
+
+        /// <summary>
+        /// Gets the current user's active ride (Rider or Driver).
+        /// </summary>
+        /// <remarks>
+        /// **Roles Required:** Rider, Driver
+        /// 
+        /// **State-recovery endpoint (source of truth).** Returns the caller's ride currently in
+        /// `Pending`, `Accepted`, `Arrived`, or `InProgress` status with full details, or `null` data if no active ride exists.
+        /// 
+        /// Call this when the app starts, restarts, or after a long SignalR outage to restore
+        /// the authoritative ride state. Do not rely on local storage or in-memory UI state.
+        /// </remarks>
+        /// <returns>The active ride snapshot, or null if the user has no active ride.</returns>
+        [Authorize(Roles = "Rider,Driver")]
+        [HttpGet("active")]
+        [Tags("Rides")]
+        [ProducesResponseType(typeof(ApiResponse<ActiveRideDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        public async Task<IActionResult> GetMyActiveRide()
+        {
+            var result = await _mediator.Send(new GetMyActiveRideQuery());
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Gets full details of a specific ride (participant only).
+        /// </summary>
+        /// <remarks>
+        /// **Roles Required:** Rider, Driver
+        /// 
+        /// **State-recovery endpoint.** Returns the authoritative ride snapshot including live driver
+        /// location (from Redis). Only the Rider or assigned Driver of the ride may call it;
+        /// non-participants receive a failure response.
+        /// </remarks>
+        /// <param name="id">The unique identifier of the Ride.</param>
+        /// <returns>The ride snapshot.</returns>
+        [Authorize(Roles = "Rider,Driver")]
+        [HttpGet("{id:guid}")]
+        [Tags("Rides")]
+        [ProducesResponseType(typeof(ApiResponse<ActiveRideDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<ActiveRideDto>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        public async Task<IActionResult> GetRideById(Guid id)
+        {
+            var result = await _mediator.Send(new GetRideByIdQuery { RideId = id });
             return result.Succeeded ? Ok(result) : BadRequest(result);
         }
 

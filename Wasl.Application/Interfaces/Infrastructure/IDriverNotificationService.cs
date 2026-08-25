@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Wasl.Application.Dtos.Rides;
 using Wasl.Application.Features.Rides.Commands.AcceptRide;
 
 namespace Wasl.Application.Interfaces.Infrastructure
@@ -22,5 +23,16 @@ namespace Wasl.Application.Interfaces.Infrastructure
         Task NotifyRiderDriverArrivedAsync(string riderId, Guid rideId);
         Task NotifyRiderRideStartedAsync(string riderId, Guid rideId);
         Task NotifyRiderRideCompletedAsync(string riderId, Guid rideId);
+
+        /// <summary>
+        /// Broadcasts to the Ride_{rideId} group that the driver lost connectivity.
+        /// Does NOT change the ride business state.
+        /// </summary>
+        Task NotifyRideGroupDriverDisconnectedAsync(Guid rideId);
+
+        /// <summary>
+        /// Pushes the authoritative ride snapshot to a user after reconnection / cold start.
+        /// </summary>
+        Task SendRideStatusSyncAsync(string userId, ActiveRideDto snapshot);
     }
 }

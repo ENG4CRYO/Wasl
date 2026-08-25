@@ -432,6 +432,15 @@
   <data name="Rides.Cancelled" xml:space="preserve">
     <value>Cancelled</value>
   </data>
+  <data name="Rides.ActiveRideRetrievedSuccessfully" xml:space="preserve">
+    <value>Active ride retrieved successfully.</value>
+  </data>
+  <data name="Rides.DriverConnectionLost" xml:space="preserve">
+    <value>Driver connection lost. Waiting for reconnection...</value>
+  </data>
+  <data name="Rides.RideStateSynchronized" xml:space="preserve">
+    <value>Ride state synchronized.</value>
+  </data>
   <data name="Validation.Common.PageNumberGreaterThanZero" xml:space="preserve">
     <value>Page number must be greater than zero.</value>
   </data>

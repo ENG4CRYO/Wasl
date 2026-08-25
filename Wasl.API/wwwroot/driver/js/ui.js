@@ -161,12 +161,31 @@ export const UI = {
         return `<span class="payment-badge ${cls}">${label}</span>`;
     },
 
-    renderActiveRideDashboard(data) {
+    renderActiveRideDashboard(data, status = 'Accepted') {
         DOM.emptyState.hidden = true;
         DOM.notificationsArea.innerHTML = '';
 
         const mapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${data.lat},${data.lng}&destination=${data.dropLat},${data.dropLng}&travelmode=driving`;
         const paymentMethod = data.paymentMethod || 'Cash';
+        const isNonCash = paymentMethod === 'Card' || paymentMethod === 'Wallet';
+
+        let controls = '';
+        if (status === 'InProgress') {
+            controls = `
+                <button id="btnCompleteRide" class="btn btn-danger">${t('btnComplete')}</button>
+                ${isNonCash ? `<button id="btnChangePayment" class="btn btn-secondary">${t('btnChangePayment')}</button>` : ''}
+            `;
+        } else if (status === 'Arrived') {
+            controls = `
+                <button id="btnStartRide" class="btn btn-primary">${t('btnStart')}</button>
+                <button id="btnCancelRide" class="btn btn-ghost" style="color: #dc3545; border: 1px solid #dc3545;">${t('btnCancel')}</button>
+            `;
+        } else {
+            controls = `
+                <button id="btnArrived" class="btn btn-warning">${t('btnArrived')}</button>
+                <button id="btnCancelRide" class="btn btn-ghost" style="color: #dc3545; border: 1px solid #dc3545;">${t('btnCancel')}</button>
+            `;
+        }
 
         const card = document.createElement('div');
         card.className = 'ride-card';
@@ -180,16 +199,26 @@ export const UI = {
                 <p class="ride-card-id">ID: <code>${data.rideId}</code></p>
             </div>
             <div class="controls-group" style="margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap;">
-                <button id="btnArrived" class="btn btn-warning">${t('btnArrived')}</button>
-                <button id="btnStartRide" class="btn btn-primary" style="display: none;">${t('btnStart')}</button>
-                <button id="btnCompleteRide" class="btn btn-danger" style="display: none;">${t('btnComplete')}</button>
-                <button id="btnCancelRide" class="btn btn-ghost" style="color: #dc3545; border: 1px solid #dc3545;">${t('btnCancel')}</button>
-                ${paymentMethod === 'Card' || paymentMethod === 'Wallet' ? `<button id="btnChangePayment" class="btn btn-secondary" style="display: none;">${t('btnChangePayment')}</button>` : ''}
+                ${controls}
             </div>
             <a class="btn-map" href="${mapsUrl}" target="_blank" rel="noopener noreferrer" style="margin-top: 15px; display: inline-block;">
                 ${t('voiceGuide')}
             </a>
         `;
         DOM.notificationsArea.appendChild(card);
+    },
+
+    // Restores the ride dashboard from an authoritative snapshot (RideStatusSync / REST),
+    // showing only the action buttons valid for the ride's current status.
+    renderRestoredRide(dto) {
+        this.renderActiveRideDashboard({
+            rideId: dto.RideId,
+            lat: dto.PickupLatitude,
+            lng: dto.PickupLongitude,
+            dropLat: dto.DropoffLatitude,
+            dropLng: dto.DropoffLongitude,
+            price: dto.CalculatedPrice,
+            paymentMethod: dto.PaymentMethod
+        }, dto.StatusName);
     }
 };

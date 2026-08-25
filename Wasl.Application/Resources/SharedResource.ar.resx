@@ -432,6 +432,15 @@
   <data name="Rides.Cancelled" xml:space="preserve">
     <value>ملغية</value>
   </data>
+  <data name="Rides.ActiveRideRetrievedSuccessfully" xml:space="preserve">
+    <value>تم استرجاع الرحلة النشطة بنجاح.</value>
+  </data>
+  <data name="Rides.DriverConnectionLost" xml:space="preserve">
+    <value>انقطع اتصال السائق. جاري انتظار إعادة الاتصال...</value>
+  </data>
+  <data name="Rides.RideStateSynchronized" xml:space="preserve">
+    <value>تمت مزامنة حالة الرحلة.</value>
+  </data>
   <data name="Validation.Common.PageNumberGreaterThanZero" xml:space="preserve">
     <value>رقم الصفحة يجب أن يكون أكبر من صفر.</value>
   </data>

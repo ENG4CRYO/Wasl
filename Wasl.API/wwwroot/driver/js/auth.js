@@ -1,5 +1,6 @@
 ﻿import { CONFIG, State, t } from './config.js';
 import { DOM, UI } from './ui.js';
+import { clearActiveRideId } from './ride.js';
 
 export const TokenManager = {
     getToken() { return localStorage.getItem('driverToken'); },
@@ -65,6 +66,7 @@ export const AuthManager = {
         State.connection = null;
         State.activeRide = null;
         TokenManager.clearTokens();
+        clearActiveRideId();
         location.reload();
     }
 };

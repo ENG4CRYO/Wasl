@@ -125,6 +125,7 @@ namespace Wasl.Infrastructure.Extensions
 
             services.AddScoped<IRideDispatchService, RideDispatchService>();
             services.AddScoped<IPaymentGatewayService, MockPaymentGatewayService>();
+            services.AddScoped<IActiveRideReader, ActiveRideReader>();
 
             return services;
         }

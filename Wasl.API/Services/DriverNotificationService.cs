@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Wasl.API.Hubs;
 using Wasl.API.Resources;
+using Wasl.Application.Dtos.Rides;
 using Wasl.Application.Features.Rides.Commands.AcceptRide;
 using Wasl.Application.Interfaces;
 using Wasl.Application.Interfaces.Infrastructure;
@@ -112,6 +113,47 @@ public class DriverNotificationService : IDriverNotificationService
         {
             RideId = rideId,
             Message = _localizer["Rides.RideCompleted"] 
+        });
+    }
+
+    public async Task NotifyRideGroupDriverDisconnectedAsync(Guid rideId)
+    {
+        await _hubContext.Clients.Group($"Ride_{rideId}").SendAsync("DriverDisconnected", new
+        {
+            RideId = rideId,
+            Message = _localizer["Rides.DriverConnectionLost"]
+        });
+    }
+
+    public async Task SendRideStatusSyncAsync(string userId, ActiveRideDto snapshot)
+    {
+        if (string.IsNullOrEmpty(userId) || snapshot == null) return;
+        await _hubContext.Clients.User(userId).SendAsync("RideStatusSync", new
+        {
+            snapshot.RideId,
+            Status = snapshot.Status,
+            StatusName = snapshot.StatusName,
+            PickupLatitude = snapshot.PickupLatitude,
+            PickupLongitude = snapshot.PickupLongitude,
+            DropoffLatitude = snapshot.DropoffLatitude,
+            DropoffLongitude = snapshot.DropoffLongitude,
+            CalculatedPrice = snapshot.CalculatedPrice,
+            PaymentMethod = snapshot.PaymentMethod,
+            RequestedAt = snapshot.RequestedAt,
+            AcceptedAt = snapshot.AcceptedAt,
+            StartedAt = snapshot.StartedAt,
+            RiderId = snapshot.RiderId,
+            RiderName = snapshot.RiderName,
+            RiderPhone = snapshot.RiderPhone,
+            DriverId = snapshot.DriverId,
+            DriverName = snapshot.DriverName,
+            DriverPhone = snapshot.DriverPhone,
+            VehicleModel = snapshot.VehicleModel,
+            VehicleYear = snapshot.VehicleYear,
+            VinNumber = snapshot.VinNumber,
+            DriverLatitude = snapshot.DriverLatitude,
+            DriverLongitude = snapshot.DriverLongitude,
+            Message = _localizer["Rides.RideStateSynchronized"]
         });
     }
 
