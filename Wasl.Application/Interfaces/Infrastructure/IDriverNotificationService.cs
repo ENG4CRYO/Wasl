@@ -34,5 +34,10 @@ namespace Wasl.Application.Interfaces.Infrastructure
         /// Pushes the authoritative ride snapshot to a user after reconnection / cold start.
         /// </summary>
         Task SendRideStatusSyncAsync(string userId, ActiveRideDto snapshot);
+
+        /// <summary>
+        /// Broadcasts the driver's updated location to the Ride_{rideId} group.
+        /// </summary>
+        Task NotifyRideGroupLocationUpdateAsync(Guid rideId, string driverId, double latitude, double longitude);
     }
 }

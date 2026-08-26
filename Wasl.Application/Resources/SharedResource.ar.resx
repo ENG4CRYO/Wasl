@@ -492,4 +492,16 @@
   <data name="Profile.PhoneNumberAlreadyTaken" xml:space="preserve">
     <value>رقم الهاتف مستخدم بالفعل</value>
   </data>
+  <data name="Tracking.NoActiveRide" xml:space="preserve">
+    <value>ليس لديك رحلة نشطة.</value>
+  </data>
+  <data name="Tracking.LocationUpdated" xml:space="preserve">
+    <value>تم تحديث الموقع بنجاح.</value>
+  </data>
+  <data name="Validation.Tracking.InvalidLatitude" xml:space="preserve">
+    <value>خط العرض يجب أن يكون بين -90 و 90.</value>
+  </data>
+  <data name="Validation.Tracking.InvalidLongitude" xml:space="preserve">
+    <value>خط الطول يجب أن يكون بين -180 و 180.</value>
+  </data>
 </root>

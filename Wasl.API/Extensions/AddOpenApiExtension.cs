@@ -97,8 +97,12 @@ namespace Wasl.API.Extensions
                             ["name"] = "Wallet",
                             ["tags"] = new JsonArray { "Wallet" }
  
+                        },
+                        new JsonObject
+                        {
+                            ["name"] = "Traking",
+                            ["tags"] = new JsonArray { "Tracking" }
                         }
-
                     };
 
                     document.Extensions ??= new Dictionary<string, IOpenApiExtension>();

@@ -492,4 +492,16 @@
   <data name="Profile.PhoneNumberAlreadyTaken" xml:space="preserve">
     <value>Phone number is already in use</value>
   </data>
+  <data name="Tracking.NoActiveRide" xml:space="preserve">
+    <value>You do not have an active ride.</value>
+  </data>
+  <data name="Tracking.LocationUpdated" xml:space="preserve">
+    <value>Location updated successfully.</value>
+  </data>
+  <data name="Validation.Tracking.InvalidLatitude" xml:space="preserve">
+    <value>Latitude must be between -90 and 90.</value>
+  </data>
+  <data name="Validation.Tracking.InvalidLongitude" xml:space="preserve">
+    <value>Longitude must be between -180 and 180.</value>
+  </data>
 </root>

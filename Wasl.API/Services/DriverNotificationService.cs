@@ -125,6 +125,11 @@ public class DriverNotificationService : IDriverNotificationService
         });
     }
 
+    public async Task NotifyRideGroupLocationUpdateAsync(Guid rideId, string driverId, double latitude, double longitude)
+    {
+        await _hubContext.Clients.Group($"Ride_{rideId}").SendAsync("ReceiveDriverLocation", latitude, longitude);
+    }
+
     public async Task SendRideStatusSyncAsync(string userId, ActiveRideDto snapshot)
     {
         if (string.IsNullOrEmpty(userId) || snapshot == null) return;

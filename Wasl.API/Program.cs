@@ -87,8 +87,6 @@ try
 
     builder.Services.AddSignalR(options =>
     {
-        // Server pings every 15s; if no client response within 30s the connection is considered dead
-        // and clients fall into automatic reconnection. Tuned for flaky mobile networks.
         options.KeepAliveInterval = TimeSpan.FromSeconds(15);
         options.ClientTimeoutInterval = TimeSpan.FromSeconds(30);
         options.EnableDetailedErrors = builder.Environment.IsDevelopment();
